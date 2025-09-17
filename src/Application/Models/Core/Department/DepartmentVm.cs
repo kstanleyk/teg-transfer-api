@@ -1,0 +1,10 @@
+﻿namespace Agrovet.Application.Models.Core.Department;
+
+public class DepartmentVm
+{
+    public string Id { get; set; } = string.Empty;
+    public Guid PublicId { get; set; }
+    public string? Name { get; set; }
+    public string? FacultyId { get; set; }
+    public DateTime DateCreated { get; set; }
+}

@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Agrovet.Application.Wrappers;
+using Agrovet.Application.Helpers;
 using Agrovet.Domain.Abstractions;
 
 namespace Agrovet.Application.Interfaces;

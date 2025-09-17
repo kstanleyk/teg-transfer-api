@@ -8,7 +8,6 @@ using Agrovet.Application.Authorization;
 using Agrovet.Infrastructure;
 using Agrovet.WebApi.Permissions;
 using Agrovet.WebApi.Services;
-using Unicorn.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

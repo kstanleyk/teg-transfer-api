@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq.Expressions;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Interfaces;
-using Agrovet.Application.Wrappers;
 using Agrovet.Domain.Abstractions;
 using Agrovet.Infrastructure.Persistence.Context;
 using AutoMapper;

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Agrovet.Infrastructure.Persistence.Context;
+using Agrovet.Migrator;
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -14,7 +15,8 @@ optionsBuilder
 
 await using var context = new AgrovetContext(optionsBuilder.Options);
 
-var operationMigrator = new OperationMigrator(config, context);
-await operationMigrator.MigrateAsync();
+var migrator = new DatabaseMigrator(config, context);
+await migrator.MigrateAsync();
 
 Console.WriteLine("Migration complete!");
+Console.ReadKey();

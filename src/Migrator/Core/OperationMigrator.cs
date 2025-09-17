@@ -2,22 +2,19 @@
 using Agrovet.Infrastructure.Persistence.Context;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Task = System.Threading.Tasks.Task;
 
 namespace Agrovet.Migrator.Core;
 
-public class OperationMigrator(IConfiguration config, AgrovetContext context)
+public class OperationMigrator(string connectionString, AgrovetContext context)
 {
-    private readonly string? _connectionString = config.GetConnectionString("SourceConn");
-    
     public async Task MigrateAsync()
     {
-        IEnumerable<Operation> legacyOperations;
-        await using (var conn = new NpgsqlConnection(_connectionString))
+        IEnumerable<Operation> legacyItems;
+        await using (var conn = new NpgsqlConnection(connectionString))
         {
-            const string query = """
+            const string selectSql = """
                                  WITH operations("id", line, payroll, employee, estate, block, item, millingCycle, description, quantity, rate, amount, transDate, status, syncReference, createdOn)
                                  AS
                                  (
@@ -29,19 +26,19 @@ public class OperationMigrator(IConfiguration config, AgrovetContext context)
                                  )
                                  SELECT * FROM operations
                                  """;
-            legacyOperations = await conn.QueryAsync<Operation>(query);
+            legacyItems = await conn.QueryAsync<Operation>(selectSql);
         }
 
-        var operations = new List<Operation>();
+        var entities = new List<Operation>();
 
-        foreach (var dto in legacyOperations)
+        foreach (var item in legacyItems)
         {
-            var operation = Operation.Create(dto.Line, dto.Payroll, dto.Employee, dto.Estate, dto.Block, dto.Item,
-                dto.MillingCycle, dto.Description, dto.Quantity, dto.Rate, dto.TransDate, dto.Status, dto.SyncReference,
-                dto.CreatedOn);
+            var entity = Operation.Create(item.Line, item.Payroll, item.Employee, item.Estate, item.Block, item.Item,
+                item.MillingCycle, item.Description, item.Quantity, item.Rate, item.TransDate, item.Status, item.SyncReference,
+                item.CreatedOn);
 
-            operation.SetId(dto.Id);
-            operations.Add(operation);
+            entity.SetId(item.Id);
+            entities.Add(entity);
         }
 
         // Delete existing data from the destination table
@@ -49,7 +46,7 @@ public class OperationMigrator(IConfiguration config, AgrovetContext context)
         await context.SaveChangesAsync();
 
         // Add new data
-        await context.OperationSet.AddRangeAsync(operations);
+        await context.OperationSet.AddRangeAsync(entities);
         await context.SaveChangesAsync();
     }
 }

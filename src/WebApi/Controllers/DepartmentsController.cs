@@ -1,6 +1,6 @@
 ﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.Departments;
 using Agrovet.Application.Features.Departments.Queries;
+using Agrovet.Application.Models.Core.Department;
 using Agrovet.WebApi.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

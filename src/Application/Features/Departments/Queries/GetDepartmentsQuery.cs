@@ -1,6 +1,7 @@
 ﻿using Agrovet.Application.Interfaces.Core;
 using AutoMapper;
 using MediatR;
+using DepartmentDto = Agrovet.Application.Models.Core.Department.DepartmentDto;
 
 namespace Agrovet.Application.Features.Departments.Queries;
 
