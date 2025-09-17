@@ -18,10 +18,10 @@ public class OperationMigrator(string connectionString, AgrovetContext context)
                                  WITH operations("id", line, payroll, employee, estate, block, item, millingCycle, description, quantity, rate, amount, transDate, status, syncReference, createdOn)
                                  AS
                                  (
-                                 SELECT reference, ref_line, payroll, employee, estate, block, item, milling_cycle, description, quantity, rate, amount, trans_date, status, sync_reference, created_on
+                                 SELECT '24'||right(reference,5), ref_line, payroll, employee, estate, block, item, milling_cycle, description, quantity, rate, amount, trans_date, status, sync_reference, created_on
                                  	FROM core.activity
                                  UNION ALL
-                                 SELECT reference, ref_line, payroll, employee, estate, block, item, milling_cycle, description, quantity, rate, amount, trans_date, status, sync_reference, created_on
+                                 SELECT '24'||right(reference,5), ref_line, payroll, employee, estate, block, item, milling_cycle, description, quantity, rate, amount, trans_date, '02' as status, sync_reference, created_on
                                  	FROM core.activity_history
                                  )
                                  SELECT * FROM operations

@@ -15,19 +15,16 @@ public class Estate : Entity<string>
     }
 
     public static Estate Create(
-        string id,
         string description,
         string location,
         DateTime dateEstablished,
         DateTime? createdOn = null)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(id);
         DomainGuards.AgainstNullOrWhiteSpace(description);
         DomainGuards.AgainstNullOrWhiteSpace(location);
 
         return new Estate
         {
-            Id = id, // Code → Id
             Description = description,
             Location = location,
             DateEstablished = dateEstablished,
@@ -37,7 +34,7 @@ public class Estate : Entity<string>
 
     public void SetId(string id)
     {
-        ArgumentNullException.ThrowIfNull(id);
+        DomainGuards.AgainstNullOrWhiteSpace(id);
         Id = id;
     }
 

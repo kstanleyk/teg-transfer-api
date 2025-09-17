@@ -16,18 +16,12 @@ public class AverageWeight : Entity<string>
     {
     }
 
-    public static AverageWeight Create(
-        string id,
-        string estateId,
-        string blockId,
-        double weight,
-        DateTime effectiveDate,
-        string status,
-        DateTime? createdOn = null)
+    public static AverageWeight Create(string id, string estate, string block, double weight,
+        DateTime effectiveDate, string status, DateTime? createdOn = null)
     {
         DomainGuards.AgainstNullOrWhiteSpace(id);
-        DomainGuards.AgainstNullOrWhiteSpace(estateId);
-        DomainGuards.AgainstNullOrWhiteSpace(blockId);
+        DomainGuards.AgainstNullOrWhiteSpace(estate);
+        DomainGuards.AgainstNullOrWhiteSpace(block);
         DomainGuards.AgainstNullOrWhiteSpace(status);
 
         if (weight < 0) throw new ArgumentOutOfRangeException(nameof(weight), "Weight cannot be negative.");
@@ -35,8 +29,8 @@ public class AverageWeight : Entity<string>
         return new AverageWeight
         {
             Id = id, // Code → Id
-            Estate = estateId,
-            Block = blockId,
+            Estate = estate,
+            Block = block,
             Weight = weight,
             EffectiveDate = effectiveDate,
             Status = status,

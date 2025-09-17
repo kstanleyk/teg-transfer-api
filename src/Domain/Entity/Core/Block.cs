@@ -16,16 +16,10 @@ public class Block : Entity<string>
     {
     }
 
-    public static Block Create(
-        string id,
-        string estate,
-        string description,
-        double treeNumber,
-        DateTime dateEstablished,
-        double blockSize,
-        DateTime? createdOn = null)
+    public static Block Create(string estate, string description, double treeNumber, DateTime dateEstablished,
+        double blockSize, DateTime? createdOn = null)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(id);
+        
         DomainGuards.AgainstNullOrWhiteSpace(estate);
         DomainGuards.AgainstNullOrWhiteSpace(description);
 
@@ -34,7 +28,6 @@ public class Block : Entity<string>
 
         return new Block
         {
-            Id = id, // Code → Id
             Estate = estate,
             Description = description,
             TreeNumber = treeNumber,
@@ -46,7 +39,7 @@ public class Block : Entity<string>
 
     public void SetId(string id)
     {
-        ArgumentNullException.ThrowIfNull(id);
+        DomainGuards.AgainstNullOrWhiteSpace(id);
         Id = id;
     }
 

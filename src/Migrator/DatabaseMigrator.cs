@@ -11,6 +11,18 @@ public class DatabaseMigrator(IConfiguration config, AgrovetContext context)
     
     public async Task MigrateAsync()
     {
+        var averageWeightMigrator = new AverageWeightMigrator(_connectionString!, context);
+        await averageWeightMigrator.MigrateAsync();
+
+        var blockMigrator = new BlockMigrator(_connectionString!, context);
+        await blockMigrator.MigrateAsync();
+
+        var estateMigrator = new EstateMigrator(_connectionString!, context);
+        await estateMigrator.MigrateAsync();
+
+        var estateTaskMigrator = new EstateTaskMigrator(_connectionString!, context);
+        await estateTaskMigrator.MigrateAsync();
+
         var operationMigrator = new OperationMigrator(_connectionString!, context);
         await operationMigrator.MigrateAsync();
     }
