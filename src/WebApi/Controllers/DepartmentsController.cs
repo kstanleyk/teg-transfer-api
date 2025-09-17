@@ -1,0 +1,19 @@
+﻿using Agrovet.Application.Authorization;
+using Agrovet.Application.Features.Departments;
+using Agrovet.Application.Features.Departments.Queries;
+using Agrovet.WebApi.Attributes;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Agrovet.WebApi.Controllers;
+
+public class DepartmentsController(IMediator mediator) : ApiControllerBase<DepartmentsController>
+{
+    [HttpGet]
+    [MustHavePermission(AppFeature.Department, AppAction.Read)]
+    public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartments()
+    {
+        var departments = await mediator.Send(new GetDepartmentsQuery());
+        return Ok(departments);
+    }
+}
