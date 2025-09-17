@@ -1,24 +1,25 @@
 ﻿namespace Agrovet.Application.Models.Core.Department;
 
-public class DepartmentDto
+public class DepartmentRequest
 {
     public Guid PublicId { get; set; }
     public required string Name { get; set; }
     public DateTime DateCreated { get; set; }
 }
 
-public abstract class BaseDepartmentDto
+public abstract class BaseDepartmentRequest
 {
     public string Name { get; set; } = null!;
     public string FacultyId { get; set; } = null!;
+    public DateTime DateCreated { get; set; }
 }
 
-public class EditDepartmentDto: BaseDepartmentDto
+public class EditDepartmentRequest: BaseDepartmentRequest
 {
     public string Id { get; set; } = string.Empty;
 }
 
-public class CreateDepartmentDto : BaseDepartmentDto
+public class CreateDepartmentRequest : BaseDepartmentRequest
 {
 
 }

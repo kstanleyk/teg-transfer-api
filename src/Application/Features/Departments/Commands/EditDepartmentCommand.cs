@@ -12,12 +12,12 @@ namespace Agrovet.Application.Features.Departments.Commands;
 
 public class EditDepartmentCommandResponse : BaseResponse
 {
-    public DepartmentVm Data { get; set; } = null!;
+    public DepartmentUpdatedResponse Data { get; set; } = null!;
 }
 
 public class EditDepartmentCommand : IRequest<EditDepartmentCommandResponse>
 {
-    public required EditDepartmentDto Department { get; set; }
+    public required EditDepartmentRequest Department { get; set; }
 }
 
 public class EditDepartmentCommandHandler(IDepartmentRepository departmentPersistence, IMapper mapper)
@@ -60,7 +60,7 @@ public class EditDepartmentCommandHandler(IDepartmentRepository departmentPersis
             return response;
         }
 
-        response.Data = mapper.Map<DepartmentVm>(result.Entity);
+        response.Data = mapper.Map<DepartmentUpdatedResponse>(result.Entity);
 
         return response;
     }

@@ -2,23 +2,22 @@
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
 using Agrovet.Application.Interfaces.Core;
+using Agrovet.Application.Models.Core.Department;
 using Agrovet.Domain.Entity;
 using AutoMapper;
 using MediatR;
 using SequentialGuid;
-using CreateDepartmentDto = Agrovet.Application.Models.Core.Department.CreateDepartmentDto;
-using CreateDepartmentVm = Agrovet.Application.Models.Core.Department.CreateDepartmentVm;
 
 namespace Agrovet.Application.Features.Departments.Commands;
 
 public class CreateDepartmentCommandResponse : BaseResponse
 {
-    public CreateDepartmentVm Data { get; set; } = null!;
+    public DepartmentCreatedResponse Data { get; set; } = null!;
 }
 
 public class CreateDepartmentCommand : IRequest<CreateDepartmentCommandResponse>
 {
-    public required CreateDepartmentDto Department { get; set; }
+    public required CreateDepartmentRequest Department { get; set; }
 }
 
 public class CreateDepartmentCommandHandler(IDepartmentRepository departmentPersistence, IMapper mapper)
@@ -58,7 +57,7 @@ public class CreateDepartmentCommandHandler(IDepartmentRepository departmentPers
             return response;
         }
 
-        response.Data = mapper.Map<CreateDepartmentVm>(result.Entity);
+        response.Data = mapper.Map<DepartmentCreatedResponse>(result.Entity);
 
         return response;
     }

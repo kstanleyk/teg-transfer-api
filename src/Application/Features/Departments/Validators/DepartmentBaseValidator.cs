@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using BaseDepartmentDto = Agrovet.Application.Models.Core.Department.BaseDepartmentDto;
+using Agrovet.Application.Models.Core.Department;
 
 namespace Agrovet.Application.Features.Departments.Validators
 {
     public abstract class DepartmentBaseValidator<T> : AbstractValidator<T>
-        where T : BaseDepartmentDto
+        where T : BaseDepartmentRequest
     {
         protected void AddCommonRules()
         {

@@ -11,7 +11,7 @@
         public const string Activate = nameof(Activate);
         public const string Close = nameof(Close);
 
-        //EmployeePersonal Actions
+        //EstateTask Actions
         public const string ReadPersonal = nameof(ReadPersonal);
     }
 }

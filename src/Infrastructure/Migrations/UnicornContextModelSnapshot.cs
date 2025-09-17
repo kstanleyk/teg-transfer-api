@@ -767,7 +767,7 @@ namespace Unicorn.Infrastructure.Migrations
                         .HasColumnType("character varying(75)")
                         .HasColumnName("description");
 
-                    b.Property<string>("Employee")
+                    b.Property<string>("Estate")
                         .IsRequired()
                         .HasMaxLength(10)
                         .IsUnicode(false)

@@ -1,10 +1,10 @@
 ﻿using Agrovet.Application.Features.Departments.Commands;
+using Agrovet.Application.Models.Core.Department;
 using FluentValidation;
-using CreateDepartmentDto = Agrovet.Application.Models.Core.Department.CreateDepartmentDto;
 
 namespace Agrovet.Application.Features.Departments.Validators;
 
-public class CreateDepartmentValidator : DepartmentBaseValidator<CreateDepartmentDto>
+public class CreateDepartmentValidator : DepartmentBaseValidator<CreateDepartmentRequest>
 {
     public CreateDepartmentValidator()
     {
@@ -17,7 +17,7 @@ public class CreateDepartmentCommandValidator : AbstractValidator<CreateDepartme
     public CreateDepartmentCommandValidator()
     {
         RuleFor(p => p.Department)
-            .NotNull().WithMessage("Department cannot be empty.")
+            .NotNull().WithMessage("AverageWeight cannot be empty.")
             .SetValidator(new CreateDepartmentValidator());
     }
 }

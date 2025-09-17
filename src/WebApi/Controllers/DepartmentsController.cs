@@ -10,8 +10,8 @@ namespace Agrovet.WebApi.Controllers;
 public class DepartmentsController(IMediator mediator) : ApiControllerBase<DepartmentsController>
 {
     [HttpGet]
-    [MustHavePermission(AppFeature.Department, AppAction.Read)]
-    public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartments()
+    [MustHavePermission(AppFeature.AverageWeight, AppAction.Read)]
+    public async Task<ActionResult<IEnumerable<DepartmentRequest>>> GetDepartments()
     {
         var departments = await mediator.Send(new GetDepartmentsQuery());
         return Ok(departments);

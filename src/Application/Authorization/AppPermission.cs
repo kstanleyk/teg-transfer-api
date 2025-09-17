@@ -20,8 +20,8 @@ namespace Agrovet.Application.Authorization
 
     public class AppPermissions
     {
-        private static readonly AppPermission[] All = new AppPermission[]
-        {
+        private static readonly AppPermission[] All =
+        [
             new AppPermission(AppFeature.Users, AppAction.Create, AppRoleGroup.SystemAccess, "Create Users"),
             new AppPermission(AppFeature.Users, AppAction.Update, AppRoleGroup.SystemAccess, "Update Users"),
             new AppPermission(AppFeature.Users, AppAction.Read, AppRoleGroup.SystemAccess, "Read Users"),
@@ -38,49 +38,72 @@ namespace Agrovet.Application.Authorization
             new AppPermission(AppFeature.RoleClaims, AppAction.Read, AppRoleGroup.SystemAccess, "Read Role Claims/Permissions"),
             new AppPermission(AppFeature.RoleClaims, AppAction.Update, AppRoleGroup.SystemAccess, "Update Role Claims/Permissions"),
 
-            // CreateDepartment
-            new AppPermission(AppFeature.Department, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read CreateDepartment", true),
-            new AppPermission(AppFeature.Department, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create CreateDepartment"),
-            new AppPermission(AppFeature.Department, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update CreateDepartment"),
+            new AppPermission(AppFeature.AverageWeight, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read CreateDepartment", true),
+            new AppPermission(AppFeature.AverageWeight, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create CreateDepartment"),
+            new AppPermission(AppFeature.AverageWeight, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update CreateDepartment"),
 
-            // Enrollment
-            new AppPermission(AppFeature.Enrollment, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Enrollment", true),
-            new AppPermission(AppFeature.Enrollment, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Enrollment"),
-            new AppPermission(AppFeature.Enrollment, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Enrollment"),
+            // Block
+            new AppPermission(AppFeature.Block, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read block", true),
+            new AppPermission(AppFeature.Block, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create block"),
+            new AppPermission(AppFeature.Block, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update block"),
 
-            new AppPermission(AppFeature.Country, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Country", true),
-            new AppPermission(AppFeature.Country, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Country"),
-            new AppPermission(AppFeature.Country, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Country"),
+            new AppPermission(AppFeature.Estate, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read estate", true),
+            new AppPermission(AppFeature.Estate, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create estate"),
+            new AppPermission(AppFeature.Estate, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update estate"),
 
-            new AppPermission(AppFeature.Employee, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Personal Info", true),
+            new AppPermission(AppFeature.EstateTask, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read estate task", true),
+            new AppPermission(AppFeature.EstateTask, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create estate task"),
+            new AppPermission(AppFeature.EstateTask, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update estate task"),
 
-            new AppPermission(AppFeature.EmployeePersonal, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Personal Info", true),
-            new AppPermission(AppFeature.EmployeePersonal, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Employee Personal Info"),
+            new AppPermission(AppFeature.EstateTaskType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read estate task type", true),
+            new AppPermission(AppFeature.EstateTaskType, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create estate task type"),
+            new AppPermission(AppFeature.EstateTaskType, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update estate task type"),
 
-            new AppPermission(AppFeature.EmployeeIdentity, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Identity Info", true),
-            new AppPermission(AppFeature.EmployeeIdentity, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Employee Identity Info"),
+            new AppPermission(AppFeature.ExpenseSource, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read expense source", true),
+            new AppPermission(AppFeature.ExpenseSource, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create expense source"),
+            new AppPermission(AppFeature.ExpenseSource, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update expense source"),
 
-            new AppPermission(AppFeature.EmployeeContact, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Contact Info", true),
-            new AppPermission(AppFeature.EmployeeContact, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Employee Contact Info"),
+            new AppPermission(AppFeature.ExpenseStatus, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read expense status", true),
+            new AppPermission(AppFeature.ExpenseStatus, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create expense status"),
+            new AppPermission(AppFeature.ExpenseStatus, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update expense status"),
 
-            new AppPermission(AppFeature.EmployeeNationality, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Nationality Info", true),
-            new AppPermission(AppFeature.EmployeeNationality, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Employee Nationality Info"),
+            new AppPermission(AppFeature.ExpenseType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read expense type", true),
+            new AppPermission(AppFeature.ExpenseType, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create expense type"),
+            new AppPermission(AppFeature.ExpenseType, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update expense type"),
 
-            new AppPermission(AppFeature.EmployeeEmployment, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Employee Employment Info", true),
-            new AppPermission(AppFeature.EmployeeEmployment, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Employee Employment Info"),
+            new AppPermission(AppFeature.ExpenseTypeInventory, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read expense type inventory", true),
+            new AppPermission(AppFeature.ExpenseTypeInventory, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create expense type inventory"),
+            new AppPermission(AppFeature.ExpenseTypeInventory, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update expense type inventory"),
 
-            new AppPermission(AppFeature.EducationProfile, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Education Profile", true),
-            new AppPermission(AppFeature.EducationProfile, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Education Profile"),
-            new AppPermission(AppFeature.EducationProfile, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Education Profile"),
+            new AppPermission(AppFeature.Operation, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read payroll farm operations", true),
+            new AppPermission(AppFeature.Operation, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create payroll farm operations"),
+            new AppPermission(AppFeature.Operation, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update payroll farm operations"),
 
-            new AppPermission(AppFeature.EducationLevel, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Education Level", true),
-            new AppPermission(AppFeature.EducationLevel, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Education Level"),
-            new AppPermission(AppFeature.EducationLevel, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Education Level"),
+            new AppPermission(AppFeature.Payroll, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read payroll", true),
+            new AppPermission(AppFeature.Payroll, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create payroll"),
+            new AppPermission(AppFeature.Payroll, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update payroll"),
 
-            new AppPermission(AppFeature.SalaryScale, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Salary Scale", true),
-            new AppPermission(AppFeature.SalaryScale, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Salary Scale"),
-            new AppPermission(AppFeature.SalaryScale, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Salary Scale"),
-        };
+            new AppPermission(AppFeature.PayrollAverageWeight, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read payroll average weight", true),
+            new AppPermission(AppFeature.PayrollAverageWeight, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create payroll average weight"),
+            new AppPermission(AppFeature.PayrollAverageWeight, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update payroll average weight"),
+
+            new AppPermission(AppFeature.Plant, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read plants", true),
+            new AppPermission(AppFeature.Plant, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create plants"),
+            new AppPermission(AppFeature.Plant, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update plants"),
+
+            new AppPermission(AppFeature.Task, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read tasks", true),
+            new AppPermission(AppFeature.Task, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create tasks"),
+            new AppPermission(AppFeature.Task, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update tasks"),
+
+            new AppPermission(AppFeature.TaskType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read task type", true),
+            new AppPermission(AppFeature.TaskType, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create task type"),
+            new AppPermission(AppFeature.TaskType, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update task type"),
+
+            new AppPermission(AppFeature.TaskTypeAccount, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read task type account", true),
+            new AppPermission(AppFeature.TaskTypeAccount, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create task type account"),
+            new AppPermission(AppFeature.TaskTypeAccount, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update task type account"),
+
+        ];
 
         public static IReadOnlyList<AppPermission> AdminPermissions { get; } =
             new ReadOnlyCollection<AppPermission>(All.Where(p => !p.IsBasic).ToArray());
