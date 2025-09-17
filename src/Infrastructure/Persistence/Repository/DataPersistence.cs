@@ -384,6 +384,7 @@ public abstract class RepositoryBase<TEntity, TContext, TId>(TContext context) :
             return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
         }
     }
+
     private static string GetPropertyName(Expression<Func<TEntity, object>> expression)
     {
         if (expression.Body is UnaryExpression unary && unary.Operand is MemberExpression member)

@@ -21,11 +21,13 @@ public static class DependencyInjection
                 .UseSnakeCaseNamingConvention())
             .AddTransient<AgrovetDatabaseSeeder>();
 
+        services.AddScoped<IDatabaseFactory, DatabaseFactory>();
+
         // Repositories
         services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
-        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
-        services.AddScoped<IDatabaseFactory, DatabaseFactory>();
+        services.AddScoped<IAverageWeightRepository, AverageWeightRepository>();
+        services.AddScoped<IEstateRepository, EstateRepository>();
 
         return services;
     }

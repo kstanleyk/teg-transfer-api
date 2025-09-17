@@ -1,15 +1,15 @@
 ﻿using System.Globalization;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Interfaces.Core;
-using Agrovet.Domain.Entity;
+using Agrovet.Domain.Entity.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agrovet.Infrastructure.Persistence.Repository.Core;
 
-public class DepartmentRepository(IDatabaseFactory databaseFactory)
-    : Repository<Department, string>(databaseFactory), IDepartmentRepository
+public class AverageWeightRepository(IDatabaseFactory databaseFactory)
+    : Repository<AverageWeight, string>(databaseFactory), IAverageWeightRepository
 {
-    public override async Task<RepositoryActionResult<Department>> AddAsync(Department department)
+    public override async Task<RepositoryActionResult<AverageWeight>> AddAsync(AverageWeight averageWeight)
     {
         try
         {
@@ -23,20 +23,20 @@ public class DepartmentRepository(IDatabaseFactory databaseFactory)
                 : lastIdValue.ToNumValue();
 
             var newId = (lastNumber + 1).ToString(CultureInfo.InvariantCulture).PadLeft(3,'0');
-            department.SetId(newId);
+            averageWeight.SetId(newId);
 
-            await DbSet.AddAsync(department);
+            await DbSet.AddAsync(averageWeight);
             var changes = await SaveChangesAsync();
 
             var status = changes == 0
                 ? RepositoryActionStatus.NothingModified
                 : RepositoryActionStatus.Created;
 
-            return new RepositoryActionResult<Department>(department, status);
+            return new RepositoryActionResult<AverageWeight>(averageWeight, status);
         }
         catch (Exception ex)
         {
-            return new RepositoryActionResult<Department>(null, RepositoryActionStatus.Error, ex);
+            return new RepositoryActionResult<AverageWeight>(null, RepositoryActionStatus.Error, ex);
         }
     }
 }

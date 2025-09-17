@@ -42,7 +42,6 @@ namespace Agrovet.Application.Authorization
             new AppPermission(AppFeature.AverageWeight, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create CreateDepartment"),
             new AppPermission(AppFeature.AverageWeight, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update CreateDepartment"),
 
-            // Block
             new AppPermission(AppFeature.Block, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read block", true),
             new AppPermission(AppFeature.Block, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create block"),
             new AppPermission(AppFeature.Block, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update block"),

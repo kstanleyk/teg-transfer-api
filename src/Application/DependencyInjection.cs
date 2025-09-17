@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Agrovet.Application.Features.Departments;
+using Agrovet.Application.Features.AverageWeight;
 using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,7 @@ public static class DependencyInjection
         // Manually register AutoMapper
         services.AddSingleton(_ => new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile(new DepartmentProfile());
+            cfg.AddProfile(new AverageWeightProfile());
             // Add other profiles here as needed
         }).CreateMapper());
 

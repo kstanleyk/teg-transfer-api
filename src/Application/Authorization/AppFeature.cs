@@ -12,6 +12,7 @@ public static partial class AppFeature
 public static partial class AppFeature
 {
     //Core
+    public const string Department = nameof(Department);
     public const string AverageWeight = nameof(AverageWeight);
     public const string Block = nameof(Block);
     public const string Estate = nameof(Estate);

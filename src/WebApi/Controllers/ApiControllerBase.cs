@@ -13,5 +13,10 @@ namespace Agrovet.WebApi.Controllers
         private ISender _sender;
 
         public ISender MediatorSender => _sender ??= HttpContext.RequestServices.GetService<ISender>();
+
+        protected async Task<IActionResult> GetActionResult(Func<Task<IActionResult>> codeToExecute)
+        {
+            return await codeToExecute.Invoke();
+        }
     }
 }
