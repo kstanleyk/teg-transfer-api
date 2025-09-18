@@ -35,7 +35,7 @@ public class EditAverageWeightCommandHandler(
             EstateCodes = ids
         };
 
-        var validator = new EditAverageWeightCommandValidator();
+        var validator = new EditAverageWeightCommandValidator(validationCodes);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)

@@ -3,9 +3,11 @@ using FluentValidation;
 
 namespace Agrovet.Application.Features.AverageWeight.Commands;
 
-public abstract class AverageWeightBaseValidator<T> : ValidatorBase<T>
+public abstract class AverageWeightBaseValidator<T>(AverageWeightValidationCodes validationCodes) : AbstractValidator<T>
     where T : BaseAverageWeightRequest
 {
+    private readonly HashSet<string> _validEstateCodes = new(validationCodes.EstateCodes, StringComparer.OrdinalIgnoreCase);
+
     protected void AddCommonRules()
     {
         RuleFor(p => p.Estate)
@@ -14,7 +16,9 @@ public abstract class AverageWeightBaseValidator<T> : ValidatorBase<T>
             .NotNull()
             .WithMessage("Estate Code is required.")
             .MaximumLength(5)
-            .WithMessage("Estate Code must not exceed 5 characters.");
+            .WithMessage("Estate Code must not exceed 5 characters.")
+            .Must(code => _validEstateCodes.Contains(code))
+            .WithMessage("Estate Code is not valid.");
 
         RuleFor(p => p.Status)
             .NotEmpty()
@@ -28,44 +32,43 @@ public abstract class AverageWeightBaseValidator<T> : ValidatorBase<T>
 
 public class CreateAverageWeightValidator : AverageWeightBaseValidator<CreateAverageWeightRequest>
 {
-    public CreateAverageWeightValidator()
+    public CreateAverageWeightValidator(AverageWeightValidationCodes validationCodes)
+        : base(validationCodes)
     {
+        AddCommonRules();
+    }
+}
+
+public class EditAverageWeightValidator : AverageWeightBaseValidator<EditAverageWeightRequest>
+{
+    public EditAverageWeightValidator(AverageWeightValidationCodes validationCodes)
+        : base(validationCodes)
+    {
+        RuleFor(p => p.Id)
+            .NotEmpty().WithMessage("Code is required.")
+            .NotNull().WithMessage("Code is required.")
+            .MaximumLength(5).WithMessage("Code must not exceed 5 characters.");
+
         AddCommonRules();
     }
 }
 
 public class CreateAverageWeightCommandValidator : AbstractValidator<CreateAverageWeightCommand>
 {
-    public CreateAverageWeightCommandValidator()
+    public CreateAverageWeightCommandValidator(AverageWeightValidationCodes validationCodes)
     {
         RuleFor(p => p.AverageWeight)
             .NotNull().WithMessage("Average weight cannot be empty.")
-            .SetValidator(new CreateAverageWeightValidator()!);
-    }
-}
-
-public class EditAverageWeightValidator : AverageWeightBaseValidator<EditAverageWeightRequest>
-{
-    public EditAverageWeightValidator()
-    {
-        RuleFor(p => p.Id)
-            .NotEmpty()
-            .WithMessage("Code is required.")
-            .NotNull()
-            .WithMessage("Code is required.")
-            .MaximumLength(5)
-            .WithMessage("Code must not exceed 5 characters.");
-
-        AddCommonRules();
+            .SetValidator(new CreateAverageWeightValidator(validationCodes));
     }
 }
 
 public class EditAverageWeightCommandValidator : AbstractValidator<EditAverageWeightCommand>
 {
-    public EditAverageWeightCommandValidator()
+    public EditAverageWeightCommandValidator(AverageWeightValidationCodes validationCodes)
     {
         RuleFor(p => p.AverageWeight)
-            .NotNull().WithMessage("AverageWeight cannot be empty.")
-            .SetValidator(new EditAverageWeightValidator());
+            .NotNull().WithMessage("Average weight cannot be empty.")
+            .SetValidator(new EditAverageWeightValidator(validationCodes));
     }
 }

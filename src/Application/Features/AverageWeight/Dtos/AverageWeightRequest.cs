@@ -23,5 +23,5 @@ public class CreateAverageWeightRequest : BaseAverageWeightRequest
 
 public class AverageWeightValidationCodes
 {
-    public required IEnumerable<string> EstateCodes { get; set; }
+    public IEnumerable<string> EstateCodes { get; set; } = [];
 }

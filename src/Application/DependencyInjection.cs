@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Agrovet.Application.Features.AverageWeight;
 using AutoMapper;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Agrovet.Application;
@@ -22,7 +21,10 @@ public static class DependencyInjection
             // Add other profiles here as needed
         }).CreateMapper());
 
-        services.AddValidatorsFromAssembly(assembly);
+        //services.AddValidatorsFromAssembly(assembly);
+
+        //services.AddScoped<IValidator<SomeDto>, SomeDtoValidator>();
+        //services.AddScoped<IValidator<AnotherDto>, AnotherDtoValidator>();
 
         return services;
     }

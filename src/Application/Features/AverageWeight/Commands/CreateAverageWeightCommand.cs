@@ -15,7 +15,7 @@ public class CreateAverageWeightCommandResponse : BaseResponse
 
 public class CreateAverageWeightCommand : IRequest<CreateAverageWeightCommandResponse>
 {
-    public CreateAverageWeightRequest? AverageWeight { get; set; }
+    public required CreateAverageWeightRequest AverageWeight { get; set; }
 }
 
 public class CreateAverageWeightCommandHandler(
@@ -37,7 +37,7 @@ public class CreateAverageWeightCommandHandler(
             EstateCodes = ids
         };
 
-        var validator = new CreateAverageWeightCommandValidator();
+        var validator = new CreateAverageWeightCommandValidator(validationCodes);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
