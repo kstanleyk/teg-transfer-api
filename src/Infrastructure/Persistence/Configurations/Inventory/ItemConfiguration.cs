@@ -20,7 +20,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         builder.Property(i => i.ShortDescription).HasMaxLength(250).IsRequired();
         builder.Property(i => i.BarCodeText).HasMaxLength(100).IsRequired();
         builder.Property(i => i.Brand).HasMaxLength(100).IsRequired();
-        builder.Property(i => i.Category).HasMaxLength(5).IsRequired();
+        builder.Property(i => i.Category).HasMaxLength(2).IsRequired();
         builder.Property(i => i.Status).HasMaxLength(5).IsRequired();
         builder.Property(i => i.MinStock).HasColumnType("double precision").IsRequired();
         builder.Property(i => i.MaxStock).HasColumnType("double precision").IsRequired();

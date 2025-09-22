@@ -77,7 +77,4 @@ public class Item : Entity<string>
         ArgumentNullException.ThrowIfNull(publicId);
         PublicId = publicId;
     }
-
-    // Additional domain behavior methods can be added below
-    // Example: UpdateStockLevels, ChangeStatus, etc.
 }

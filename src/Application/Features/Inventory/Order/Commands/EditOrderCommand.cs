@@ -1,7 +1,6 @@
 ﻿using Agrovet.Application.Features.Inventory.Order.Dtos;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Core;
 using Agrovet.Application.Interfaces.Inventory;
 using AutoMapper;
 using MediatR;
@@ -18,10 +17,7 @@ public class EditOrderCommand : IRequest<EditOrderCommandResponse>
     public required EditOrderRequest Order { get; set; }
 }
 
-public class EditOrderCommandHandler(
-    IOrderRepository averageWeightRepository,
-    IEstateRepository estateRepository,
-    IMapper mapper)
+public class EditOrderCommandHandler(IOrderRepository orderRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<EditOrderCommand, EditOrderCommandResponse>
 {
@@ -30,11 +26,9 @@ public class EditOrderCommandHandler(
     {
         var response = new EditOrderCommandResponse();
 
-        var ids = await estateRepository.GetIdsAsync();
-
         var validationCodes = new OrderValidationCodes
         {
-            ValidSuppliers = ids
+            ValidSuppliers = []
         };
 
         var validator = new EditOrderCommandValidator(validationCodes);
@@ -58,7 +52,7 @@ public class EditOrderCommandHandler(
         order.SetId(or.Id);
         order.SetPublicId(or.PublicId);
 
-        var result = await averageWeightRepository.EditAsync(order);
+        var result = await orderRepository.EditAsync(order);
 
         if (result.Status != RepositoryActionStatus.Updated && 
             result.Status != RepositoryActionStatus.NothingModified)
@@ -74,7 +68,6 @@ public class EditOrderCommandHandler(
 
     protected override void DisposeCore()
     {
-        averageWeightRepository.Dispose();
-        estateRepository.Dispose();
+        orderRepository.Dispose();
     }
 }

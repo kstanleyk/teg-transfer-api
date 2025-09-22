@@ -1,7 +1,6 @@
 ﻿using Agrovet.Application.Features.Inventory.Order.Dtos;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Core;
 using Agrovet.Application.Interfaces.Inventory;
 using AutoMapper;
 using MediatR;
@@ -19,8 +18,7 @@ public class CreateOrderCommand : IRequest<CreateOrderCommandResponse>
     public required CreateOrderRequest Order { get; set; }
 }
 
-public class CreateOrderCommandHandler(IOrderRepository averageWeightRepository,
-    IEstateRepository estateRepository, IMapper mapper)
+public class CreateOrderCommandHandler(IOrderRepository orderRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<CreateOrderCommand, CreateOrderCommandResponse>
 {
@@ -29,11 +27,9 @@ public class CreateOrderCommandHandler(IOrderRepository averageWeightRepository,
     {
         var response = new CreateOrderCommandResponse();
 
-        var ids = await estateRepository.GetIdsAsync();
-
         var validationCodes = new OrderValidationCodes
         {
-            ValidSuppliers = ids
+            ValidSuppliers = []
         };
 
         var validator = new CreateOrderCommandValidator(validationCodes);
@@ -59,7 +55,7 @@ public class CreateOrderCommandHandler(IOrderRepository averageWeightRepository,
 
         order.SetPublicId(SequentialGuidGenerator.Instance.NewGuid());
 
-        var result = await averageWeightRepository.AddAsync(order);
+        var result = await orderRepository.AddAsync(order);
 
         if (result.Status != RepositoryActionStatus.Created)
         {
@@ -74,7 +70,6 @@ public class CreateOrderCommandHandler(IOrderRepository averageWeightRepository,
 
     protected override void DisposeCore()
     {
-        averageWeightRepository.Dispose();
-        estateRepository.Dispose();
+        orderRepository.Dispose();
     }
 }

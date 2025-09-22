@@ -2,7 +2,7 @@
 using Agrovet.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Agrovet.WebApi.Controllers;
+namespace Agrovet.WebApi.Controllers.Auth;
 
 public class PermissionsController(CurrentUserService currentUserService) : ApiControllerBase<PermissionsController>
 {

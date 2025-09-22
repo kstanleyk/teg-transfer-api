@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
 
 public class ItemMovementRepository(IDatabaseFactory databaseFactory)
-    : Repository<ItemMovement, string>(databaseFactory), IItemMovementRepository
+    : DataRepository<ItemMovement, string>(databaseFactory), IItemMovementRepository
 {
     public override async Task<RepositoryActionResult<ItemMovement>> AddAsync(ItemMovement itemMovement)
     {

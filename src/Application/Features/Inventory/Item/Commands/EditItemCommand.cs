@@ -1,7 +1,6 @@
 ﻿using Agrovet.Application.Features.Inventory.Item.Dtos;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Core;
 using Agrovet.Application.Interfaces.Inventory;
 using AutoMapper;
 using MediatR;
@@ -18,7 +17,7 @@ public class EditItemCommand : IRequest<EditItemCommandResponse>
     public required EditItemRequest Item { get; set; }
 }
 
-public class EditItemCommandHandler(IItemRepository itemRepository, IEstateRepository estateRepository, IMapper mapper)
+public class EditItemCommandHandler(IItemRepository itemRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<EditItemCommand, EditItemCommandResponse>
 {
@@ -27,11 +26,9 @@ public class EditItemCommandHandler(IItemRepository itemRepository, IEstateRepos
     {
         var response = new EditItemCommandResponse();
 
-        var ids = await estateRepository.GetIdsAsync();
-
         var validationCodes = new ItemValidationCodes
         {
-            CategoryCodes = ids
+            CategoryCodes = []
         };
 
         var validator = new EditItemCommandValidator(validationCodes);
@@ -71,6 +68,5 @@ public class EditItemCommandHandler(IItemRepository itemRepository, IEstateRepos
     protected override void DisposeCore()
     {
         itemRepository.Dispose();
-        estateRepository.Dispose();
     }
 }

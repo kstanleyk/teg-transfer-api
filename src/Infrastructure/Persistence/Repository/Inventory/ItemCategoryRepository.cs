@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
 
 public class ItemCategoryRepository(IDatabaseFactory databaseFactory)
-    : Repository<ItemCategory, string>(databaseFactory), IItemCategoryRepository
+    : DataRepository<ItemCategory, string>(databaseFactory), IItemCategoryRepository
 {
     public override async Task<RepositoryActionResult<ItemCategory>> AddAsync(ItemCategory itemCategory)
     {
@@ -22,7 +22,7 @@ public class ItemCategoryRepository(IDatabaseFactory databaseFactory)
                 ? 0
                 : lastIdValue.ToNumValue();
 
-            var newId = (lastNumber + 1).ToString(CultureInfo.InvariantCulture).PadLeft(3,'0');
+            var newId = (lastNumber + 1).ToString(CultureInfo.InvariantCulture).PadLeft(2,'0');
             itemCategory.SetId(newId);
 
             await DbSet.AddAsync(itemCategory);

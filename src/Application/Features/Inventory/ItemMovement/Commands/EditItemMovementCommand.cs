@@ -1,7 +1,6 @@
 ﻿using Agrovet.Application.Features.Inventory.ItemMovement.Dtos;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Core;
 using Agrovet.Application.Interfaces.Inventory;
 using AutoMapper;
 using MediatR;
@@ -19,9 +18,7 @@ public class EditItemMovementCommand : IRequest<EditItemMovementCommandResponse>
 }
 
 public class EditItemMovementCommandHandler(
-    IItemMovementRepository averageWeightRepository,
-    IEstateRepository estateRepository,
-    IMapper mapper)
+    IItemMovementRepository averageWeightRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<EditItemMovementCommand, EditItemMovementCommandResponse>
 {
@@ -30,11 +27,9 @@ public class EditItemMovementCommandHandler(
     {
         var response = new EditItemMovementCommandResponse();
 
-        var ids = await estateRepository.GetIdsAsync();
-
         var validationCodes = new ItemMovementValidationCodes
         {
-            ValidSenses = ids
+            ValidSenses = []
         };
 
         var validator = new EditItemMovementCommandValidator(validationCodes);
@@ -75,6 +70,5 @@ public class EditItemMovementCommandHandler(
     protected override void DisposeCore()
     {
         averageWeightRepository.Dispose();
-        estateRepository.Dispose();
     }
 }

@@ -13,13 +13,13 @@ public class ItemCategoryConfiguration : IEntityTypeConfiguration<ItemCategory>
 
         // Primary key
         builder.HasKey(c => c.Id);
-        builder.Property(c => c.Id).HasMaxLength(5).IsRequired();
+        builder.Property(c => c.Id).HasMaxLength(2).IsRequired();
 
         // Name property
-        builder.Property(c => c.Name).HasMaxLength(150).IsRequired();
+        builder.Property(c => c.Name).HasMaxLength(50).IsRequired();
 
         // PublicId
-        builder.Property(c => c.PublicId).HasDefaultValueSql("gen_random_uuid()"); // PostgreSQL: auto-generate UUID
+        builder.Property(c => c.PublicId).HasDefaultValueSql("gen_random_uuid()");
 
         // CreatedOn
         builder.Property(c => c.CreatedOn).IsRequired()
@@ -27,6 +27,6 @@ public class ItemCategoryConfiguration : IEntityTypeConfiguration<ItemCategory>
 
         // Indexes
         builder.HasIndex(c => c.PublicId).IsUnique();
-        builder.HasIndex(c => c.Name).IsUnique(); // Optional: enforce unique category names
+        builder.HasIndex(c => c.Name).IsUnique();
     }
 }

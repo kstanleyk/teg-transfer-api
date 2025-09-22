@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
 
 public class OrderRepository(IDatabaseFactory databaseFactory)
-    : Repository<Order, string>(databaseFactory), IOrderRepository
+    : DataRepository<Order, string>(databaseFactory), IOrderRepository
 {
     public override async Task<RepositoryActionResult<Order>> AddAsync(Order order)
     {

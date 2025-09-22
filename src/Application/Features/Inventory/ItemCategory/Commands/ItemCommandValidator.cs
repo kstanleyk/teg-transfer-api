@@ -6,53 +6,53 @@ namespace Agrovet.Application.Features.Inventory.ItemCategory.Commands;
 public abstract class ItemCategoryBaseValidator<T> : AbstractValidator<T>
     where T : BaseItemCategoryRequest
 {
-    protected void AddCommonRules(ItemCategoryValidationCodes validationCodes)
+    protected void AddCommonRules()
     {
 
         RuleFor(c => c.Name)
-            .NotEmpty().WithMessage("Category Name is required.")
-            .NotNull().WithMessage("Category Name is required.")
-            .MaximumLength(150).WithMessage("Category Name must not exceed 150 characters.");
+            .NotEmpty().WithMessage("Category name is required.")
+            .NotNull().WithMessage("Category name is required.")
+            .MaximumLength(50).WithMessage("Category name must not exceed 50 characters.");
     }
 }
 
 public class CreateItemCategoryValidator : ItemCategoryBaseValidator<CreateItemCategoryRequest>
 {
-    public CreateItemCategoryValidator(ItemCategoryValidationCodes validationCodes)
+    public CreateItemCategoryValidator()
     {
-        AddCommonRules(validationCodes);
+        AddCommonRules();
     }
 }
 
 public class EditItemCategoryValidator : ItemCategoryBaseValidator<EditItemCategoryRequest>
 {
-    public EditItemCategoryValidator(ItemCategoryValidationCodes validationCodes)
+    public EditItemCategoryValidator()
     {
         RuleFor(c => c.Id)
-            .NotEmpty().WithMessage("Category Code is required for edit.")
-            .NotNull().WithMessage("Category Code is required for edit.")
-            .MaximumLength(5).WithMessage("Category Code must not exceed 5 characters.");
+            .NotEmpty().WithMessage("Category code is required for edit.")
+            .NotNull().WithMessage("Category code is required for edit.")
+            .MaximumLength(2).WithMessage("Category code must not exceed 2 characters.");
 
-        AddCommonRules(validationCodes);
+        AddCommonRules();
     }
 }
 
 public class CreateItemCategoryCommandValidator : AbstractValidator<CreateItemCategoryCommand>
 {
-    public CreateItemCategoryCommandValidator(ItemCategoryValidationCodes validationCodes)
+    public CreateItemCategoryCommandValidator()
     {
         RuleFor(p => p.ItemCategory)
             .NotNull().WithMessage("Item category cannot be empty.")
-            .SetValidator(new CreateItemCategoryValidator(validationCodes));
+            .SetValidator(new CreateItemCategoryValidator());
     }
 }
 
 public class EditItemCategoryCommandValidator : AbstractValidator<EditItemCategoryCommand>
 {
-    public EditItemCategoryCommandValidator(ItemCategoryValidationCodes validationCodes)
+    public EditItemCategoryCommandValidator()
     {
         RuleFor(p => p.ItemCategory)
             .NotNull().WithMessage("Item category cannot be empty.")
-            .SetValidator(new EditItemCategoryValidator(validationCodes));
+            .SetValidator(new EditItemCategoryValidator());
     }
 }

@@ -5,12 +5,11 @@ using Agrovet.Application.Helpers;
 using Agrovet.Application.Interfaces;
 using Agrovet.Domain.Abstractions;
 using Agrovet.Infrastructure.Persistence.Context;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agrovet.Infrastructure.Persistence.Repository;
 
-public abstract class RepositoryBase<TEntity, TContext, TId>(TContext context) : Disposable, IRepository<TEntity, TId>
+public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext context) : Disposable, IRepository<TEntity, TId>
     where TEntity : Entity<TId>
     where TContext : DbContext
 {
@@ -498,8 +497,8 @@ public abstract class RepositoryBase<TEntity, TContext, TId>(TContext context) :
     protected override void DisposeCore() => Context.Dispose();
 }
 
-public abstract class Repository<TEntity, TId>(IDatabaseFactory databaseFactory)
-    : RepositoryBase<TEntity, AgrovetContext, TId>(databaseFactory.GetContext())
+public abstract class DataRepository<TEntity, TId>(IDatabaseFactory databaseFactory)
+    : DataRepositoryBase<TEntity, AgrovetContext, TId>(databaseFactory.GetContext())
     where TEntity : Entity<TId>
 {
     protected IDatabaseFactory DatabaseFactory = databaseFactory;
@@ -508,92 +507,5 @@ public abstract class Repository<TEntity, TId>(IDatabaseFactory databaseFactory)
     {
         DatabaseFactory.Dispose();
         base.DisposeCore();
-    }
-}
-
-public abstract class Repository<TEntity, TEntityHistory, TId>(IDatabaseFactory databaseFactory, IMapper mapper)
-    : Repository<TEntity, TId>(databaseFactory)
-    where TEntity : Entity<TId>
-    where TEntityHistory : Entity<TId>
-{
-    protected async Task<TEntity[]> GetAllWithHistoryAsync(Expression<Func<TEntity, bool>> where)
-    {
-        var entitiesQuery = DbSet.Where(where);
-        var entityHistoriesQuery = Context.Set<TEntityHistory>()
-            .Where(ConvertExpression<TEntity, TEntityHistory>(where))
-            .Select(eh => CreateEntity(eh));
-
-        return await entitiesQuery.Concat(entityHistoriesQuery).ToArrayAsync();
-    }
-
-    protected async Task<TEntity[]> GetAllWithHistoryAsync()
-    {
-        var entities = await DbSet.ToArrayAsync();
-        var entityHistories = await Context.Set<TEntityHistory>().ToArrayAsync();
-        return entityHistories.Select(CreateEntity).Concat(entities).ToArray();
-    }
-
-    protected async Task<TEntity[]> GetHistoryAsync()
-    {
-        var entityHistories = await Context.Set<TEntityHistory>().ToArrayAsync();
-        return entityHistories.Select(CreateEntity).ToArray();
-    }
-
-    protected async Task<RepositoryActionResult<TEntity[]>> PostAsync(Expression<Func<TEntity, bool>> where)
-    {
-        var entities = await DbSet.Where(where).ToArrayAsync();
-        if (!entities.Any())
-        {
-            return new RepositoryActionResult<TEntity[]>(null, RepositoryActionStatus.NothingModified);
-        }
-
-        var entityHistories = mapper.Map<TEntityHistory[]>(entities);
-
-
-        Context.Set<TEntityHistory>().AddRange(entityHistories);
-
-        var result = await SaveChangesAsync();
-        if (result == 0)
-        {
-            return new RepositoryActionResult<TEntity[]>(null, RepositoryActionStatus.NothingModified);
-        }
-
-        // Archive successful, now delete active records
-        var deleteResult = await DeleteManyAsync(where);
-        if (deleteResult.Status != RepositoryActionStatus.Deleted)
-        {
-            return new RepositoryActionResult<TEntity[]>(null, RepositoryActionStatus.NothingModified);
-        }
-
-        return new RepositoryActionResult<TEntity[]>(entities, RepositoryActionStatus.Okay);
-    }
-
-    protected TEntity CreateEntity(TEntityHistory entityHistory) =>
-        mapper.Map<TEntity>(entityHistory);
-
-    private static Expression<Func<TTo, bool>> ConvertExpression<TFrom, TTo>(Expression<Func<TFrom, bool>> expression)
-    {
-        var parameter = Expression.Parameter(typeof(TTo), expression.Parameters[0].Name);
-        var body = new PropertyReplacer<TTo>(expression.Parameters[0], parameter).Visit(expression.Body);
-        return Expression.Lambda<Func<TTo, bool>>(body, parameter);
-    }
-
-    private class PropertyReplacer<TTo>(ParameterExpression oldParameter, ParameterExpression newParameter)
-        : ExpressionVisitor
-    {
-        protected override Expression VisitParameter(ParameterExpression node)
-        {
-            return node == oldParameter ? newParameter : base.VisitParameter(node);
-        }
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            if (node.Expression == oldParameter)
-            {
-                var newProperty = typeof(TTo).GetProperty(node.Member.Name);
-                return newProperty != null ? Expression.Property(newParameter, newProperty) : base.VisitMember(node);
-            }
-            return base.VisitMember(node);
-        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Agrovet.Application.Authorization;
 using Agrovet.Domain.Entity.Auth;
+using Agrovet.Domain.Entity.Inventory;
+using Agrovet.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agrovet.Infrastructure.Persistence.Context;
@@ -14,7 +16,7 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         await SeedRolesAsync();
         await SeedUsersAsync();
 
-        //await SeedDepartmentsAsync();
+        await SeedItemCategoriesAsync();
     }
 
     private async Task CheckAndApplyPendingMigrationAsync()
@@ -222,5 +224,35 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         }
 
         await context.SaveChangesAsync();
+    }
+
+    private async Task SeedItemCategoriesAsync()
+    {
+        if (await context.ItemCategorySet.AnyAsync())
+            return;
+
+        var seedData = new[]
+        {
+            new { Id = "01", Name = "Palm Oil"},
+            new { Id = "02", Name = "Egusi"},
+        };
+
+        var itemCategories = seedData
+            .Select(region => CreateItemCategory(region.Id, region.Name)).ToList();
+
+        await context.ItemCategorySet.AddRangeAsync(itemCategories);
+        await context.SaveChangesAsync();
+        return;
+
+        ItemCategory CreateItemCategory(string id, string name)
+        {
+            var itemCategory = ItemCategory.Create(name);
+
+            itemCategory.SetId(id);
+
+            itemCategory.SetPublicId(PublicId.CreateUnique().Value);
+
+            return itemCategory;
+        }
     }
 }

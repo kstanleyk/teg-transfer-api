@@ -1,11 +1,10 @@
 ﻿using Agrovet.Application.Features.Inventory.ItemCategory.Dtos;
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Core;
 using Agrovet.Application.Interfaces.Inventory;
+using Agrovet.Domain.ValueObjects;
 using AutoMapper;
 using MediatR;
-using SequentialGuid;
 
 namespace Agrovet.Application.Features.Inventory.ItemCategory.Commands;
 
@@ -19,8 +18,7 @@ public class CreateItemCategoryCommand : IRequest<CreateItemCategoryCommandRespo
     public required CreateItemCategoryRequest ItemCategory { get; set; }
 }
 
-public class CreateItemCategoryCommandHandler(IItemCategoryRepository itemCategoryRepository,
-    IEstateRepository estateRepository, IMapper mapper)
+public class CreateItemCategoryCommandHandler(IItemCategoryRepository itemCategoryRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<CreateItemCategoryCommand, CreateItemCategoryCommandResponse>
 {
@@ -29,14 +27,7 @@ public class CreateItemCategoryCommandHandler(IItemCategoryRepository itemCatego
     {
         var response = new CreateItemCategoryCommandResponse();
 
-        var ids = await estateRepository.GetIdsAsync();
-
-        var validationCodes = new ItemCategoryValidationCodes
-        {
-            ValidIds = ids
-        };
-
-        var validator = new CreateItemCategoryCommandValidator(validationCodes);
+        var validator = new CreateItemCategoryCommandValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -54,9 +45,9 @@ public class CreateItemCategoryCommandHandler(IItemCategoryRepository itemCatego
 
         var icr = request.ItemCategory;
 
-        var itemCategory = Domain.Entity.Inventory.ItemCategory.Create(icr.Name, DateTime.UtcNow);
+        var itemCategory = Domain.Entity.Inventory.ItemCategory.Create(icr.Name);
 
-        itemCategory.SetPublicId(SequentialGuidGenerator.Instance.NewGuid());
+        itemCategory.SetPublicId(PublicId.CreateUnique().Value);
 
         var result = await itemCategoryRepository.AddAsync(itemCategory);
 
@@ -74,6 +65,5 @@ public class CreateItemCategoryCommandHandler(IItemCategoryRepository itemCatego
     protected override void DisposeCore()
     {
         itemCategoryRepository.Dispose();
-        estateRepository.Dispose();
     }
 }
