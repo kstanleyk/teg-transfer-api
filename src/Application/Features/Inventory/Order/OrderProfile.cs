@@ -7,7 +7,8 @@ public class OrderProfile : Profile
 {
     public OrderProfile()
     {
-        CreateMap<Domain.Entity.Inventory.Order, OrderResponse>()
-            .ForMember(dest => dest.PublicId, opt => opt.MapFrom(src => src.PublicId!.Value));
+        CreateMap<Domain.Entity.Inventory.Order, OrderResponse>();
+        CreateMap<Domain.Entity.Inventory.Order, OrderCreatedResponse>();
+        CreateMap<Domain.Entity.Inventory.Order, OrderUpdatedResponse>();
     }
 }

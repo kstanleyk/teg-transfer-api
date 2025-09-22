@@ -2,4 +2,7 @@
 
 namespace Agrovet.Application.Interfaces.Inventory;
 
-public interface IItemRepository : IRepository<Item, string> { }
+public interface IItemRepository : IRepository<Item, string>
+{
+
+}

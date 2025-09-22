@@ -21,6 +21,17 @@ public class ItemCreatedResponse
 {
     public string Id { get; set; } = string.Empty;
     public Guid PublicId { get; set; }
+    public string? Name { get; set; }
+    public string? ShortDescription { get; set; }
+    public string? BarCodeText { get; set; }
+    public string? Brand { get; set; }
+    public string? Category { get; set; }
+    public string? Status { get; set; }
+    public double? MinStock { get; set; }
+    public double? MaxStock { get; set; }
+    public double? ReorderLev { get; set; }
+    public double? ReorderQtty { get; set; }
+    public DateTime CreatedOn { get; set; }
 }
 
 public class ItemUpdatedResponse

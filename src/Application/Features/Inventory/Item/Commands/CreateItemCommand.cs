@@ -18,7 +18,7 @@ public class CreateItemCommand : IRequest<CreateItemCommandResponse>
     public required CreateItemRequest Item { get; set; }
 }
 
-public class CreateItemCommandHandler(IItemRepository itemRepository, IMapper mapper) : 
+public class CreateItemCommandHandler(IItemRepository itemRepository,IItemCategoryRepository itemCategoryRepository, IMapper mapper) : 
     RequestHandlerBase, IRequestHandler<CreateItemCommand, CreateItemCommandResponse>
 {
     public async Task<CreateItemCommandResponse> Handle(CreateItemCommand request, CancellationToken cancellationToken)
@@ -28,8 +28,14 @@ public class CreateItemCommandHandler(IItemRepository itemRepository, IMapper ma
         if (request.Item == null)
             throw new ArgumentNullException(nameof(request.Item));
 
+        var categoryIds = await itemCategoryRepository.GetAllIdsAsync();
+        var validationCodes = new ItemValidationCodes
+        {
+            CategoryCodes = categoryIds
+        };
+
         // Validate the request
-        var validator = new CreateItemCommandValidator(new ItemValidationCodes());
+        var validator = new CreateItemCommandValidator(validationCodes);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -64,5 +70,6 @@ public class CreateItemCommandHandler(IItemRepository itemRepository, IMapper ma
     protected override void DisposeCore()
     {
         itemRepository.Dispose();
+        itemCategoryRepository.Dispose();
     }
 }

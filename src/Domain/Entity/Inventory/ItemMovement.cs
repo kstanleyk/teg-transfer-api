@@ -13,8 +13,6 @@ public class ItemMovement : Entity<string>
     public double Qtty { get; private set; }
     public string SourceId { get; private set; } = null!;
     public string SourceLineNum { get; private set; } = null!;
-    public Guid? PublicId { get; private set; }
-    public DateTime CreatedOn { get; private set; }
 
     protected ItemMovement() { }
 
@@ -54,12 +52,6 @@ public class ItemMovement : Entity<string>
     {
         DomainGuards.AgainstNullOrWhiteSpace(id);
         Id = id;
-    }
-
-    public void SetPublicId(Guid publicId)
-    {
-        ArgumentNullException.ThrowIfNull(publicId);
-        PublicId = publicId;
     }
 
     public void ReverseMovement()

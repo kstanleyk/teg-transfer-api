@@ -34,4 +34,6 @@ public interface IRepository<TEntity, TId> : IDisposable, IRepository
         TEntity incomingEntity,
         params Expression<Func<TEntity, object>>[] updatedProperties);
     Task<TId[]> GetAllIdsAsync();
+    Task<TEntity?> GetByPublicIdAsync(Guid publicId);
+    Task<RepositoryActionResult<TEntity>> UpdateAsyncAsync(Guid publicId, TEntity item);
 }

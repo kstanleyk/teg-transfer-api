@@ -11,8 +11,6 @@ public class Order : Entity<string>
     public string Description { get; private set; } = null!;
     public string Supplier { get; private set; } = null!;
     public DateTime TransDate { get; private set; }
-    public Guid? PublicId { get; private set; }
-    public DateTime CreatedOn { get; private set; }
 
     private readonly List<OrderDetail> _orderDetails = [];
     public IReadOnlyCollection<OrderDetail> OrderDetails => _orderDetails.AsReadOnly();
@@ -37,12 +35,6 @@ public class Order : Entity<string>
             TransDate = transDate,
             CreatedOn = createdOn ?? DateTime.UtcNow
         };
-    }
-
-    public void SetPublicId(Guid publicId)
-    {
-        ArgumentNullException.ThrowIfNull(publicId);
-        PublicId = publicId;
     }
 
     public void SetId(string id)

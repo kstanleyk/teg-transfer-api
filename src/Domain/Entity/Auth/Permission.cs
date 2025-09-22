@@ -1,9 +1,8 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿namespace Agrovet.Domain.Entity.Auth;
 
-namespace Agrovet.Domain.Entity.Auth;
-
-public class Permission : Entity<string>
+public class Permission
 {
+    public required string Id { get; set; }
     public required string Feature { get; set; }
     public required string Action { get; set; }
     public required string Group { get; set; }

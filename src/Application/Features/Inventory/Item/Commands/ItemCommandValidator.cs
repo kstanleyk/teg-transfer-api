@@ -8,10 +8,7 @@ public abstract class ItemBaseValidator<T> : AbstractValidator<T>
 {
     protected void AddCommonRules(ItemValidationCodes validationCodes)
     {
-        //RuleFor(i => i.Id)
-        //    .NotEmpty().WithMessage("Item Code is required.")
-        //    .NotNull().WithMessage("Item Code is required.")
-        //    .MaximumLength(10).WithMessage("Item Code must not exceed 10 characters.");
+        var validCategories = new HashSet<string>(validationCodes.CategoryCodes);
 
         RuleFor(i => i.Name)
             .NotEmpty().WithMessage("Item Name is required.")
@@ -36,7 +33,9 @@ public abstract class ItemBaseValidator<T> : AbstractValidator<T>
         RuleFor(i => i.Category)
             .NotEmpty().WithMessage("Category Code is required.")
             .NotNull().WithMessage("Category Code is required.")
-            .MaximumLength(5).WithMessage("Category Code must not exceed 5 characters.");
+            .MaximumLength(5).WithMessage("Category Code must not exceed 5 characters.")
+            .Must(category => validCategories.Contains(category))
+            .WithMessage("Invalid Category Code.");
 
         RuleFor(i => i.Status)
             .NotEmpty().WithMessage("Status is required.")

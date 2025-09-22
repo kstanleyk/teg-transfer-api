@@ -1,5 +1,4 @@
-﻿using Agrovet.Migrator.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Agrovet.Infrastructure.Persistence.Context;
 using Agrovet.Migrator;

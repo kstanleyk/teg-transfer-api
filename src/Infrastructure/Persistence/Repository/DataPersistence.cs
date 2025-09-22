@@ -111,6 +111,33 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
         }
     }
 
+    public async Task<TEntity?> GetByPublicIdAsync(Guid publicId) =>
+        await DbSet.FirstOrDefaultAsync(x => x.PublicId == publicId);
+
+    public virtual async Task<RepositoryActionResult<TEntity>> UpdateAsyncAsync(Guid publicId, TEntity item)
+    {
+        try
+        {
+            var existingEntity = await GetByPublicIdAsync(publicId);
+            if (existingEntity == null)
+                return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.NotFound);
+
+            return await EditAsync(existingEntity);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
     public virtual async Task<RepositoryActionResult<IEnumerable<TEntity>>> AddManyAsync(IEnumerable<TEntity> entities)
     {
         try
@@ -425,7 +452,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
         Expression<Func<TEntity, string>> orderBy, Expression<Func<TEntity, string>> thenBy) =>
         await DbSet.AsNoTracking().Where(where).OrderBy(orderBy).ThenBy(thenBy).ToArrayAsync();
 
-    protected virtual async Task<TEntity[]> ItemsToGetAsync() => await DbSet.AsNoTracking().ToArrayAsync();
+    protected virtual async Task<TEntity[]> ItemsToGetAsync() => await DbSet.AsNoTracking().OrderBy(x=>x.Id).ToArrayAsync();
 
     protected virtual async Task<TEntity?> ItemToGetAsync(TEntity entity)
     {

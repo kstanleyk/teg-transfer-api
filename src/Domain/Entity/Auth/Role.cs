@@ -1,9 +1,8 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿namespace Agrovet.Domain.Entity.Auth;
 
-namespace Agrovet.Domain.Entity.Auth;
-
-public class Role : Entity<Guid>
+public class Role
 {
+    public Guid Id { get; set; }
     public required string Name { get; set; }
     public required DateTime CreatedOn { get; set; }
 

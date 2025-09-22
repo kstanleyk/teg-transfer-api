@@ -17,7 +17,7 @@ public class EditItemCommand : IRequest<EditItemCommandResponse>
     public required EditItemRequest Item { get; set; }
 }
 
-public class EditItemCommandHandler(IItemRepository itemRepository, IMapper mapper)
+public class EditItemCommandHandler(IItemRepository itemRepository, IItemCategoryRepository itemCategoryRepository, IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<EditItemCommand, EditItemCommandResponse>
 {
@@ -26,9 +26,10 @@ public class EditItemCommandHandler(IItemRepository itemRepository, IMapper mapp
     {
         var response = new EditItemCommandResponse();
 
+        var categoryIds = await itemCategoryRepository.GetAllIdsAsync();
         var validationCodes = new ItemValidationCodes
         {
-            CategoryCodes = []
+            CategoryCodes = categoryIds
         };
 
         var validator = new EditItemCommandValidator(validationCodes);
@@ -49,9 +50,9 @@ public class EditItemCommandHandler(IItemRepository itemRepository, IMapper mapp
             ir.Category, ir.Status, ir.MinStock, ir.MaxStock, ir.ReorderLev, ir.ReorderQtty, DateTime.UtcNow);
 
         item.SetId(ir.Id);
-        //item.SetPublicId(ir.PublicId);
+        item.SetPublicId(ir.PublicId);
 
-        var result = await itemRepository.EditAsync(item);
+        var result = await itemRepository.UpdateAsyncAsync(item.PublicId, item);
 
         if (result.Status != RepositoryActionStatus.Updated && 
             result.Status != RepositoryActionStatus.NothingModified)
@@ -68,5 +69,6 @@ public class EditItemCommandHandler(IItemRepository itemRepository, IMapper mapp
     protected override void DisposeCore()
     {
         itemRepository.Dispose();
+        itemCategoryRepository.Dispose();
     }
 }

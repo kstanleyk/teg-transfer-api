@@ -41,10 +41,10 @@ public class EditItemCategoryCommandHandler(IItemCategoryRepository itemCategory
         var icr = request.ItemCategory;
 
         var itemCategory = Domain.Entity.Inventory.ItemCategory.Create(icr.Name);
-
         itemCategory.SetId(icr.Id);
+        itemCategory.SetPublicId(icr.PublicId);
 
-        var result = await itemCategoryRepository.EditAsync(itemCategory);
+        var result = await itemCategoryRepository.UpdateAsyncAsync(icr.PublicId, itemCategory);
 
         if (result.Status != RepositoryActionStatus.Updated && 
             result.Status != RepositoryActionStatus.NothingModified)

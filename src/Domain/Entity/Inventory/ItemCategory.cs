@@ -4,9 +4,7 @@ namespace Agrovet.Domain.Entity.Inventory;
 
 public class ItemCategory : Entity<string>
 {
-    public Guid? PublicId { get; private set; }
     public string Name { get; private set; } = null!;
-    public DateTime CreatedOn { get; private set; }
 
     protected ItemCategory()
     {
@@ -29,9 +27,17 @@ public class ItemCategory : Entity<string>
         Id = id;
     }
 
-    public void SetPublicId(Guid publicId)
+    public void Update(ItemCategory itemCategory)
     {
-        ArgumentNullException.ThrowIfNull(publicId);
-        PublicId = publicId;
+        DomainGuards.AgainstNullOrWhiteSpace(itemCategory.Name);
+        Name = itemCategory.Name;
+    }
+
+    public bool HasChanges(ItemCategory? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return false;
+
+        return Name != other.Name;
     }
 }

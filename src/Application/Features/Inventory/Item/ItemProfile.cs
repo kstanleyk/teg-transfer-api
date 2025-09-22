@@ -7,7 +7,8 @@ public class ItemProfile : Profile
 {
     public ItemProfile()
     {
-        CreateMap<Domain.Entity.Inventory.Item, ItemResponse>()
-            .ForMember(dest => dest.PublicId, opt => opt.MapFrom(src => src.PublicId!.Value));
+        CreateMap<Domain.Entity.Inventory.Item, ItemResponse>();
+        CreateMap<Domain.Entity.Inventory.Item, ItemCreatedResponse>();
+        CreateMap<Domain.Entity.Inventory.Item, ItemUpdatedResponse>();
     }
 }

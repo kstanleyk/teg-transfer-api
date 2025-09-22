@@ -14,8 +14,6 @@ public class Item : Entity<string>
     public double MaxStock { get; private set; }
     public double ReorderLev { get; private set; }
     public double ReorderQtty { get; private set; }
-    public Guid? PublicId { get; private set; }
-    public DateTime CreatedOn { get; private set; }
 
     protected Item()
     {
@@ -76,5 +74,45 @@ public class Item : Entity<string>
     {
         ArgumentNullException.ThrowIfNull(publicId);
         PublicId = publicId;
+    }
+
+    public void Update(Item item)
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(item.Name);
+        DomainGuards.AgainstNullOrWhiteSpace(item.ShortDescription);
+        DomainGuards.AgainstNullOrWhiteSpace(item.BarCodeText);
+        DomainGuards.AgainstNullOrWhiteSpace(item.Brand);
+        DomainGuards.AgainstNullOrWhiteSpace(item.Category);
+        DomainGuards.AgainstNullOrWhiteSpace(item.Status);
+
+        ValidateStockValues(item.MinStock, item.MaxStock, item.ReorderLev, item.ReorderQtty);
+
+        Name = item.Name;
+        ShortDescription = item.ShortDescription;
+        BarCodeText = item.BarCodeText;
+        Brand = item.Brand;
+        Category = item.Category;
+        Status = item.Status;
+        MinStock = item.MinStock;
+        MaxStock = item.MaxStock;
+        ReorderLev = item.ReorderLev;
+        ReorderQtty = item.ReorderQtty;
+    }
+
+    public bool HasChanges(Item? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return false;
+
+        return Name != other.Name ||
+               ShortDescription != other.ShortDescription ||
+               BarCodeText != other.BarCodeText ||
+               Brand != other.Brand ||
+               Category != other.Category ||
+               Status != other.Status ||
+               !MinStock.Equals(other.MinStock) ||
+               !MaxStock.Equals(other.MaxStock) ||
+               !ReorderLev.Equals(other.ReorderLev) ||
+               !ReorderQtty.Equals(other.ReorderQtty);
     }
 }

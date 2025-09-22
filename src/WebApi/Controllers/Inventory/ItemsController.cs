@@ -17,10 +17,10 @@ public class ItemsController(IMediator mediator) : ApiControllerBase<ItemsContro
     public async Task<IActionResult> Get() =>
         await GetActionResult(async () => Ok(await MediatorSender.Send(new ItemsQuery())));
 
-    [HttpGet("{departmentId}")]
+    [HttpGet("{publicId:guid}")]
     [MustHavePermission(AppFeature.Item, AppAction.Read)]
-    public async Task<IActionResult> Get(string departmentId) =>
-        await GetActionResult(async () => Ok(await MediatorSender.Send(new ItemQuery { Id = departmentId })));
+    public async Task<IActionResult> Get(Guid publicId) =>
+        await GetActionResult(async () => Ok(await MediatorSender.Send(new ItemQuery { PublicId = publicId })));
 
     [HttpPost]
     [MustHavePermission(AppFeature.Item, AppAction.Create)]

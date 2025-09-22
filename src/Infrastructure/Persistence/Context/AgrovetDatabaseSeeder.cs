@@ -17,6 +17,7 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         await SeedUsersAsync();
 
         await SeedItemCategoriesAsync();
+        await SeedItemsAsync();
     }
 
     private async Task CheckAndApplyPendingMigrationAsync()
@@ -253,6 +254,176 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
             itemCategory.SetPublicId(PublicId.CreateUnique().Value);
 
             return itemCategory;
+        }
+    }
+
+    private async Task SeedItemsAsync()
+    {
+        if (await context.ItemSet.AnyAsync())
+            return;
+
+        var seedData = new[]
+        {
+            new
+            {
+                Id = "000001",
+                Name = "Palm Oil, Lum 5l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "LM00001",
+                Brand = "Lum",
+                Category = "01",
+                Status = "01",
+                MinStock = 10.0,
+                MaxStock = 100.0,
+                ReorderLev = 15.0,
+                ReorderQtty = 25.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000002",
+                Name = "Palm Oil, Engwari 5l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EN00002",
+                Brand = "Engwari",
+                Category = "01",
+                Status = "01",
+                MinStock = 5.0,
+                MaxStock = 50.0,
+                ReorderLev = 10.0,
+                ReorderQtty = 15.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000003",
+                Name = "Palm Oil, Eposi 5l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EP00003",
+                Brand = "Eposi",
+                Category = "01",
+                Status = "01",
+                MinStock = 8.0,
+                MaxStock = 80.0,
+                ReorderLev = 12.0,
+                ReorderQtty = 20.0,
+                CreatedOn = DateTime.UtcNow
+            },
+
+            new
+            {
+                Id = "000004",
+                Name = "Palm Oil, Lum 1l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "LM00004",
+                Brand = "Lum",
+                Category = "01",
+                Status = "01",
+                MinStock = 10.0,
+                MaxStock = 100.0,
+                ReorderLev = 15.0,
+                ReorderQtty = 25.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000005",
+                Name = "Palm Oil, Engwari 1l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EN00005",
+                Brand = "Engwari",
+                Category = "01",
+                Status = "01",
+                MinStock = 5.0,
+                MaxStock = 50.0,
+                ReorderLev = 10.0,
+                ReorderQtty = 15.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000006",
+                Name = "Palm Oil, Eposi 1l",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EP00006",
+                Brand = "Eposi",
+                Category = "01",
+                Status = "01",
+                MinStock = 8.0,
+                MaxStock = 80.0,
+                ReorderLev = 12.0,
+                ReorderQtty = 20.0,
+                CreatedOn = DateTime.UtcNow
+            },
+
+            new
+            {
+                Id = "000007",
+                Name = "Palm Oil, Lum 33cl",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "LM00007",
+                Brand = "Lum",
+                Category = "01",
+                Status = "01",
+                MinStock = 10.0,
+                MaxStock = 100.0,
+                ReorderLev = 15.0,
+                ReorderQtty = 25.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000008",
+                Name = "Palm Oil, Engwari 33cl",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EN00008",
+                Brand = "Engwari",
+                Category = "01",
+                Status = "01",
+                MinStock = 5.0,
+                MaxStock = 50.0,
+                ReorderLev = 10.0,
+                ReorderQtty = 15.0,
+                CreatedOn = DateTime.UtcNow
+            },
+            new
+            {
+                Id = "000009",
+                Name = "Palm Oil, Eposi 33cl",
+                ShortDescription = "Cameroon Palm Oil",
+                BarCodeText = "EP00009",
+                Brand = "Eposi",
+                Category = "01",
+                Status = "01",
+                MinStock = 8.0,
+                MaxStock = 80.0,
+                ReorderLev = 12.0,
+                ReorderQtty = 20.0,
+                CreatedOn = DateTime.UtcNow
+            },
+        };
+
+        var items = seedData
+            .Select(item => CreateItem(item.Id, item.Name, item.ShortDescription, item.BarCodeText, item.Brand,
+                item.Category, item.Status, item.MinStock, item.MaxStock, item.ReorderLev, item.ReorderQtty,
+                item.CreatedOn)).ToList();
+
+        await context.ItemSet.AddRangeAsync(items);
+        await context.SaveChangesAsync();
+        return;
+
+        Item CreateItem(string id, string name, string shortDescription, string barCodeText, string brand, string category,
+            string status, double minStock, double maxStock, double reorderLev, double reorderQtty,
+            DateTime? createdOn)
+        {
+            var item = Item.Create(name, shortDescription, barCodeText, brand, category,
+                status, minStock, maxStock, reorderLev, reorderQtty, createdOn);
+
+            item.SetId(id);
+
+            item.SetPublicId(PublicId.CreateUnique().Value);
+
+            return item;
         }
     }
 }

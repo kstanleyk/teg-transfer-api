@@ -7,7 +7,10 @@ public class ItemCategoryProfile : Profile
 {
     public ItemCategoryProfile()
     {
-        CreateMap<Domain.Entity.Inventory.ItemCategory, ItemCategoryResponse>()
-            .ForMember(dest => dest.PublicId, opt => opt.MapFrom(src => src.PublicId!.Value));
+        CreateMap<Domain.Entity.Inventory.ItemCategory, ItemCategoryResponse>();
+
+        CreateMap<Domain.Entity.Inventory.ItemCategory, ItemCategoryUpdatedResponse>();
+
+        CreateMap<Domain.Entity.Inventory.ItemCategory, ItemCategoryCreatedResponse>();
     }
 }

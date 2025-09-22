@@ -7,7 +7,6 @@ public class ItemMovementProfile : Profile
 {
     public ItemMovementProfile()
     {
-        CreateMap<Domain.Entity.Inventory.ItemMovement, ItemMovementResponse>()
-            .ForMember(dest => dest.PublicId, opt => opt.MapFrom(src => src.PublicId!.Value));
+        CreateMap<Domain.Entity.Inventory.ItemMovement, ItemMovementResponse>();
     }
 }

@@ -14,8 +14,6 @@ public class OrderDetail : Entity<string>
     public double Amount { get; private set; }
     public string Status { get; private set; } = null!;
     public DateTime TransDate { get; private set; }
-    public Guid? PublicId { get; private set; }
-    public DateTime CreatedOn { get; private set; }
 
     // Navigation back to Order (aggregate root)
     public string OrderId { get; private set; } = null!;
@@ -68,12 +66,6 @@ public class OrderDetail : Entity<string>
     {
         DomainGuards.AgainstNullOrWhiteSpace(id);
         Id = id;
-    }
-
-    public void SetPublicId(Guid publicId)
-    {
-        ArgumentNullException.ThrowIfNull(publicId);
-        PublicId = publicId;
     }
 
     public void UpdateQuantity(double newQtty)

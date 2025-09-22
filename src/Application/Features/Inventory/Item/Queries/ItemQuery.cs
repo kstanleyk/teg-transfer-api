@@ -7,7 +7,7 @@ namespace Agrovet.Application.Features.Inventory.Item.Queries;
 
 public record ItemQuery : IRequest<ItemResponse>
 {
-    public required string Id { get; set; }
+    public required Guid PublicId { get; set; }
 }
 
 public class ItemQueryHandler(IItemRepository itemRepository, IMapper mapper)
@@ -16,7 +16,7 @@ public class ItemQueryHandler(IItemRepository itemRepository, IMapper mapper)
 
     public async Task<ItemResponse> Handle(ItemQuery request, CancellationToken cancellationToken)
     {
-        var item = await itemRepository.GetAsync(request.Id);
+        var item = await itemRepository.GetByPublicIdAsync(request.PublicId);
         return mapper.Map<ItemResponse>(item);
     }
 

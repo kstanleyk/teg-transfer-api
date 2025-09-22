@@ -2,7 +2,7 @@
 
 public abstract class BaseItemRequest
 {
-    public Guid? PublicId { get; set; }
+    public Guid PublicId { get; set; }
     public required string Name { get; set; }
     public required string ShortDescription { get; set; }
     public required string BarCodeText { get; set; }

@@ -7,7 +7,7 @@ namespace Agrovet.Application.Features.Inventory.ItemCategory.Queries;
 
 public record ItemCategoryQuery : IRequest<ItemCategoryResponse>
 {
-    public required string Id { get; set; }
+    public required Guid PublicId { get; set; }
 }
 
 public class ItemCategoryQueryHandler(IItemCategoryRepository itemCategoryRepository, IMapper mapper)
@@ -16,7 +16,7 @@ public class ItemCategoryQueryHandler(IItemCategoryRepository itemCategoryReposi
 
     public async Task<ItemCategoryResponse> Handle(ItemCategoryQuery request, CancellationToken cancellationToken)
     {
-        var itemCategory = await itemCategoryRepository.GetAsync(request.Id);
+        var itemCategory = await itemCategoryRepository.GetByPublicIdAsync(request.PublicId);
         return mapper.Map<ItemCategoryResponse>(itemCategory);
     }
 
