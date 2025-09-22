@@ -16,10 +16,9 @@ public class AverageWeight : Entity<string>
     {
     }
 
-    public static AverageWeight Create(string id, string estate, string block, double weight,
+    public static AverageWeight Create(string estate, string block, double weight,
         DateTime effectiveDate, string status, DateTime? createdOn = null)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(id);
         DomainGuards.AgainstNullOrWhiteSpace(estate);
         DomainGuards.AgainstNullOrWhiteSpace(block);
         DomainGuards.AgainstNullOrWhiteSpace(status);
@@ -28,7 +27,6 @@ public class AverageWeight : Entity<string>
 
         return new AverageWeight
         {
-            Id = id, // Code → Id
             Estate = estate,
             Block = block,
             Weight = weight,

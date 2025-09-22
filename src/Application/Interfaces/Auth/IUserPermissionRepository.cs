@@ -1,6 +1,6 @@
 ﻿namespace Agrovet.Application.Interfaces.Auth;
 
-public interface IUserPermissionRepository
+public interface IUserPermissionRepository: IDisposable
 {
     Task<HashSet<string>> GetPermissionsForUserAsync(string userId);
 }

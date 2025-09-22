@@ -1,5 +1,6 @@
 ﻿using Agrovet.Domain.Entity.Auth;
 using Agrovet.Domain.Entity.Core;
+using Agrovet.Domain.Entity.Inventory;
 using Microsoft.EntityFrameworkCore;
 using Task = Agrovet.Domain.Entity.Core.Task;
 
@@ -30,6 +31,13 @@ public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContex
     public virtual DbSet<Payroll> PayrollSet { get; set; }
     public virtual DbSet<PayrollAverageWeight> PayrollAverageWeightSet { get; set; }
     public virtual DbSet<Plant> PlantSet { get; set; }
+
+    //Inventory
+    public virtual DbSet<ItemCategory> ItemCategorySet { get; set; }
+    public virtual DbSet<Item> ItemSet { get; set; }
+    public virtual DbSet<ItemMovement> ItemMovementSet { get; set; }
+    public virtual DbSet<Order> OrderSet { get; set; }
+    public virtual DbSet<OrderDetail> OrderDetailSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

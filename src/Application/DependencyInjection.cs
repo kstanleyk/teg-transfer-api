@@ -1,5 +1,9 @@
 ﻿using System.Reflection;
-using Agrovet.Application.Features.AverageWeight;
+using Agrovet.Application.Features.Core.AverageWeight;
+using Agrovet.Application.Features.Inventory.Item;
+using Agrovet.Application.Features.Inventory.ItemCategory;
+using Agrovet.Application.Features.Inventory.ItemMovement;
+using Agrovet.Application.Features.Inventory.Order;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,8 +21,14 @@ public static class DependencyInjection
         // Manually register AutoMapper
         services.AddSingleton(_ => new MapperConfiguration(cfg =>
         {
+            //Core
             cfg.AddProfile(new AverageWeightProfile());
-            // Add other profiles here as needed
+
+            // Inventory
+            cfg.AddProfile(new ItemProfile());
+            cfg.AddProfile(new ItemCategoryProfile());
+            cfg.AddProfile(new ItemMovementProfile());
+            cfg.AddProfile(new OrderProfile());
         }).CreateMapper());
 
         //services.AddValidatorsFromAssembly(assembly);

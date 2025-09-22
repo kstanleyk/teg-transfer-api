@@ -1,10 +1,11 @@
-﻿using Agrovet.Application.Interfaces.Auth;
+﻿using Agrovet.Application.Helpers;
+using Agrovet.Application.Interfaces.Auth;
 using Agrovet.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agrovet.Infrastructure.Persistence.Repository.Auth;
 
-public class UserPermissionRepository(AgrovetContext context) : IUserPermissionRepository
+public class UserPermissionRepository(AgrovetContext context) :Disposable, IUserPermissionRepository
 {
     public async Task<HashSet<string>> GetPermissionsForUserAsync(string userId)
     {
@@ -12,8 +13,6 @@ public class UserPermissionRepository(AgrovetContext context) : IUserPermissionR
             .Where(u => u.IdentityId == userId)
             .Select(u => u.Id)
             .FirstOrDefaultAsync();
-
-        //var guid = Guid.Parse(userId);
 
         var permissions = await context.UserRoleSet
             .Where(ur => ur.UserId == usrId)
@@ -24,4 +23,9 @@ public class UserPermissionRepository(AgrovetContext context) : IUserPermissionR
 
         return permissions.ToHashSet();
     }
+
+    //protected override void DisposeCore()
+    //{
+    //    base.DisposeCore();
+    //}
 }

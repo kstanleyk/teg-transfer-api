@@ -1,8 +1,7 @@
 ﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.AverageWeight.Commands;
-using Agrovet.Application.Features.AverageWeight.Dtos;
-using Agrovet.Application.Features.AverageWeight.Queries;
-using Agrovet.Application.Features.AverageWeights.Queries;
+using Agrovet.Application.Features.Core.AverageWeight.Commands;
+using Agrovet.Application.Features.Core.AverageWeight.Dtos;
+using Agrovet.Application.Features.Core.AverageWeight.Queries;
 using Agrovet.WebApi.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

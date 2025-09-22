@@ -30,10 +30,12 @@ public class AverageWeightMigrator(string connectionString, AgrovetContext conte
 
         foreach (var item in legacyItems)
         {
-            var entity = AverageWeight.Create(item.Id, item.Estate, item.Block, item.Weight, item.EffectiveDate,
-                item.Status, item.CreatedOn);
+            var entity = AverageWeight.Create(item.Estate, item.Block, item.Weight, item.EffectiveDate, item.Status,
+                item.CreatedOn);
 
+            entity.SetId(item.Id);
             entity.SetPublicId(SequentialGuidGenerator.Instance.NewGuid());
+
             entities.Add(entity);
         }
 

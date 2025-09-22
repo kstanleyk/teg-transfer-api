@@ -13,6 +13,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
 var configuration = builder.Configuration;
+var host = builder.WebHost;
+
+// Configure settings without building service provider
+var protocolSettings = configuration.GetSection("WebProtocolSettings").Get<WebProtocolSettings>();
+if (protocolSettings != null)
+{
+    host.UseUrls($"{protocolSettings.Url}:{protocolSettings.Port}");
+}
+
+services
+    .AddOptions<WebProtocolSettings>()
+    .Bind(configuration.GetSection("WebProtocolSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 services.AddApplication();
 services.AddInfrastructure(configuration);
@@ -55,6 +69,7 @@ services.AddAuthorization(options =>
 });
 
 services.AddHttpContextAccessor();
+services.AddScoped<CurrentUserService>();
 services.AddScoped<TokenInfoService>();
 
 services.AddEndpointsApiExplorer();
@@ -75,3 +90,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+
+internal class WebProtocolSettings
+{
+    public required string Url { get; set; }
+    public int Port { get; set; }
+}
