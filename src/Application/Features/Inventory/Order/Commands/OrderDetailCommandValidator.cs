@@ -33,9 +33,9 @@ public abstract class OrderDetailBaseValidator<T> : AbstractValidator<T>
             .MaximumLength(5).WithMessage("Line number must not exceed 5 characters.");
 
         RuleFor(d => d.Item)
-            .NotEmpty().WithMessage("Item is required.")
-            .NotNull().WithMessage("Item is required.")
-            .MaximumLength(10).WithMessage("Item must not exceed 10 characters.");
+            .NotEmpty().WithMessage("Product is required.")
+            .NotNull().WithMessage("Product is required.")
+            .MaximumLength(10).WithMessage("Product must not exceed 10 characters.");
 
         RuleFor(d => d.Description)
             .NotEmpty().WithMessage("Description is required.")

@@ -7,7 +7,7 @@ namespace Agrovet.Application.Features.Inventory.Order.Queries;
 
 public record OrderQuery : IRequest<OrderResponse>
 {
-    public required string Id { get; set; }
+    public Guid PublicId { get; set; }
 }
 
 public class OrderQueryHandler(IOrderRepository orderRepository, IMapper mapper)
@@ -16,7 +16,7 @@ public class OrderQueryHandler(IOrderRepository orderRepository, IMapper mapper)
 
     public async Task<OrderResponse> Handle(OrderQuery request, CancellationToken cancellationToken)
     {
-        var order = await orderRepository.GetAsync(request.Id);
+        var order = await orderRepository.GetByPublicIdAsync(request.PublicId);
         return mapper.Map<OrderResponse>(order);
     }
 

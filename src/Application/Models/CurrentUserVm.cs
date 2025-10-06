@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.Models;
+﻿namespace Agrovet.Application.Models;
 
 public class CurrentUserVm
 {

@@ -1,9 +1,11 @@
 ﻿using Agrovet.Application.Interfaces.Auth;
 using Agrovet.Application.Interfaces.Inventory;
+using Agrovet.Application.Interfaces.Sales;
 using Agrovet.Infrastructure.Persistence.Context;
 using Agrovet.Infrastructure.Persistence.Repository;
 using Agrovet.Infrastructure.Persistence.Repository.Auth;
 using Agrovet.Infrastructure.Persistence.Repository.Inventory;
+using Agrovet.Infrastructure.Persistence.Repository.Sales;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +15,7 @@ namespace Agrovet.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         // Entity Framework
         services.AddDbContext<AgrovetContext>(options =>
@@ -27,11 +29,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
 
         //Inventory
-        services.AddScoped<IItemCategoryRepository, ItemCategoryRepository>();
-        services.AddScoped<IItemMovementRepository, ItemMovementRepository>();
-        services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+        services.AddScoped<IProductMovementRepository, ProductMovementRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<IOrderTypeRepository, OrderTypeRepository>();
+        services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+        services.AddScoped<IDistributionChannelRepository, DistributionChannelRepository>();
+        services.AddScoped<IPriceItemRepository, PriceItemRepository>();
 
         return services;
     }

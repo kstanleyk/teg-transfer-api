@@ -8,10 +8,8 @@
         public const string Update = nameof(Update);
         public const string Delete = nameof(Delete);
         public const string Submit = nameof(Submit);
-        public const string Activate = nameof(Activate);
+        public const string Validate = nameof(Validate);
+        public const string Receive = nameof(Receive);
         public const string Close = nameof(Close);
-
-        //EstateTask Actions
-        public const string ReadPersonal = nameof(ReadPersonal);
     }
 }

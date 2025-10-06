@@ -2,6 +2,7 @@
 using Agrovet.Application.Helpers;
 using Agrovet.Application.Helpers.Exceptions;
 using Agrovet.Application.Interfaces.Inventory;
+using Agrovet.Domain.ValueObjects;
 using AutoMapper;
 using MediatR;
 using SequentialGuid;
@@ -52,6 +53,19 @@ public class CreateOrderCommandHandler(IOrderRepository orderRepository, IMapper
 
         var order = Domain.Entity.Inventory.Order.Create(or.OrderType, or.OrderDate, or.Status, or.Description,
             or.Supplier, or.TransDate, DateTime.UtcNow);
+
+        var orderDetails = or.OrderDetails?.ToArray();
+        if (orderDetails != null)
+        {
+            foreach (var detail in orderDetails)
+            {
+                var orderDetail = Domain.Entity.Inventory.OrderDetail.Create(detail.Item, detail.Qtty, detail.UnitCost);
+                orderDetail.SetPublicId(PublicId.CreateUnique().Value);
+                order.AddOrderDetail(orderDetail);
+            }
+        }
+
+        order.MarkAsPendingSubmission();
 
         order.SetPublicId(SequentialGuidGenerator.Instance.NewGuid());
 

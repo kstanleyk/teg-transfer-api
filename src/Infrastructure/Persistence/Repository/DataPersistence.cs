@@ -38,7 +38,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
     public virtual async Task<RepositoryActionResult<TEntity>> AddAsync(TEntity entity, int propertyLength)
     {
         if (entity.Id == null)
-            throw new ArgumentNullException(nameof(entity.Id), "Entity Id cannot be null.");
+            throw new ArgumentNullException(nameof(entity.Id), "Entity PublicId cannot be null.");
 
         return await AddAsync(entity, x => x.Id, nameof(entity.Id), propertyLength);
     }
@@ -457,7 +457,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
     protected virtual async Task<TEntity?> ItemToGetAsync(TEntity entity)
     {
         if (entity.Id == null)
-            throw new ArgumentNullException(nameof(entity.Id), "Entity Id cannot be null.");
+            throw new ArgumentNullException(nameof(entity.Id), "Entity PublicId cannot be null.");
 
         return await DbSet.AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id != null && e.Id.Equals(entity.Id));

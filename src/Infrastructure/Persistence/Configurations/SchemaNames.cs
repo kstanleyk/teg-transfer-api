@@ -7,4 +7,5 @@ internal static class SchemaNames
     public static string Core = nameof(Core).ToLower();
     public static string Common = nameof(Common).ToLower();
     public static string Inventory = nameof(Inventory).ToLower();
+    public static string Sales = nameof(Sales).ToLower();
 }

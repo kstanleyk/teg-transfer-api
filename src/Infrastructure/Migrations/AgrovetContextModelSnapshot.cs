@@ -204,7 +204,8 @@ namespace Agrovet.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001);
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -215,7 +216,8 @@ namespace Agrovet.Infrastructure.Migrations
 
                     b.Property<Guid?>("PublicId")
                         .HasColumnType("uuid")
-                        .HasColumnName("public_id");
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000);
 
                     b.Property<string>("Telephone")
                         .IsRequired()
@@ -246,7 +248,8 @@ namespace Agrovet.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001);
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -254,6 +257,11 @@ namespace Agrovet.Infrastructure.Migrations
                         .IsUnicode(false)
                         .HasColumnType("character varying(125)")
                         .HasColumnName("description");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000);
 
                     b.HasKey("Id", "Lid")
                         .HasName("pk_dialog_message");
@@ -277,7 +285,8 @@ namespace Agrovet.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001);
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -286,147 +295,34 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(125)")
                         .HasColumnName("description");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000);
+
                     b.HasKey("Id", "Lid")
                         .HasName("pk_month_name");
 
                     b.ToTable("month_name", "common");
                 });
 
-            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.Item", b =>
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.ProductMovement", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
                         .HasColumnName("id");
 
-                    b.Property<string>("BarCodeText")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("bar_code_text");
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("brand");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("category");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<double>("MaxStock")
-                        .HasColumnType("double precision")
-                        .HasColumnName("max_stock");
-
-                    b.Property<double>("MinStock")
-                        .HasColumnType("double precision")
-                        .HasColumnName("min_stock");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(85)
-                        .HasColumnType("character varying(85)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid?>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<double>("ReorderLev")
-                        .HasColumnType("double precision")
-                        .HasColumnName("reorder_lev");
-
-                    b.Property<double>("ReorderQtty")
-                        .HasColumnType("double precision")
-                        .HasColumnName("reorder_qtty");
-
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
-                        .HasColumnName("short_description");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<string>("LineNum")
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_item");
-
-                    b.HasIndex("BarCodeText")
-                        .IsUnique()
-                        .HasDatabaseName("ix_item_bar_code_text");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_item_public_id");
-
-                    b.ToTable("item", "inventory");
-                });
-
-            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.ItemCategory", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("id");
+                        .HasColumnName("line_num");
 
                     b.Property<DateTime>("CreatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid?>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.HasKey("Id")
-                        .HasName("pk_item_category");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_item_category_name");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_item_category_public_id");
-
-                    b.ToTable("item_category", "inventory");
-                });
-
-            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.ItemMovement", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Description")
@@ -441,16 +337,15 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("item");
 
-                    b.Property<string>("LineNum")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)")
-                        .HasColumnName("line_num");
+                    b.Property<string>("OrderId")
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("order_id");
 
-                    b.Property<Guid?>("PublicId")
+                    b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<double>("Qtty")
@@ -485,8 +380,11 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("trans_time");
 
-                    b.HasKey("Id")
+                    b.HasKey("Id", "LineNum")
                         .HasName("pk_item_movement");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_item_movement_order_id");
 
                     b.HasIndex("PublicId")
                         .IsUnique()
@@ -510,6 +408,7 @@ namespace Agrovet.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Description")
@@ -528,10 +427,11 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("order_type");
 
-                    b.Property<Guid?>("PublicId")
+                    b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Status")
@@ -562,10 +462,10 @@ namespace Agrovet.Infrastructure.Migrations
 
             modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.OrderDetail", b =>
                 {
-                    b.Property<string>("OrderId")
+                    b.Property<string>("Id")
                         .HasMaxLength(15)
                         .HasColumnType("character varying(15)")
-                        .HasColumnName("order_id");
+                        .HasColumnName("id");
 
                     b.Property<string>("LineNum")
                         .HasMaxLength(5)
@@ -580,21 +480,12 @@ namespace Agrovet.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("description");
 
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expiry_date");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("id");
 
                     b.Property<string>("Item")
                         .IsRequired()
@@ -602,19 +493,16 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("item");
 
-                    b.Property<Guid?>("PublicId")
+                    b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<double>("Qtty")
                         .HasColumnType("double precision")
                         .HasColumnName("qtty");
-
-                    b.Property<DateTime?>("ReceiveDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("receive_date");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -622,15 +510,11 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("status");
 
-                    b.Property<DateTime>("TransDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("trans_date");
-
                     b.Property<double>("UnitCost")
                         .HasColumnType("double precision")
                         .HasColumnName("unit_cost");
 
-                    b.HasKey("OrderId", "LineNum")
+                    b.HasKey("Id", "LineNum")
                         .HasName("pk_order_detail");
 
                     b.HasIndex("PublicId")
@@ -638,6 +522,332 @@ namespace Agrovet.Infrastructure.Migrations
                         .HasDatabaseName("ix_order_detail_public_id");
 
                     b.ToTable("order_detail", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.OrderStatus", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order_status");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_status_name");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_status_public_id");
+
+                    b.ToTable("order_status", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.OrderType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order_type");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_type_name");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_type_public_id");
+
+                    b.ToTable("order_type", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.Product", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<double>("MaxStock")
+                        .HasColumnType("double precision")
+                        .HasColumnName("max_stock");
+
+                    b.Property<double>("MinStock")
+                        .HasColumnType("double precision")
+                        .HasColumnName("min_stock");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("character varying(75)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<double>("ReorderLev")
+                        .HasColumnType("double precision")
+                        .HasColumnName("reorder_lev");
+
+                    b.Property<double>("ReorderQtty")
+                        .HasColumnType("double precision")
+                        .HasColumnName("reorder_qtty");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("sku");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product");
+
+                    b.ToTable("product", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.ProductCategory", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_category");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_category_name");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_category_public_id");
+
+                    b.ToTable("product_category", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.Supplier", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(5)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("city");
+
+                    b.Property<string>("ContactPerson")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("contact_person");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(25)")
+                        .HasColumnName("phone");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000);
+
+                    b.HasKey("Id")
+                        .HasName("pk_supplier");
+
+                    b.ToTable("supplier", "inventory");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Sales.DistributionChannel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_distribution_channel");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_distribution_channel_name");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_distribution_channel_public_id");
+
+                    b.ToTable("distribution_channel", "sales");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Sales.PriceItem", b =>
+                {
+                    b.Property<string>("ChannelId")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<string>("ItemId")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("item_id");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("EffectiveDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_date");
+
+                    b.HasKey("ChannelId", "ItemId")
+                        .HasName("pk_price_item");
+
+                    b.ToTable("price_item", "sales");
                 });
 
             modelBuilder.Entity("Agrovet.Domain.Entity.Auth.RolePermission", b =>
@@ -682,16 +892,79 @@ namespace Agrovet.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.ProductMovement", b =>
+                {
+                    b.HasOne("Agrovet.Domain.Entity.Inventory.Order", null)
+                        .WithMany("ItemMovements")
+                        .HasForeignKey("OrderId")
+                        .HasConstraintName("fk_item_movement_order_set_order_id");
+                });
+
             modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.OrderDetail", b =>
                 {
                     b.HasOne("Agrovet.Domain.Entity.Inventory.Order", "Order")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_detail_order_order_id");
+                        .HasConstraintName("fk_order_detail_order_id");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.Product", b =>
+                {
+                    b.OwnsOne("Agrovet.Domain.Entity.Inventory.BottlingType", "BottlingType", b1 =>
+                        {
+                            b1.Property<string>("ProductId")
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("DisplayName")
+                                .IsRequired()
+                                .HasMaxLength(5)
+                                .HasColumnType("character varying(5)")
+                                .HasColumnName("bottling_type_display_name");
+
+                            b1.Property<decimal>("SizeInLiters")
+                                .HasColumnType("numeric")
+                                .HasColumnName("bottling_type_size_in_liters");
+
+                            b1.HasKey("ProductId");
+
+                            b1.ToTable("product", "inventory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId")
+                                .HasConstraintName("fk_product_product_id");
+                        });
+
+                    b.OwnsOne("Agrovet.Domain.Entity.Inventory.Brand", "Brand", b1 =>
+                        {
+                            b1.Property<string>("ProductId")
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("brand_name");
+
+                            b1.HasKey("ProductId");
+
+                            b1.ToTable("product", "inventory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId")
+                                .HasConstraintName("fk_product_product_id");
+                        });
+
+                    b.Navigation("BottlingType")
+                        .IsRequired();
+
+                    b.Navigation("Brand")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Agrovet.Domain.Entity.Auth.Permission", b =>
@@ -713,6 +986,8 @@ namespace Agrovet.Infrastructure.Migrations
 
             modelBuilder.Entity("Agrovet.Domain.Entity.Inventory.Order", b =>
                 {
+                    b.Navigation("ItemMovements");
+
                     b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618

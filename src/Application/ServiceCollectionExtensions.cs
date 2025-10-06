@@ -1,16 +1,22 @@
-﻿using System.Reflection;
-using Agrovet.Application.Features.Inventory.Item;
-using Agrovet.Application.Features.Inventory.ItemCategory;
-using Agrovet.Application.Features.Inventory.ItemMovement;
-using Agrovet.Application.Features.Inventory.Order;
+﻿using Agrovet.Application.Features.Inventory.Order;
+using Agrovet.Application.Features.Inventory.OrderDetail;
+using Agrovet.Application.Features.Inventory.OrderStatus;
+using Agrovet.Application.Features.Inventory.OrderType;
+using Agrovet.Application.Features.Inventory.Supplier;
+using Agrovet.Application.Features.Sales.DistributionChannel;
+using Agrovet.Application.Features.Sales.PriceItem;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using Agrovet.Application.Features.Inventory.Product;
+using Agrovet.Application.Features.Inventory.ProductCategory;
+using Agrovet.Application.Features.Inventory.ProductMovement;
 
 namespace Agrovet.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
@@ -21,10 +27,19 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(_ => new MapperConfiguration(cfg =>
         {
             // Inventory
-            cfg.AddProfile(new ItemProfile());
-            cfg.AddProfile(new ItemCategoryProfile());
-            cfg.AddProfile(new ItemMovementProfile());
+            cfg.AddProfile(new ProductProfile());
+            cfg.AddProfile(new ProductCategoryProfile());
+            cfg.AddProfile(new ProductMovementProfile());
             cfg.AddProfile(new OrderProfile());
+            cfg.AddProfile(new OrderDetailProfile());
+            cfg.AddProfile(new SupplierProfile());
+            cfg.AddProfile(new OrderTypeProfile());
+            cfg.AddProfile(new OrderStatusProfile());
+
+            //Sales
+            cfg.AddProfile(new DistributionChannelProfile());
+            cfg.AddProfile(new PriceItemProfile());
+
         }).CreateMapper());
 
         //services.AddValidatorsFromAssembly(assembly);

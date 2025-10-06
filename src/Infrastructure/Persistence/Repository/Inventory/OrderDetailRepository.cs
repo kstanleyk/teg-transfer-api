@@ -23,7 +23,7 @@ public class OrderDetailRepository(IDatabaseFactory databaseFactory)
                 : lastIdValue.ToNumValue();
 
             var newId = (lastNumber + 1).ToString(CultureInfo.InvariantCulture).PadLeft(3,'0');
-            orderDetail.SetId(newId);
+            orderDetail.SetOrderId(newId);
 
             await DbSet.AddAsync(orderDetail);
             var changes = await SaveChangesAsync();
@@ -38,5 +38,26 @@ public class OrderDetailRepository(IDatabaseFactory databaseFactory)
         {
             return new RepositoryActionResult<OrderDetail>(null, RepositoryActionStatus.Error, ex);
         }
+    }
+
+    public async Task<RepositoryActionResult<IEnumerable<OrderDetail>>> UpdateOrderDetailsAsync(string id,
+        OrderDetail[] orderDetails)
+    {
+        await DeleteManyAsync(x => x.Id == id);
+
+        if (orderDetails.Length == 0)
+        {
+            return new RepositoryActionResult<IEnumerable<OrderDetail>>(orderDetails,
+                RepositoryActionStatus.Okay);
+        }
+
+        var result = await AddManyAsync(orderDetails);
+        if (result.Status == RepositoryActionStatus.Created)
+        {
+            return new RepositoryActionResult<IEnumerable<OrderDetail>>(result.Entity,
+                RepositoryActionStatus.Okay);
+        }
+
+        return result;
     }
 }

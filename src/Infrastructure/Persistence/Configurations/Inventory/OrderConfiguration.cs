@@ -25,7 +25,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasIndex(o => o.PublicId).IsUnique();
 
         // Configure relationship with OrderDetail
-        builder.HasMany(o => o.OrderDetails).WithOne(d => d.Order).HasForeignKey(d => d.OrderId)
+        builder.HasMany(o => o.OrderDetails).WithOne(d => d.Order).HasForeignKey(d => d.Id)
             .OnDelete(DeleteBehavior.Cascade); // Aggregate root deletes cascade
     }
 }

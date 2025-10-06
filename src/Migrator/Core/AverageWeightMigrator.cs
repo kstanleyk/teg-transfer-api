@@ -33,7 +33,7 @@
 //            var entity = AverageWeight.Create(item.Estate, item.Block, item.Weight, item.EffectiveDate, item.Status,
 //                item.CreatedOn);
 
-//            entity.SetId(item.Id);
+//            entity.SetOrderId(item.PublicId);
 //            entity.SetPublicId(SequentialGuidGenerator.Instance.NewGuid());
 
 //            entities.Add(entity);

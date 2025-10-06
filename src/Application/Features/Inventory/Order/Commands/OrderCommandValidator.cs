@@ -51,9 +51,9 @@ public class EditOrderValidator : OrderBaseValidator<EditOrderRequest>
     public EditOrderValidator(OrderValidationCodes validationCodes)
     {
         RuleFor(o => o.Id)
-            .NotEmpty().WithMessage("Order Id is required.")
-            .NotNull().WithMessage("Order Id is required.")
-            .MaximumLength(15).WithMessage("Order Id must not exceed 15 characters.");
+            .NotEmpty().WithMessage("Order PublicId is required.")
+            .NotNull().WithMessage("Order PublicId is required.")
+            .MaximumLength(15).WithMessage("Order PublicId must not exceed 15 characters.");
 
         AddCommonRules(validationCodes);
     }
@@ -64,7 +64,7 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
     public CreateOrderCommandValidator(OrderValidationCodes validationCodes)
     {
         RuleFor(p => p.Order)
-            .NotNull().WithMessage("Item category cannot be empty.")
+            .NotNull().WithMessage("Product category cannot be empty.")
             .SetValidator(new CreateOrderValidator(validationCodes));
     }
 }
@@ -74,7 +74,37 @@ public class EditOrderCommandValidator : AbstractValidator<EditOrderCommand>
     public EditOrderCommandValidator(OrderValidationCodes validationCodes)
     {
         RuleFor(p => p.Order)
-            .NotNull().WithMessage("Item category cannot be empty.")
+            .NotNull().WithMessage("Product category cannot be empty.")
+            .SetValidator(new EditOrderValidator(validationCodes));
+    }
+}
+
+public class SubmitOrderCommandValidator : AbstractValidator<SubmitOrderCommand>
+{
+    public SubmitOrderCommandValidator(OrderValidationCodes validationCodes)
+    {
+        RuleFor(p => p.Order)
+            .NotNull().WithMessage("Product category cannot be empty.")
+            .SetValidator(new EditOrderValidator(validationCodes));
+    }
+}
+
+public class ReceiveOrderCommandValidator : AbstractValidator<ReceiveOrderCommand>
+{
+    public ReceiveOrderCommandValidator(OrderValidationCodes validationCodes)
+    {
+        RuleFor(p => p.Order)
+            .NotNull().WithMessage("Product category cannot be empty.")
+            .SetValidator(new EditOrderValidator(validationCodes));
+    }
+}
+
+public class ValidateOrderCommandValidator : AbstractValidator<ValidateOrderCommand>
+{
+    public ValidateOrderCommandValidator(OrderValidationCodes validationCodes)
+    {
+        RuleFor(p => p.Order)
+            .NotNull().WithMessage("Product category cannot be empty.")
             .SetValidator(new EditOrderValidator(validationCodes));
     }
 }

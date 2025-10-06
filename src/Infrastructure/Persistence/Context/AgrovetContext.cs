@@ -1,6 +1,7 @@
 ﻿using Agrovet.Domain.Abstractions;
 using Agrovet.Domain.Entity.Auth;
 using Agrovet.Domain.Entity.Inventory;
+using Agrovet.Domain.Entity.Sales;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agrovet.Infrastructure.Persistence.Context;
@@ -15,11 +16,16 @@ public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContex
     public DbSet<UserRole> UserRoleSet => Set<UserRole>();
 
     //Inventory
-    public virtual DbSet<ItemCategory> ItemCategorySet { get; set; }
-    public virtual DbSet<Item> ItemSet { get; set; }
-    public virtual DbSet<ItemMovement> ItemMovementSet { get; set; }
+    public virtual DbSet<ProductCategory> ItemCategorySet { get; set; }
+    public virtual DbSet<Product> ProductSet { get; set; }
+    public virtual DbSet<ProductMovement> ItemMovementSet { get; set; }
     public virtual DbSet<Order> OrderSet { get; set; }
     public virtual DbSet<OrderDetail> OrderDetailSet { get; set; }
+    public virtual DbSet<Supplier> SupplierSet { get; set; }
+    public virtual DbSet<OrderStatus> OrderStatusSet { get; set; }
+    public virtual DbSet<OrderType> OrderTypeSet { get; set; }
+    public virtual DbSet<DistributionChannel> DistributionChannelSet { get; set; }
+    public virtual DbSet<PriceItem> PriceItemSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

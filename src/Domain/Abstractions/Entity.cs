@@ -11,13 +11,14 @@ public abstract class Entity<TId>
         PublicId = publicId;
     }
 
+    public void SetId(TId id)
+    {
+        Id = id;
+    }
+
     public void SetCreatedOn(DateTime createdOn)
     {
         CreatedOn = createdOn;
     }
 }
 
-public abstract class AuthEntity<TId>
-{
-    public TId Id { get; protected set; } = default!;
-}

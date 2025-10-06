@@ -1,0 +1,27 @@
+﻿using Agrovet.Application.Features.Inventory.ProductMovement.Dtos;
+using Agrovet.Application.Interfaces.Inventory;
+using AutoMapper;
+using MediatR;
+
+namespace Agrovet.Application.Features.Inventory.ProductMovement.Queries;
+
+public record ProductMovementQuery : IRequest<ProductMovementResponse>
+{
+    public required string Id { get; set; }
+}
+
+public class ProductMovementQueryHandler(IProductMovementRepository productMovementRepository, IMapper mapper)
+    : RequestHandlerBase, IRequestHandler<ProductMovementQuery, ProductMovementResponse>
+{
+
+    public async Task<ProductMovementResponse> Handle(ProductMovementQuery request, CancellationToken cancellationToken)
+    {
+        var itemMovement = await productMovementRepository.GetAsync(request.Id);
+        return mapper.Map<ProductMovementResponse>(itemMovement);
+    }
+
+    protected override void DisposeCore()
+    {
+        productMovementRepository.Dispose();
+    }
+}

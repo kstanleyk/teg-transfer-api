@@ -22,22 +22,12 @@ public class OrderDetail : Entity<string>
     protected OrderDetail() { }
 
     public static OrderDetail Create(
-        string lineNum,
         string item,
-        string description,
         double qtty,
         double unitCost,
-        DateTime transDate,
-        string orderId,
-        DateTime? expiryDate = null,
-        DateTime? receiveDate = null,
-        string status = "OPEN",
         DateTime? createdOn = null)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(lineNum);
         DomainGuards.AgainstNullOrWhiteSpace(item);
-        DomainGuards.AgainstNullOrWhiteSpace(description);
-        DomainGuards.AgainstNullOrWhiteSpace(orderId);
 
         if (qtty <= 0)
             throw new ArgumentOutOfRangeException(nameof(qtty), "Quantity must be greater than zero.");
@@ -47,17 +37,10 @@ public class OrderDetail : Entity<string>
 
         return new OrderDetail
         {
-            LineNum = lineNum,
             Item = item,
-            Description = description,
             Qtty = qtty,
             UnitCost = unitCost,
             Amount = qtty * unitCost,
-            TransDate = transDate,
-            OrderId = orderId,
-            ExpiryDate = expiryDate,
-            ReceiveDate = receiveDate,
-            Status = status,
             CreatedOn = createdOn ?? DateTime.UtcNow
         };
     }
@@ -94,5 +77,23 @@ public class OrderDetail : Entity<string>
     public void Reopen()
     {
         Status = "OPEN";
+    }
+
+    public void SetLineNum(string lineNum)
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(lineNum);
+        LineNum = lineNum;
+    }
+
+    public void SetOrderId(string id)
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(id);
+        OrderId = id;
+    }
+
+    public void SetStatus(string status)
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(status);
+        Status = status;
     }
 }

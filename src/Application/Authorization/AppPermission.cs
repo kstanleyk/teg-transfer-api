@@ -35,9 +35,9 @@ public class AppPermissions
         new AppPermission(AppFeature.RoleClaims, AppAction.Read, AppRoleGroup.SystemAccess, "Read Role Claims/Permissions"),
         new AppPermission(AppFeature.RoleClaims, AppAction.Update, AppRoleGroup.SystemAccess, "Update Role Claims/Permissions"),
 
-        new AppPermission(AppFeature.Item, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Inventory Item", true),
-        new AppPermission(AppFeature.Item, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Inventory Item"),
-        new AppPermission(AppFeature.Item, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Inventory Item"),
+        new AppPermission(AppFeature.Item, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Inventory Product", true),
+        new AppPermission(AppFeature.Item, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Inventory Product"),
+        new AppPermission(AppFeature.Item, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Inventory Product"),
 
         new AppPermission(AppFeature.ItemCategory, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read item category", true),
         new AppPermission(AppFeature.ItemCategory, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create item category"),
@@ -50,10 +50,36 @@ public class AppPermissions
         new AppPermission(AppFeature.Order, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read orders", true),
         new AppPermission(AppFeature.Order, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create orders"),
         new AppPermission(AppFeature.Order, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update orders"),
+        new AppPermission(AppFeature.Order, AppAction.Submit, AppRoleGroup.ManagementHierarchy, "Submit orders"),
+        new AppPermission(AppFeature.Order, AppAction.Validate, AppRoleGroup.ManagementHierarchy, "Validate orders"),
+        new AppPermission(AppFeature.Order, AppAction.Receive, AppRoleGroup.ManagementHierarchy, "Receive orders"),
 
         new AppPermission(AppFeature.OrderDetail, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read order details", true),
         new AppPermission(AppFeature.OrderDetail, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create order details"),
         new AppPermission(AppFeature.OrderDetail, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update order details"),
+
+        new AppPermission(AppFeature.Supplier, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read supplier", true),
+        new AppPermission(AppFeature.Supplier, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create supplier"),
+        new AppPermission(AppFeature.Supplier, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update supplier"),
+
+        new AppPermission(AppFeature.OrderType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read order type", true),
+        new AppPermission(AppFeature.OrderType, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create order type"),
+        new AppPermission(AppFeature.OrderType, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update order type"),
+
+        new AppPermission(AppFeature.OrderStatus, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read order status", true),
+        new AppPermission(AppFeature.OrderStatus, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create order status"),
+        new AppPermission(AppFeature.OrderStatus, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update order status"),
+
+        new AppPermission(AppFeature.DistributionChannel, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read distribution channels", true),
+        new AppPermission(AppFeature.DistributionChannel, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create distribution channels"),
+        new AppPermission(AppFeature.DistributionChannel, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update distribution channels"),
+
+        new AppPermission(AppFeature.BottlingType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read bottling types", true),
+        new AppPermission(AppFeature.PackagingType, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read packaging types", true),
+
+        new AppPermission(AppFeature.PriceItem, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read price items", true),
+        new AppPermission(AppFeature.PriceItem, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create price items"),
+        new AppPermission(AppFeature.PriceItem, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update price items"),
     ];
 
     public static IReadOnlyList<AppPermission> AdminPermissions { get; } =
