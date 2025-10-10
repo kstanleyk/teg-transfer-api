@@ -1,17 +1,8 @@
 ﻿using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using Transfer.Application.Features.Inventory.Category;
-using Transfer.Application.Features.Inventory.Order;
-using Transfer.Application.Features.Inventory.OrderDetail;
-using Transfer.Application.Features.Inventory.OrderStatus;
-using Transfer.Application.Features.Inventory.OrderType;
-using Transfer.Application.Features.Inventory.Product;
-using Transfer.Application.Features.Inventory.ProductMovement;
-using Transfer.Application.Features.Inventory.Supplier;
 using Transfer.Application.Features.Inventory.Warehouse;
-using Transfer.Application.Features.Sales.DistributionChannel;
-using Transfer.Application.Features.Sales.PriceItem;
+
 
 namespace Transfer.Application;
 
@@ -28,19 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(_ => new MapperConfiguration(cfg =>
         {
             // Inventory
-            cfg.AddProfile(new ProductProfile());
-            cfg.AddProfile(new CategoryProfile());
-            cfg.AddProfile(new ProductMovementProfile());
-            cfg.AddProfile(new OrderProfile());
-            cfg.AddProfile(new OrderDetailProfile());
-            cfg.AddProfile(new SupplierProfile());
-            cfg.AddProfile(new OrderTypeProfile());
-            cfg.AddProfile(new OrderStatusProfile());
             cfg.AddProfile(new WarehouseProfile());
-
-            //Sales
-            cfg.AddProfile(new DistributionChannelProfile());
-            cfg.AddProfile(new PriceItemProfile());
 
         }).CreateMapper());
 
