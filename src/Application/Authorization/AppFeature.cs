@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Authorization;
+﻿namespace Transfer.Application.Authorization;
 
 public static class AppFeature
 {
@@ -10,7 +10,7 @@ public static class AppFeature
 
     //Inventory
     public const string Item = nameof(Item);
-    public const string ItemCategory = nameof(ItemCategory);
+    public const string Category = nameof(Category);
     public const string ItemMovement = nameof(ItemMovement);
     public const string Order = nameof(Order);
     public const string OrderDetail = nameof(OrderDetail);

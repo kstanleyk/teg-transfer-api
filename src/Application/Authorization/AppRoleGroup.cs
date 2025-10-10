@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Authorization
+﻿namespace Transfer.Application.Authorization
 {
     public static class AppRoleGroup
     {

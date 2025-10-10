@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Sales.PriceItem.Dtos;
+﻿namespace Transfer.Application.Features.Sales.PriceItem.Dtos;
 
 public abstract class BasePriceItemRequest
 {

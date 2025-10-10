@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Inventory.OrderType.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.OrderType.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Inventory.OrderType.Commands;
+namespace Transfer.Application.Features.Inventory.OrderType.Commands;
 
 public class CreateOrderTypeCommandResponse : BaseResponse
 {
@@ -45,7 +45,7 @@ public class CreateOrderTypeCommandHandler(IOrderTypeRepository orderTypeReposit
 
         var icr = request.OrderType;
 
-        var orderType = Domain.Entity.Inventory.OrderType.Create(icr.Name);
+        var orderType = Transfer.Domain.Entity.Inventory.OrderType.Create(icr.Name);
 
         orderType.SetPublicId(PublicId.CreateUnique().Value);
 

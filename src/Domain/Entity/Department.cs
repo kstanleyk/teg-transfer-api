@@ -1,13 +1,11 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity;
+namespace Transfer.Domain.Entity;
 
 public class Department : Entity<string>
 {
     public string Name { get; private set; } = null!;
     public string FacultyId { get; private set; } = null!;
-    public Guid? PublicId { get; private set; }
-    public DateTime CreatedOn { get; private set; }
 
     protected Department()
     {
@@ -25,17 +23,5 @@ public class Department : Entity<string>
             FacultyId = facultyId,
             CreatedOn = createdOn
         };
-    }
-
-    public void SetId(string id)
-    {
-        ArgumentNullException.ThrowIfNull(id);
-        Id = id;
-    }
-
-    public void SetPublicId(Guid publicId)
-    {
-        ArgumentNullException.ThrowIfNull(publicId);
-        PublicId = publicId;
     }
 }

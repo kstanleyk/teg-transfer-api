@@ -1,10 +1,10 @@
-﻿using Agrovet.Domain.Abstractions;
-using Agrovet.Domain.Entity.Auth;
-using Agrovet.Domain.Entity.Inventory;
-using Agrovet.Domain.Entity.Sales;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Transfer.Domain.Abstractions;
+using Transfer.Domain.Entity.Auth;
+using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Sales;
 
-namespace Agrovet.Infrastructure.Persistence.Context;
+namespace Transfer.Infrastructure.Persistence.Context;
 
 public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContext(options)
 {
@@ -16,7 +16,7 @@ public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContex
     public DbSet<UserRole> UserRoleSet => Set<UserRole>();
 
     //Inventory
-    public virtual DbSet<ProductCategory> ItemCategorySet { get; set; }
+    public virtual DbSet<Category> ItemCategorySet { get; set; }
     public virtual DbSet<Product> ProductSet { get; set; }
     public virtual DbSet<ProductMovement> ItemMovementSet { get; set; }
     public virtual DbSet<Order> OrderSet { get; set; }
@@ -26,6 +26,8 @@ public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContex
     public virtual DbSet<OrderType> OrderTypeSet { get; set; }
     public virtual DbSet<DistributionChannel> DistributionChannelSet { get; set; }
     public virtual DbSet<PriceItem> PriceItemSet { get; set; }
+    public virtual DbSet<Warehouse> WarehouseSet { get; set; }
+    public virtual DbSet<Country> CountrySet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

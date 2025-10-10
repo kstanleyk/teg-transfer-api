@@ -1,8 +1,8 @@
-﻿using Agrovet.Domain.Entity.Sales;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Transfer.Domain.Entity.Sales;
 
-namespace Agrovet.Infrastructure.Persistence.Configurations.Sales;
+namespace Transfer.Infrastructure.Persistence.Configurations.Sales;
 
 public class DistributionChannelConfiguration : IEntityTypeConfiguration<DistributionChannel>
 {

@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Helpers;
+﻿namespace Transfer.Application.Helpers;
 
 public enum RepositoryActionStatus
 {

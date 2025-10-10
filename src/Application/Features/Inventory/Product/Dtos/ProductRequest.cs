@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.Product.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.Product.Dtos;
 
 public abstract class BaseProductRequest
 {

@@ -1,6 +1,6 @@
-using Agrovet.Application;
-using Agrovet.Infrastructure;
-using Agrovet.WebApi;
+using Transfer.Application;
+using Transfer.Infrastructure;
+using Transfer.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

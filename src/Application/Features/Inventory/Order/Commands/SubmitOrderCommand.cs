@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Inventory.Order.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Order.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Inventory.Order.Commands;
+namespace Transfer.Application.Features.Inventory.Order.Commands;
 
 public class SubmitOrderCommandResponse : BaseResponse
 {
@@ -47,13 +47,17 @@ public class SubmitOrderCommandHandler(IOrderRepository orderRepository, IMapper
 
         var or = request.Order;
 
-        var order = Domain.Entity.Inventory.Order.Create(or.OrderType, or.OrderDate, or.Status, or.Description,
+        var order = Transfer.Domain.Entity.Inventory.Order.Create(or.OrderType, or.OrderDate, or.Status, or.Description,
             or.Supplier, or.TransDate, DateTime.UtcNow);
         var orderDetails = or.OrderDetails.ToArray();
 
         foreach (var detail in orderDetails)
         {
-            var orderDetail = Domain.Entity.Inventory.OrderDetail.Create(detail.Item, detail.Qtty, detail.UnitCost);
+            var packagingType = Transfer.Domain.Entity.Inventory.PackagingType.FromId(detail.PackagingType);
+
+            var orderDetail = Transfer.Domain.Entity.Inventory.OrderDetail.Create(detail.Item, detail.BatchNumber,
+                detail.Qtty, detail.UnitCost, packagingType);
+
             orderDetail.SetPublicId(PublicId.CreateUnique().Value);
             order.AddOrderDetail(orderDetail);
         }

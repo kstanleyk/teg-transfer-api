@@ -1,13 +1,13 @@
-﻿using Agrovet.Application.Authorization;
-using Agrovet.Domain.Entity.Auth;
-using Agrovet.Domain.Entity.Inventory;
-using Agrovet.Domain.Entity.Sales;
-using Agrovet.Domain.ValueObjects;
+﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Dapper;
+using Transfer.Application.Authorization;
+using Transfer.Domain.Entity.Auth;
+using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Sales;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Infrastructure.Persistence.Context;
+namespace Transfer.Infrastructure.Persistence.Context;
 
 public class AgrovetDatabaseSeeder(AgrovetContext context)
 {
@@ -20,10 +20,12 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         await SeedUsersAsync();
 
         await SeedProductCategoriesAsync();
+        await SeedWarehousesAsync();
         await SeedProductsAsync();
         await SeedSuppliersAsync();
         await SeedOrderStatusesAsync();
         await SeedOrderTypesAsync();
+        await SeedCountriesAsync();
         await SeedDistributionChannelsAsync();
         await SeedPriceItemsAsync();
     }
@@ -253,9 +255,9 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         await context.SaveChangesAsync();
         return;
 
-        ProductCategory CreateItemCategory(string id, string name)
+        Category CreateItemCategory(string id, string name)
         {
-            var itemCategory = ProductCategory.Create(name);
+            var itemCategory = Category.Create(name);
 
             itemCategory.SetId(id);
 
@@ -263,6 +265,49 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
 
             return itemCategory;
         }
+    }
+
+    private async Task SeedWarehousesAsync()
+    {
+        if (await context.WarehouseSet.AnyAsync())
+            return;
+
+        var warehouses = new List<Warehouse>();
+
+        // Cameroon Production Warehouse
+        var cameroonAddress = Address.CreateCameroonAddress(
+            city: "Douala",
+            quarter: "Bonaberi",
+            landmark: "Near Douala Port",
+            region: "LT");
+
+        var cameroonWarehouse = Warehouse.Create("Douala Production Facility", cameroonAddress);
+        cameroonWarehouse.SetId("CM001");
+        cameroonWarehouse.SetPublicId(PublicId.CreateUnique().Value);
+        warehouses.Add(cameroonWarehouse);
+
+        // US Warehouses
+        var usWarehouses = new[]
+        {
+            new { Id = "US001", Name = "Miramar FL Distribution Center", Street = "5360 SW 150th Terrace", City = "Miramar", State = "FL", Zip = "33026" },
+            new { Id = "US002", Name = "Laurel MD Distribution Center", Street = "9157 Whiskey Bottom Road", City = "LAUREL", State = "MD", Zip = "20723" },
+            new { Id = "US003", Name = "Burtonsville MD Distribution Center", Street = "4311 Ambrose Court", City = "Burtonsville", State = "MD", Zip = "20866" },
+            new { Id = "US004", Name = "Chicago IL Distribution Center", Street = "1133 Keystone Avenue", City = "Chicago", State = "IL", Zip = "60651" },
+            new { Id = "US005", Name = "Overland Park KS Distribution Center", Street = "10205 West 147 St", City = "Overland Park", State = "KS", Zip = "66221" }
+        };
+
+        foreach (var wh in usWarehouses)
+        {
+            var usAddress = Address.CreateUsAddress(street: wh.Street, city: wh.City, state: wh.State, zipCode: wh.Zip);
+
+            var warehouse = Warehouse.Create(wh.Name, usAddress);
+            warehouse.SetId(wh.Id);
+            warehouse.SetPublicId(PublicId.CreateUnique().Value);
+            warehouses.Add(warehouse);
+        }
+
+        await context.WarehouseSet.AddRangeAsync(warehouses);
+        await context.SaveChangesAsync();
     }
 
     private async Task SeedDistributionChannelsAsync()
@@ -399,6 +444,36 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         OrderType CreateOrderType(string id, string name)
         {
             var orderType = OrderType.Create(name);
+
+            orderType.SetId(id);
+
+            orderType.SetPublicId(PublicId.CreateUnique().Value);
+
+            return orderType;
+        }
+    }
+
+    private async Task SeedCountriesAsync()
+    {
+        if (await context.CountrySet.AnyAsync())
+            return;
+
+        var seedData = new[]
+        {
+            new { Id = "CM", Name = "Cameroon"},
+            new { Id = "US", Name = "USA"},
+        };
+
+        var countries = seedData
+            .Select(region => CreateCountry(region.Id, region.Name)).ToList();
+
+        await context.CountrySet.AddRangeAsync(countries);
+        await context.SaveChangesAsync();
+        return;
+
+        Country CreateCountry(string id, string name)
+        {
+            var orderType = Country.Create(name);
 
             orderType.SetId(id);
 
@@ -623,5 +698,4 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
             return supplier;
         }
     }
-
 }

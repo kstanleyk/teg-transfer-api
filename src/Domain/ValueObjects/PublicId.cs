@@ -1,6 +1,6 @@
 ﻿using SequentialGuid;
 
-namespace Agrovet.Domain.ValueObjects;
+namespace Transfer.Domain.ValueObjects;
 
 public sealed record PublicId
 {

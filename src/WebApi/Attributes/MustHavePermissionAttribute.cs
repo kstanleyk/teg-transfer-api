@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Authorization;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Transfer.Application.Authorization;
 
-namespace Agrovet.WebApi.Attributes
+namespace Transfer.WebApi.Attributes
 {
     public class MustHavePermissionAttribute : AuthorizeAttribute
     {

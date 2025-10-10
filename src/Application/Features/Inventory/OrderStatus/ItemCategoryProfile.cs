@@ -1,16 +1,16 @@
-﻿using Agrovet.Application.Features.Inventory.OrderStatus.Dtos;
-using AutoMapper;
+﻿using AutoMapper;
+using Transfer.Application.Features.Inventory.OrderStatus.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.OrderStatus;
+namespace Transfer.Application.Features.Inventory.OrderStatus;
 
 public class OrderStatusProfile : Profile
 {
     public OrderStatusProfile()
     {
-        CreateMap<Domain.Entity.Inventory.OrderStatus, OrderStatusResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.OrderStatus, OrderStatusResponse>();
 
-        CreateMap<Domain.Entity.Inventory.OrderStatus, OrderStatusUpdatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.OrderStatus, OrderStatusUpdatedResponse>();
 
-        CreateMap<Domain.Entity.Inventory.OrderStatus, OrderStatusCreatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.OrderStatus, OrderStatusCreatedResponse>();
     }
 }

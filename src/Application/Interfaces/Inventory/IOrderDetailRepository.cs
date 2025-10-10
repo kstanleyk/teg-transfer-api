@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Domain.Entity.Inventory;
+﻿using Transfer.Application.Helpers;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Application.Interfaces.Inventory;
+namespace Transfer.Application.Interfaces.Inventory;
 
 public interface IOrderDetailRepository : IRepository<OrderDetail, string>
 {

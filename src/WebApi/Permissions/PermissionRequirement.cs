@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Agrovet.WebApi.Permissions;
+namespace Transfer.WebApi.Permissions;
 
 public class PermissionRequirement(string permission) : IAuthorizationRequirement
 {

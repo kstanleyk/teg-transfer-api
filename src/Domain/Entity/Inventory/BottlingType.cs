@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.ValueObjects;
+﻿using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Domain.Entity.Inventory;
+namespace Transfer.Domain.Entity.Inventory;
 
 public sealed class BottlingType : ValueObject
 {

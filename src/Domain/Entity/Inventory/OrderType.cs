@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity.Inventory;
+namespace Transfer.Domain.Entity.Inventory;
 
 public class OrderType : Entity<string>
 {
@@ -19,12 +19,6 @@ public class OrderType : Entity<string>
             Name = name,
             CreatedOn = createdOn ?? DateTime.UtcNow
         };
-    }
-
-    public void SetId(string id)
-    {
-        DomainGuards.AgainstNullOrWhiteSpace(id);
-        Id = id;
     }
 
     public void Update(OrderType itemCategory)

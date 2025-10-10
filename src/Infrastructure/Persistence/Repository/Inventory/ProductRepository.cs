@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.Entity.Inventory;
+﻿using System.Globalization;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using Agrovet.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
+namespace Transfer.Infrastructure.Persistence.Repository.Inventory;
 
 public class ProductRepository(IDatabaseFactory databaseFactory)
     : DataRepository<Product, string>(databaseFactory), IProductRepository
@@ -90,26 +90,29 @@ public class ProductRepository(IDatabaseFactory databaseFactory)
         {
             const string selectSql = """
 
-                                     WITH item_movements AS (
-                                         SELECT 
-                                             im.source_id, 
-                                             im.source_line_num, 
-                                             coalesce(SUM(im.qtty) FILTER (WHERE im.sense = 'D'),0) AS total_debit,
-                                             coalesce(SUM(im.qtty) FILTER (WHERE im.sense = 'C'),0) AS total_credit
-                                         FROM inventory.item_movement im
-                                         GROUP BY im.source_id, im.source_line_num
-                                     )
-                                     SELECT 
-                                         od.id, 
-                                         od.line_num as lineNum, 
-                                     	od.item,
+                                      WITH item_movements AS (
+                                     	 SELECT 
+                                     		 im.source_id, 
+                                     		 im.source_line_num, 
+                                     		 coalesce(SUM(im.qtty) FILTER (WHERE im.sense = 'D'),0) AS total_debit,
+                                     		 coalesce(SUM(im.qtty) FILTER (WHERE im.sense = 'C'),0) AS total_credit
+                                     	 FROM inventory.product_movement im
+                                     	 GROUP BY im.source_id, im.source_line_num
+                                      )
+                                      SELECT 
+                                     	 od.id, 
+                                     	 od.line_num as lineNum, 
+                                     	od.item as product,
                                      	od.unit_cost as unitcost,
-                                         COALESCE(im.total_debit, 0) - COALESCE(im.total_credit, 0) AS stockQtty
-                                     FROM inventory.order_detail od
-                                     LEFT JOIN item_movements im 
-                                         ON im.source_id = od.id 
-                                         AND im.source_line_num = od.line_num
-                                     WHERE COALESCE(im.total_debit, 0) - COALESCE(im.total_credit, 0) <> 0;
+                                     	 od.packaging_type_id as packagingType,
+                                     	 od.packaging_type_units_per_box as unitsPerBox,
+                                     	 COALESCE(im.total_debit, 0) - COALESCE(im.total_credit, 0) AS stockQtty
+                                      FROM inventory.order_detail od
+                                      LEFT JOIN item_movements im 
+                                     	 ON im.source_id = od.id 
+                                     	 AND im.source_line_num = od.line_num
+                                      WHERE COALESCE(im.total_debit, 0) - COALESCE(im.total_credit, 0) <> 0;
+
                                      """;
 
             var stockDetails = await Db.QueryAsync<ProductStockBalanceResponse>(selectSql);

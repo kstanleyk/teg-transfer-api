@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Inventory.Product.Dtos;
-using Agrovet.Domain.Entity.Inventory;
+﻿using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Application.Interfaces.Inventory;
+namespace Transfer.Application.Interfaces.Inventory;
 
 public interface IProductRepository : IRepository<Product, string>
 {

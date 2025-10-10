@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Inventory.Product.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using Transfer.Application.Features.Inventory.Product.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.Product.Commands;
+namespace Transfer.Application.Features.Inventory.Product.Commands;
 
 public abstract class ItemBaseValidator<T> : AbstractValidator<T>
     where T : BaseProductRequest

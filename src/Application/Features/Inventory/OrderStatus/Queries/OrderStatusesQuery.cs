@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Features.Inventory.OrderStatus.Dtos;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.OrderStatus.Dtos;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.OrderStatus.Queries;
+namespace Transfer.Application.Features.Inventory.OrderStatus.Queries;
 
 public record OrderStatusesQuery : IRequest<OrderStatusResponse[]>;
 

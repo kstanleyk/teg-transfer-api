@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.Product.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.Product.Dtos;
 
 public class ProductResponse
 {
@@ -59,7 +59,9 @@ public class ProductStockBalanceResponse
 {
     public string Id { get; set; } = string.Empty;
     public string LineNum { get; set; } = string.Empty;
-    public string Item { get; set; } = string.Empty;
+    public string Product { get; set; } = string.Empty;
+    public string PackagingType { get; set; } = string.Empty;
+    public double UnitsPerBox { get; set; } = 0;
     public double StockQtty { get; set; } = 0;
     public double UnitCost { get; set; } = 0;
     public double Amount { get; set; } = 0;

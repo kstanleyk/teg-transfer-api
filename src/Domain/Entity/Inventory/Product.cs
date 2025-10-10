@@ -1,8 +1,8 @@
-﻿using Agrovet.Domain.Abstractions;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity.Inventory;
+namespace Transfer.Domain.Entity.Inventory;
 
 public class Product : Entity<string>
 {

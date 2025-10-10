@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Entity.Inventory;
+﻿using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Application.Interfaces.Inventory;
+namespace Transfer.Application.Interfaces.Inventory;
 
 public interface IOrderTypeRepository : IRepository<OrderType, string>
 {

@@ -1,16 +1,16 @@
-﻿using Agrovet.Application.Features.Inventory.Supplier.Dtos;
-using AutoMapper;
+﻿using AutoMapper;
+using Transfer.Application.Features.Inventory.Supplier.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.Supplier;
+namespace Transfer.Application.Features.Inventory.Supplier;
 
 public class SupplierProfile : Profile
 {
     public SupplierProfile()
     {
-        CreateMap<Domain.Entity.Inventory.Supplier, SupplierResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.Supplier, SupplierResponse>();
 
-        CreateMap<Domain.Entity.Inventory.Supplier, SupplierUpdatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.Supplier, SupplierUpdatedResponse>();
 
-        CreateMap<Domain.Entity.Inventory.Supplier, SupplierCreatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Inventory.Supplier, SupplierCreatedResponse>();
     }
 }

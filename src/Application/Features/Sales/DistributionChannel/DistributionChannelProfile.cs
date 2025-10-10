@@ -1,16 +1,16 @@
-﻿using Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
-using AutoMapper;
+﻿using AutoMapper;
+using Transfer.Application.Features.Sales.DistributionChannel.Dtos;
 
-namespace Agrovet.Application.Features.Sales.DistributionChannel;
+namespace Transfer.Application.Features.Sales.DistributionChannel;
 
 public class DistributionChannelProfile : Profile
 {
     public DistributionChannelProfile()
     {
-        CreateMap<Domain.Entity.Sales.DistributionChannel, DistributionChannelResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.DistributionChannel, DistributionChannelResponse>();
 
-        CreateMap<Domain.Entity.Sales.DistributionChannel, DistributionChannelUpdatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.DistributionChannel, DistributionChannelUpdatedResponse>();
 
-        CreateMap<Domain.Entity.Sales.DistributionChannel, DistributionChannelCreatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.DistributionChannel, DistributionChannelCreatedResponse>();
     }
 }

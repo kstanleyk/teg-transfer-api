@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.Sales.DistributionChannel.Commands;
-using Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
-using Agrovet.Application.Features.Sales.DistributionChannel.Queries;
-using Agrovet.WebApi.Attributes;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Authorization;
+using Transfer.Application.Features.Sales.DistributionChannel.Commands;
+using Transfer.Application.Features.Sales.DistributionChannel.Dtos;
+using Transfer.Application.Features.Sales.DistributionChannel.Queries;
+using Transfer.WebApi.Attributes;
 
-namespace Agrovet.WebApi.Controllers.Sales;
+namespace Transfer.WebApi.Controllers.Sales;
 
 public class DistributionChannelsController(IMediator mediator) : ApiControllerBase<DistributionChannelsController>
 {

@@ -1,13 +1,13 @@
-using Agrovet.Application.Authorization;
-using Agrovet.WebApi.Permissions;
-using Agrovet.WebApi.Services;
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using System.Reflection;
+using Transfer.Application.Authorization;
+using Transfer.WebApi.Permissions;
+using Transfer.WebApi.Services;
 
-namespace Agrovet.WebApi;
+namespace Transfer.WebApi;
 
 public static class ServiceCollectionExtensions
 {

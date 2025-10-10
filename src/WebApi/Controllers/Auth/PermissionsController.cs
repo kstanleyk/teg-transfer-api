@@ -1,8 +1,8 @@
-﻿using Agrovet.Application.Features.Auth.Permission.Queries;
-using Agrovet.WebApi.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Features.Auth.Permission.Queries;
+using Transfer.WebApi.Services;
 
-namespace Agrovet.WebApi.Controllers.Auth;
+namespace Transfer.WebApi.Controllers.Auth;
 
 public class PermissionsController(CurrentUserService currentUserService) : ApiControllerBase<PermissionsController>
 {

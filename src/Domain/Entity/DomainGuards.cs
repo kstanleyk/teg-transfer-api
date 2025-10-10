@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
-using Agrovet.Domain.Exceptions;
+using Transfer.Domain.Exceptions;
 
-namespace Agrovet.Domain.Entity;
+namespace Transfer.Domain.Entity;
 
 public static class DomainGuards
 {

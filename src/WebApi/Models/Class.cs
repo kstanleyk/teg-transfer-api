@@ -1,4 +1,4 @@
-﻿namespace Agrovet.WebApi.Models;
+﻿namespace Transfer.WebApi.Models;
 
 public class CurrentUserVm
 {

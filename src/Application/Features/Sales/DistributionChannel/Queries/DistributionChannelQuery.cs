@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
-using Agrovet.Application.Interfaces.Sales;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Sales.DistributionChannel.Dtos;
+using Transfer.Application.Interfaces.Sales;
 
-namespace Agrovet.Application.Features.Sales.DistributionChannel.Queries;
+namespace Transfer.Application.Features.Sales.DistributionChannel.Queries;
 
 public record DistributionChannelQuery : IRequest<DistributionChannelResponse>
 {

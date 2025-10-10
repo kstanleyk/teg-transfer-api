@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity.Common;
+namespace Transfer.Domain.Entity.Common;
 
 public class MonthName : Entity<string>
 {

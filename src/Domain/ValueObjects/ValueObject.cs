@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.ValueObjects;
+﻿namespace Transfer.Domain.ValueObjects;
 
 public abstract class ValueObject
 {

@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.OrderType.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.OrderType.Dtos;
 
 public class OrderTypeResponse
 {

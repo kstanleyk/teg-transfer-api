@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Agrovet.Application.Features.Inventory.BottlingType.Dtos;
+using Transfer.Application.Features.Inventory.BottlingType.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.BottlingType.Queries;
+namespace Transfer.Application.Features.Inventory.BottlingType.Queries;
 
 public record BottlingTypesQuery : IRequest<BottlingTypeResponse[]>;
 
@@ -9,7 +9,7 @@ public class BottlingTypesQueryHandler : RequestHandlerBase, IRequestHandler<Bot
 {
     public Task<BottlingTypeResponse[]> Handle(BottlingTypesQuery request, CancellationToken cancellationToken)
     {
-        var bottlingTypes = Domain.Entity.Inventory.BottlingType.All
+        var bottlingTypes = Transfer.Domain.Entity.Inventory.BottlingType.All
             .Select(BottlingTypeMapper.ToDto)
             .ToArray();
 
@@ -19,13 +19,13 @@ public class BottlingTypesQueryHandler : RequestHandlerBase, IRequestHandler<Bot
 
 public static class BottlingTypeMapper
 {
-    public static BottlingTypeResponse ToDto(Domain.Entity.Inventory.BottlingType bottlingType) =>
+    public static BottlingTypeResponse ToDto(Transfer.Domain.Entity.Inventory.BottlingType bottlingType) =>
         bottlingType switch
         {
-            _ when ReferenceEquals(bottlingType, Domain.Entity.Inventory.BottlingType.OneLiter) => new BottlingTypeResponse("OneLiter", bottlingType.SizeInLiters, bottlingType.DisplayName),
-            _ when ReferenceEquals(bottlingType, Domain.Entity.Inventory.BottlingType.HalfLiter) => new BottlingTypeResponse("HalfLiter", bottlingType.SizeInLiters, bottlingType.DisplayName),
-            _ when ReferenceEquals(bottlingType, Domain.Entity.Inventory.BottlingType.ThreeLiters) => new BottlingTypeResponse("ThreeLiters", bottlingType.SizeInLiters, bottlingType.DisplayName),
-            _ when ReferenceEquals(bottlingType, Domain.Entity.Inventory.BottlingType.FiveLiters) => new BottlingTypeResponse("FiveLiters", bottlingType.SizeInLiters, bottlingType.DisplayName),
+            _ when ReferenceEquals(bottlingType, Transfer.Domain.Entity.Inventory.BottlingType.OneLiter) => new BottlingTypeResponse("OneLiter", bottlingType.SizeInLiters, bottlingType.DisplayName),
+            _ when ReferenceEquals(bottlingType, Transfer.Domain.Entity.Inventory.BottlingType.HalfLiter) => new BottlingTypeResponse("HalfLiter", bottlingType.SizeInLiters, bottlingType.DisplayName),
+            _ when ReferenceEquals(bottlingType, Transfer.Domain.Entity.Inventory.BottlingType.ThreeLiters) => new BottlingTypeResponse("ThreeLiters", bottlingType.SizeInLiters, bottlingType.DisplayName),
+            _ when ReferenceEquals(bottlingType, Transfer.Domain.Entity.Inventory.BottlingType.FiveLiters) => new BottlingTypeResponse("FiveLiters", bottlingType.SizeInLiters, bottlingType.DisplayName),
             _ => throw new ArgumentOutOfRangeException(nameof(bottlingType), "Unknown bottling type")
         };
 }

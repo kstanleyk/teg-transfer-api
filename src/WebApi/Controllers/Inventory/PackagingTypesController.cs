@@ -1,10 +1,10 @@
-﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.Inventory.PackagingType.Queries;
-using Agrovet.WebApi.Attributes;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Authorization;
+using Transfer.Application.Features.Inventory.PackagingType.Queries;
+using Transfer.WebApi.Attributes;
 
-namespace Agrovet.WebApi.Controllers.Inventory;
+namespace Transfer.WebApi.Controllers.Inventory;
 
 public class PackagingTypesController(IMediator mediator) : ApiControllerBase<PackagingTypesController>
 {

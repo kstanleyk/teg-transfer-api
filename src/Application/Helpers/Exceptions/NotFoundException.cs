@@ -1,3 +1,3 @@
-﻿namespace Agrovet.Application.Helpers.Exceptions;
+﻿namespace Transfer.Application.Helpers.Exceptions;
 
 public class NotFoundException(string name, object key) : ApplicationException($"{name} ({key}) is not found");

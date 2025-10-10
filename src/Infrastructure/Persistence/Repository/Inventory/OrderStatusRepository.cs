@@ -1,10 +1,10 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.Entity.Inventory;
+﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
+namespace Transfer.Infrastructure.Persistence.Repository.Inventory;
 
 public class OrderStatusRepository(IDatabaseFactory databaseFactory)
     : DataRepository<OrderStatus, string>(databaseFactory), IOrderStatusRepository

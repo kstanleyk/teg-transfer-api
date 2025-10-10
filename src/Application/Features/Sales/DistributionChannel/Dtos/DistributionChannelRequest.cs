@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
+﻿namespace Transfer.Application.Features.Sales.DistributionChannel.Dtos;
 
 public abstract class BaseDistributionChannelRequest
 {

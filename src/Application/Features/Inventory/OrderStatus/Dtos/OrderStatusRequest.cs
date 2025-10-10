@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.OrderStatus.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.OrderStatus.Dtos;
 
 public abstract class BaseOrderStatusRequest
 {

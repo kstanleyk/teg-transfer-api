@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.Entity;
+﻿namespace Transfer.Domain.Entity;
 
 public interface IEntity<TId>: IEntity
 {

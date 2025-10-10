@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Features.Sales.PriceItem.Dtos;
-using Agrovet.Application.Interfaces.Sales;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Sales.PriceItem.Dtos;
+using Transfer.Application.Interfaces.Sales;
 
-namespace Agrovet.Application.Features.Sales.PriceItem.Queries;
+namespace Transfer.Application.Features.Sales.PriceItem.Queries;
 
 public record PriceItemsQuery : IRequest<PriceItemResponse[]>;
 

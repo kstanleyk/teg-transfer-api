@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
-using Agrovet.Domain.Exceptions;
+using Transfer.Domain.Exceptions;
 using static System.Text.RegularExpressions.Regex;
 
-namespace Agrovet.Domain.ValueObjects;
+namespace Transfer.Domain.ValueObjects;
 
 public class EmailAddress : ValueObject
 {

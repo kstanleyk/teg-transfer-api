@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Interfaces.Auth;
+﻿namespace Transfer.Application.Interfaces.Auth;
 
 public interface IUserPermissionRepository: IDisposable
 {

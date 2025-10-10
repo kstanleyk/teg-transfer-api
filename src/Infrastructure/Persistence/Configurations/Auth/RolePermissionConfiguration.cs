@@ -1,8 +1,8 @@
-﻿using Agrovet.Domain.Entity.Auth;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Transfer.Domain.Entity.Auth;
 
-namespace Agrovet.Infrastructure.Persistence.Configurations.Auth;
+namespace Transfer.Infrastructure.Persistence.Configurations.Auth;
 
 public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
 {

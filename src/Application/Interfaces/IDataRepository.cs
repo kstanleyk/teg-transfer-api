@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using Agrovet.Application.Helpers;
-using Agrovet.Domain.Abstractions;
+using Transfer.Application.Helpers;
+using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Application.Interfaces;
+namespace Transfer.Application.Interfaces;
 
 public interface IRepository { }
 

@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Helpers.Exceptions;
+﻿namespace Transfer.Application.Helpers.Exceptions;
 
 public class ValidationException : ApplicationException
 {

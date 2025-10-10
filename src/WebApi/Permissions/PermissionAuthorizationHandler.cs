@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Interfaces.Auth;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Transfer.Application.Interfaces.Auth;
 
-namespace Agrovet.WebApi.Permissions;
+namespace Transfer.WebApi.Permissions;
 
 public class PermissionAuthorizationHandler(IUserPermissionRepository userPermissionRepository)
     : AuthorizationHandler<PermissionRequirement>

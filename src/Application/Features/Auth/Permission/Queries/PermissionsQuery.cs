@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Interfaces.Auth;
-using MediatR;
+﻿using MediatR;
+using Transfer.Application.Interfaces.Auth;
 
-namespace Agrovet.Application.Features.Auth.Permission.Queries;
+namespace Transfer.Application.Features.Auth.Permission.Queries;
 
 public record PermissionsQuery : IRequest<string[]>
 {

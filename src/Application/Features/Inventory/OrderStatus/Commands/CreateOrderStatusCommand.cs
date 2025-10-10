@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Inventory.OrderStatus.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.OrderStatus.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Inventory.OrderStatus.Commands;
+namespace Transfer.Application.Features.Inventory.OrderStatus.Commands;
 
 public class CreateOrderStatusCommandResponse : BaseResponse
 {
@@ -45,7 +45,7 @@ public class CreateOrderStatusCommandHandler(IOrderStatusRepository orderStatusR
 
         var icr = request.OrderStatus;
 
-        var orderStatus = Domain.Entity.Inventory.OrderStatus.Create(icr.Name);
+        var orderStatus = Transfer.Domain.Entity.Inventory.OrderStatus.Create(icr.Name);
 
         orderStatus.SetPublicId(PublicId.CreateUnique().Value);
 

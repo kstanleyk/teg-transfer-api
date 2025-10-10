@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.ProductMovement.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.ProductMovement.Dtos;
 
 public class ProductMovementResponse
 {

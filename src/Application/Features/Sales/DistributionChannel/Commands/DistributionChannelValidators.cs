@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using Transfer.Application.Features.Sales.DistributionChannel.Dtos;
 
-namespace Agrovet.Application.Features.Sales.DistributionChannel.Commands;
+namespace Transfer.Application.Features.Sales.DistributionChannel.Commands;
 
 public abstract class DistributionChannelBaseValidator<T> : AbstractValidator<T>
     where T : BaseDistributionChannelRequest

@@ -1,6 +1,6 @@
-﻿using Agrovet.Application.Helpers;
+﻿using Transfer.Application.Helpers;
 
-namespace Agrovet.Application.Features;
+namespace Transfer.Application.Features;
 
 public class RequestHandlerBase : Disposable
 {

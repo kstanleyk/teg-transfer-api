@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces.Auth;
-using Agrovet.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces.Auth;
+using Transfer.Infrastructure.Persistence.Context;
 
-namespace Agrovet.Infrastructure.Persistence.Repository.Auth;
+namespace Transfer.Infrastructure.Persistence.Repository.Auth;
 
 public class UserPermissionRepository(AgrovetContext context) :Disposable, IUserPermissionRepository
 {

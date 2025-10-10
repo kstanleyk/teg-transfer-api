@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Models.Core
+﻿namespace Transfer.Application.Models.Core
 {
     public class SalaryScaleVm
     {

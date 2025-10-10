@@ -1,8 +1,8 @@
-﻿using Agrovet.Domain.Entity.Common;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Transfer.Domain.Entity.Common;
 
-namespace Agrovet.Infrastructure.Persistence.Configurations.Common;
+namespace Transfer.Infrastructure.Persistence.Configurations.Common;
 
 public class BranchConfiguration : IEntityTypeConfiguration<Branch>
 {

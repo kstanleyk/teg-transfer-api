@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Agrovet.Domain.Entity;
+namespace Transfer.Domain.Entity;
 
 public static class Extensions
 {

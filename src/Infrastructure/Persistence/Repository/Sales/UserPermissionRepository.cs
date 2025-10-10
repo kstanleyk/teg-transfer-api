@@ -1,10 +1,10 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces.Sales;
-using Agrovet.Domain.Entity.Sales;
-using Agrovet.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces.Sales;
+using Transfer.Domain.Entity.Sales;
+using Transfer.Infrastructure.Persistence.Context;
 
-namespace Agrovet.Infrastructure.Persistence.Repository.Sales;
+namespace Transfer.Infrastructure.Persistence.Repository.Sales;
 
 public class PriceItemRepository(AgrovetContext context) :Disposable, IPriceItemRepository
 {

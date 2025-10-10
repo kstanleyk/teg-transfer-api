@@ -1,14 +1,14 @@
-﻿using Agrovet.Application.Features.Inventory.Product.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.Entity.Inventory;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using SequentialGuid;
+using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Inventory.Product.Commands;
+namespace Transfer.Application.Features.Inventory.Product.Commands;
 
 public class CreateProductCommandResponse : BaseResponse
 {
@@ -20,7 +20,7 @@ public class CreateProductCommand : IRequest<CreateProductCommandResponse>
     public required CreateProductRequest Product { get; set; }
 }
 
-public class CreateProductCommandHandler(IProductRepository productRepository,IProductCategoryRepository productCategoryRepository, IMapper mapper) : 
+public class CreateProductCommandHandler(IProductRepository productRepository,ICategoryRepository categoryRepository, IMapper mapper) : 
     RequestHandlerBase, IRequestHandler<CreateProductCommand, CreateProductCommandResponse>
 {
     public async Task<CreateProductCommandResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public class CreateProductCommandHandler(IProductRepository productRepository,IP
         if (request.Product == null)
             throw new ArgumentNullException(nameof(request.Product));
 
-        var categoryIds = await productCategoryRepository.GetAllIdsAsync();
+        var categoryIds = await categoryRepository.GetAllIdsAsync();
         var validationCodes = new ItemValidationCodes
         {
             CategoryCodes = categoryIds
@@ -53,9 +53,9 @@ public class CreateProductCommandHandler(IProductRepository productRepository,IP
         var productRequest = request.Product;
 
         var brand = Brand.FromName(productRequest.Brand);
-        var packagingType = Domain.Entity.Inventory.BottlingType.FiveLiters;
+        var packagingType = Transfer.Domain.Entity.Inventory.BottlingType.FiveLiters;
 
-        var product = Domain.Entity.Inventory.Product.Create(brand, packagingType, productRequest.Category, productRequest.Status,
+        var product = Transfer.Domain.Entity.Inventory.Product.Create(brand, packagingType, productRequest.Category, productRequest.Status,
             productRequest.MinStock, productRequest.MaxStock, productRequest.ReorderLev,
             productRequest.ReorderQtty, SkuGenerators.Deterministic, DateTime.UtcNow);
 
@@ -79,6 +79,6 @@ public class CreateProductCommandHandler(IProductRepository productRepository,IP
     protected override void DisposeCore()
     {
         productRepository.Dispose();
-        productCategoryRepository.Dispose();
+        categoryRepository.Dispose();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System.Data;
-using Agrovet.Application.Helpers;
-using Agrovet.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Transfer.Application.Helpers;
+using Transfer.Infrastructure.Persistence.Context;
 
-namespace Agrovet.Infrastructure.Persistence.Repository;
+namespace Transfer.Infrastructure.Persistence.Repository;
 
 public class DatabaseFactory : Disposable, IDatabaseFactory
 {

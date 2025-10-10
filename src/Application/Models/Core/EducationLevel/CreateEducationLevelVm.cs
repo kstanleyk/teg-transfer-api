@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Models.Core.EducationLevel;
+﻿namespace Transfer.Application.Models.Core.EducationLevel;
 
 public class CreateEducationLevelVm
 {

@@ -1,8 +1,8 @@
-﻿using Agrovet.Domain.Entity.Inventory;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Infrastructure.Persistence.Configurations.Inventory;
+namespace Transfer.Infrastructure.Persistence.Configurations.Inventory;
 
 public class OrderTypeConfiguration : IEntityTypeConfiguration<OrderType>
 {

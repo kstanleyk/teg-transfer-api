@@ -1,8 +1,8 @@
-﻿using Agrovet.Application.Features.Inventory.OrderDetail.Queries;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Features.Inventory.OrderDetail.Queries;
 
-namespace Agrovet.WebApi.Controllers.Inventory;
+namespace Transfer.WebApi.Controllers.Inventory;
 
 public class OrderDetailsController(IMediator mediator) : ApiControllerBase<OrderDetailsController>
 {

@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Inventory.Supplier.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Supplier.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Inventory.Supplier.Commands;
+namespace Transfer.Application.Features.Inventory.Supplier.Commands;
 
 public class CreateSupplierCommandResponse : BaseResponse
 {
@@ -46,7 +46,7 @@ public class CreateSupplierCommandHandler(ISupplierRepository itemCategoryReposi
         var sr = request.Supplier;
 
         var supplier =
-            Domain.Entity.Inventory.Supplier.Create(sr.Name, sr.Address, sr.City, sr.Phone, sr.ContactPerson);
+            Transfer.Domain.Entity.Inventory.Supplier.Create(sr.Name, sr.Address, sr.City, sr.Phone, sr.ContactPerson);
 
         supplier.SetPublicId(PublicId.CreateUnique().Value);
 

@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Features.Inventory.Supplier.Dtos;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Supplier.Dtos;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.Supplier.Queries;
+namespace Transfer.Application.Features.Inventory.Supplier.Queries;
 
 public record SupplierQuery : IRequest<SupplierResponse>
 {

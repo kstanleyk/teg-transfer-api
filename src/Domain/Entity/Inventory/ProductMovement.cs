@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity.Inventory;
+namespace Transfer.Domain.Entity.Inventory;
 
 public class ProductMovement : Entity<string>
 {

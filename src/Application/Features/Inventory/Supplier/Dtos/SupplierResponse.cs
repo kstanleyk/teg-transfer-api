@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Features.Inventory.Supplier.Dtos;
+﻿namespace Transfer.Application.Features.Inventory.Supplier.Dtos;
 
 public class SupplierResponse
 {

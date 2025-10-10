@@ -1,9 +1,9 @@
-﻿using Agrovet.Application.Features.Inventory.Product.Dtos;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.Product.Queries;
+namespace Transfer.Application.Features.Inventory.Product.Queries;
 
 public record ProductsQuery : IRequest<ProductResponse[]>;
 

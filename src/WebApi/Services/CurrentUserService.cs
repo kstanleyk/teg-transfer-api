@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Agrovet.WebApi.Services;
+namespace Transfer.WebApi.Services;
 
 public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
 {

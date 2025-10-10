@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.Exceptions;
+﻿namespace Transfer.Domain.Exceptions;
 public class DomainException : Exception
 {
     public DomainException(string message, Exception innerException)

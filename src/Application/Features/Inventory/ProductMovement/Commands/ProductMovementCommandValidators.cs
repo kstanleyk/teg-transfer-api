@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Inventory.ProductMovement.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using Transfer.Application.Features.Inventory.ProductMovement.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.ProductMovement.Commands;
+namespace Transfer.Application.Features.Inventory.ProductMovement.Commands;
 
 public abstract class ProductMovementBaseValidator<T> : AbstractValidator<T>
     where T : BaseProductMovementRequest

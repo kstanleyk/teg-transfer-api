@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Sales.DistributionChannel.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Sales;
-using Agrovet.Domain.ValueObjects;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Sales.DistributionChannel.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Sales;
+using Transfer.Domain.ValueObjects;
 
-namespace Agrovet.Application.Features.Sales.DistributionChannel.Commands;
+namespace Transfer.Application.Features.Sales.DistributionChannel.Commands;
 
 public class CreateDistributionChannelCommandResponse : BaseResponse
 {
@@ -45,7 +45,7 @@ public class CreateDistributionChannelCommandHandler(IDistributionChannelReposit
 
         var icr = request.DistributionChannel;
 
-        var distributionChannel = Domain.Entity.Sales.DistributionChannel.Create(icr.Name);
+        var distributionChannel = Transfer.Domain.Entity.Sales.DistributionChannel.Create(icr.Name);
 
         distributionChannel.SetPublicId(PublicId.CreateUnique().Value);
 

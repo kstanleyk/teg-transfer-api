@@ -1,11 +1,11 @@
-﻿using Agrovet.Application.Features.Inventory.Supplier.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Supplier.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.Supplier.Commands;
+namespace Transfer.Application.Features.Inventory.Supplier.Commands;
 
 public class EditSupplierCommandResponse : BaseResponse
 {
@@ -41,7 +41,7 @@ public class EditSupplierCommandHandler(ISupplierRepository itemCategoryReposito
         var sr = request.Supplier;
 
         var supplier =
-            Domain.Entity.Inventory.Supplier.Create(sr.Name, sr.Address, sr.City, sr.Phone, sr.ContactPerson);
+            Transfer.Domain.Entity.Inventory.Supplier.Create(sr.Name, sr.Address, sr.City, sr.Phone, sr.ContactPerson);
 
         supplier.SetId(sr.Id);
         supplier.SetPublicId(sr.PublicId);

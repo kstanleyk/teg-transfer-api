@@ -1,11 +1,11 @@
-﻿using Agrovet.Application.Features.Inventory.ProductMovement.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.ProductMovement.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.ProductMovement.Commands;
+namespace Transfer.Application.Features.Inventory.ProductMovement.Commands;
 
 public class EditProductMovementCommandResponse : BaseResponse
 {
@@ -47,7 +47,7 @@ public class EditProductMovementCommandHandler(
 
         var imr = request.ProductMovement;
 
-        var itemMovement = Domain.Entity.Inventory.ProductMovement.Create(imr.LineNum, imr.Description, imr.Item,
+        var itemMovement = Transfer.Domain.Entity.Inventory.ProductMovement.Create(imr.LineNum, imr.Description, imr.Item,
             imr.TransDate, imr.TransTime, imr.Sense, imr.Qtty, imr.SourceId, imr.SourceLineNum, DateTime.UtcNow);
 
         itemMovement.SetId(imr.Id);

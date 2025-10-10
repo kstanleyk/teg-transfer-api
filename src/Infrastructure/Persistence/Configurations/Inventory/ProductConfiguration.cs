@@ -1,9 +1,8 @@
-﻿using Agrovet.Domain.Entity.Inventory;
-
-namespace Agrovet.Infrastructure.Persistence.Configurations.Inventory;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Transfer.Domain.Entity.Inventory;
+
+namespace Transfer.Infrastructure.Persistence.Configurations.Inventory;
 
 public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {

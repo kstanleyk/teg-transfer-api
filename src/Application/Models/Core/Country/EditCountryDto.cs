@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Models.Core.Country;
+﻿namespace Transfer.Application.Models.Core.Country;
 
 public class EditCountryRequest
 {

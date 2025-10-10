@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.Entity.Sales;
+﻿namespace Transfer.Domain.Entity.Sales;
 
 public class PriceItem
 {

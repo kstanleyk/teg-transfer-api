@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Inventory.OrderStatus.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using Transfer.Application.Features.Inventory.OrderStatus.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.OrderStatus.Commands;
+namespace Transfer.Application.Features.Inventory.OrderStatus.Commands;
 
 public abstract class OrderStatusBaseValidator<T> : AbstractValidator<T>
     where T : BaseOrderStatusRequest

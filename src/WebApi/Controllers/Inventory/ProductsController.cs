@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.Inventory.Product.Commands;
-using Agrovet.Application.Features.Inventory.Product.Dtos;
-using Agrovet.Application.Features.Inventory.Product.Queries;
-using Agrovet.WebApi.Attributes;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Authorization;
+using Transfer.Application.Features.Inventory.Product.Commands;
+using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Features.Inventory.Product.Queries;
+using Transfer.WebApi.Attributes;
 
-namespace Agrovet.WebApi.Controllers.Inventory;
+namespace Transfer.WebApi.Controllers.Inventory;
 
 public class ProductsController(IMediator mediator) : ApiControllerBase<ProductsController>
 {

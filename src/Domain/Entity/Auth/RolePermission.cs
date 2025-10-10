@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.Entity.Auth;
+﻿namespace Transfer.Domain.Entity.Auth;
 
 public class RolePermission
 {

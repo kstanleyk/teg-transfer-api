@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Models.Core.EducationProfile;
+﻿namespace Transfer.Application.Models.Core.EducationProfile;
 
 public class EducationProfileVm
 {

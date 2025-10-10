@@ -1,16 +1,16 @@
-﻿using Agrovet.Application.Features.Sales.PriceItem.Dtos;
-using AutoMapper;
+﻿using AutoMapper;
+using Transfer.Application.Features.Sales.PriceItem.Dtos;
 
-namespace Agrovet.Application.Features.Sales.PriceItem;
+namespace Transfer.Application.Features.Sales.PriceItem;
 
 public class PriceItemProfile : Profile
 {
     public PriceItemProfile()
     {
-        CreateMap<Domain.Entity.Sales.PriceItem, PriceItemResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.PriceItem, PriceItemResponse>();
 
-        CreateMap<Domain.Entity.Sales.PriceItem, PriceItemUpdatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.PriceItem, PriceItemUpdatedResponse>();
 
-        CreateMap<Domain.Entity.Sales.PriceItem, PriceItemCreatedResponse>();
+        CreateMap<Transfer.Domain.Entity.Sales.PriceItem, PriceItemCreatedResponse>();
     }
 }

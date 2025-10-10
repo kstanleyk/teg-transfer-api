@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Entity.Sales;
+﻿using Transfer.Domain.Entity.Sales;
 
-namespace Agrovet.Application.Interfaces.Sales;
+namespace Transfer.Application.Interfaces.Sales;
 
 public interface IPriceItemRepository 
 {

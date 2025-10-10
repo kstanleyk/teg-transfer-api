@@ -1,13 +1,13 @@
 ﻿using System.Data;
 using System.Globalization;
 using System.Linq.Expressions;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces;
-using Agrovet.Domain.Abstractions;
-using Agrovet.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces;
+using Transfer.Domain.Abstractions;
+using Transfer.Infrastructure.Persistence.Context;
 
-namespace Agrovet.Infrastructure.Persistence.Repository;
+namespace Transfer.Infrastructure.Persistence.Repository;
 
 public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext context) : Disposable, IRepository<TEntity, TId>
     where TEntity : Entity<TId>

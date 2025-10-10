@@ -1,6 +1,6 @@
-﻿using Agrovet.Domain.Abstractions;
+﻿using Transfer.Domain.Abstractions;
 
-namespace Agrovet.Domain.Entity.Sales;
+namespace Transfer.Domain.Entity.Sales;
 
 public class DistributionChannel : Entity<string>
 {

@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Infrastructure.Persistence.Configurations;
+﻿namespace Transfer.Infrastructure.Persistence.Configurations;
 
 internal static class SchemaNames
 {

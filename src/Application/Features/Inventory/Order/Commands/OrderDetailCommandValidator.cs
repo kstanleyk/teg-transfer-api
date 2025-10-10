@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Agrovet.Application.Features.Inventory.Order.Commands;
+namespace Transfer.Application.Features.Inventory.Order.Commands;
 
 public class OrderDetailRequest
 {

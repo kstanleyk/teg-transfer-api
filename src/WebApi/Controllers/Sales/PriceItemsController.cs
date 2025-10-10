@@ -1,10 +1,10 @@
-﻿using Agrovet.Application.Authorization;
-using Agrovet.Application.Features.Sales.PriceItem.Queries;
-using Agrovet.WebApi.Attributes;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Transfer.Application.Authorization;
+using Transfer.Application.Features.Sales.PriceItem.Queries;
+using Transfer.WebApi.Attributes;
 
-namespace Agrovet.WebApi.Controllers.Sales;
+namespace Transfer.WebApi.Controllers.Sales;
 
 public class PriceItemsController(IMediator mediator) : ApiControllerBase<PriceItemsController>
 {

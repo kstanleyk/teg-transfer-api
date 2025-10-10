@@ -1,12 +1,12 @@
-﻿using Agrovet.Application.Features.Inventory.Product.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using Agrovet.Domain.Entity.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.Product.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
+using Transfer.Domain.Entity.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.Product.Commands;
+namespace Transfer.Application.Features.Inventory.Product.Commands;
 
 public class EditProductCommandResponse : BaseResponse
 {
@@ -20,7 +20,7 @@ public class EditProductCommand : IRequest<EditProductCommandResponse>
 
 public class EditItemCommandHandler(
     IProductRepository productRepository,
-    IProductCategoryRepository productCategoryRepository,
+    ICategoryRepository categoryRepository,
     IMapper mapper)
     :
         RequestHandlerBase, IRequestHandler<EditProductCommand, EditProductCommandResponse>
@@ -30,7 +30,7 @@ public class EditItemCommandHandler(
     {
         var response = new EditProductCommandResponse();
 
-        var categoryIds = await productCategoryRepository.GetAllIdsAsync();
+        var categoryIds = await categoryRepository.GetAllIdsAsync();
         var validationCodes = new ItemValidationCodes
         {
             CategoryCodes = categoryIds
@@ -52,9 +52,9 @@ public class EditItemCommandHandler(
         var productRequest = request.Product;
 
         var brand = Brand.FromName(productRequest.Brand);
-        var bottlingType = Domain.Entity.Inventory.BottlingType.FiveLiters;
+        var bottlingType = Transfer.Domain.Entity.Inventory.BottlingType.FiveLiters;
 
-        var product = Domain.Entity.Inventory.Product.Create(brand, bottlingType, productRequest.Category, productRequest.Status,
+        var product = Transfer.Domain.Entity.Inventory.Product.Create(brand, bottlingType, productRequest.Category, productRequest.Status,
             productRequest.MinStock, productRequest.MaxStock, productRequest.ReorderLev,
             productRequest.ReorderQtty, SkuGenerators.Deterministic, DateTime.UtcNow);
 
@@ -78,6 +78,6 @@ public class EditItemCommandHandler(
     protected override void DisposeCore()
     {
         productRepository.Dispose();
-        productCategoryRepository.Dispose();
+        categoryRepository.Dispose();
     }
 }

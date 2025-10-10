@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Application.Models.Core.Employee;
+﻿namespace Transfer.Application.Models.Core.Employee;
 
 public class EmployeePersonalVm
 {

@@ -1,11 +1,11 @@
-﻿using Agrovet.Application.Features.Inventory.OrderType.Dtos;
-using Agrovet.Application.Helpers;
-using Agrovet.Application.Helpers.Exceptions;
-using Agrovet.Application.Interfaces.Inventory;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Transfer.Application.Features.Inventory.OrderType.Dtos;
+using Transfer.Application.Helpers;
+using Transfer.Application.Helpers.Exceptions;
+using Transfer.Application.Interfaces.Inventory;
 
-namespace Agrovet.Application.Features.Inventory.OrderType.Commands;
+namespace Transfer.Application.Features.Inventory.OrderType.Commands;
 
 public class EditOrderTypeCommandResponse : BaseResponse
 {
@@ -40,7 +40,7 @@ public class EditOrderTypeCommandHandler(IOrderTypeRepository orderTypeRepositor
 
         var icr = request.OrderType;
 
-        var orderType = Domain.Entity.Inventory.OrderType.Create(icr.Name);
+        var orderType = Transfer.Domain.Entity.Inventory.OrderType.Create(icr.Name);
         orderType.SetId(icr.Id);
         orderType.SetPublicId(icr.PublicId);
 

@@ -1,18 +1,19 @@
-﻿using Agrovet.Application.Features.Inventory.Order;
-using Agrovet.Application.Features.Inventory.OrderDetail;
-using Agrovet.Application.Features.Inventory.OrderStatus;
-using Agrovet.Application.Features.Inventory.OrderType;
-using Agrovet.Application.Features.Inventory.Supplier;
-using Agrovet.Application.Features.Sales.DistributionChannel;
-using Agrovet.Application.Features.Sales.PriceItem;
+﻿using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Agrovet.Application.Features.Inventory.Product;
-using Agrovet.Application.Features.Inventory.ProductCategory;
-using Agrovet.Application.Features.Inventory.ProductMovement;
+using Transfer.Application.Features.Inventory.Category;
+using Transfer.Application.Features.Inventory.Order;
+using Transfer.Application.Features.Inventory.OrderDetail;
+using Transfer.Application.Features.Inventory.OrderStatus;
+using Transfer.Application.Features.Inventory.OrderType;
+using Transfer.Application.Features.Inventory.Product;
+using Transfer.Application.Features.Inventory.ProductMovement;
+using Transfer.Application.Features.Inventory.Supplier;
+using Transfer.Application.Features.Inventory.Warehouse;
+using Transfer.Application.Features.Sales.DistributionChannel;
+using Transfer.Application.Features.Sales.PriceItem;
 
-namespace Agrovet.Application;
+namespace Transfer.Application;
 
 public static class ServiceCollectionExtensions
 {
@@ -28,13 +29,14 @@ public static class ServiceCollectionExtensions
         {
             // Inventory
             cfg.AddProfile(new ProductProfile());
-            cfg.AddProfile(new ProductCategoryProfile());
+            cfg.AddProfile(new CategoryProfile());
             cfg.AddProfile(new ProductMovementProfile());
             cfg.AddProfile(new OrderProfile());
             cfg.AddProfile(new OrderDetailProfile());
             cfg.AddProfile(new SupplierProfile());
             cfg.AddProfile(new OrderTypeProfile());
             cfg.AddProfile(new OrderStatusProfile());
+            cfg.AddProfile(new WarehouseProfile());
 
             //Sales
             cfg.AddProfile(new DistributionChannelProfile());

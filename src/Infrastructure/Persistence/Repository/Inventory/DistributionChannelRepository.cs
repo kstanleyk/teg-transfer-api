@@ -1,10 +1,10 @@
-﻿using Agrovet.Application.Helpers;
-using Agrovet.Application.Interfaces.Sales;
-using Agrovet.Domain.Entity.Sales;
+﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+using Transfer.Application.Helpers;
+using Transfer.Application.Interfaces.Sales;
+using Transfer.Domain.Entity.Sales;
 
-namespace Agrovet.Infrastructure.Persistence.Repository.Inventory;
+namespace Transfer.Infrastructure.Persistence.Repository.Inventory;
 
 public class DistributionChannelRepository(IDatabaseFactory databaseFactory)
     : DataRepository<DistributionChannel, string>(databaseFactory), IDistributionChannelRepository

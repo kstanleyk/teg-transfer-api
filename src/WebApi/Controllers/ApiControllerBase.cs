@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Agrovet.WebApi.Controllers
+namespace Transfer.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

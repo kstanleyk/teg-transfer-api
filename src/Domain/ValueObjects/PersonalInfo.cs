@@ -1,4 +1,4 @@
-﻿namespace Agrovet.Domain.ValueObjects;
+﻿namespace Transfer.Domain.ValueObjects;
 
 public sealed class PersonalInfo: ValueObject
 {

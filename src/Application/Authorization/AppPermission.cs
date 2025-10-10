@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Agrovet.Application.Authorization;
+namespace Transfer.Application.Authorization;
 
 public class AppPermission(string feature, string action, string group, string description, bool isBasic = false)
 {
@@ -39,9 +39,9 @@ public class AppPermissions
         new AppPermission(AppFeature.Item, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Inventory Product"),
         new AppPermission(AppFeature.Item, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Inventory Product"),
 
-        new AppPermission(AppFeature.ItemCategory, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read item category", true),
-        new AppPermission(AppFeature.ItemCategory, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create item category"),
-        new AppPermission(AppFeature.ItemCategory, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update item category"),
+        new AppPermission(AppFeature.Category, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read category", true),
+        new AppPermission(AppFeature.Category, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create category"),
+        new AppPermission(AppFeature.Category, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update category"),
 
         new AppPermission(AppFeature.ItemMovement, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read item category", true),
         new AppPermission(AppFeature.ItemMovement, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create item category"),

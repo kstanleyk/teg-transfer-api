@@ -1,7 +1,7 @@
-﻿using Agrovet.Application.Features.Inventory.Supplier.Dtos;
-using FluentValidation;
+﻿using FluentValidation;
+using Transfer.Application.Features.Inventory.Supplier.Dtos;
 
-namespace Agrovet.Application.Features.Inventory.Supplier.Commands;
+namespace Transfer.Application.Features.Inventory.Supplier.Commands;
 
 public abstract class SupplierBaseValidator<T> : AbstractValidator<T>
     where T : BaseSupplierRequest

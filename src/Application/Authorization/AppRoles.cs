@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Agrovet.Application.Authorization
+namespace Transfer.Application.Authorization
 {
     public static class AppRoles
     {

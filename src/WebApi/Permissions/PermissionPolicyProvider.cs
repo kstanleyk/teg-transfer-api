@@ -1,8 +1,8 @@
-﻿using Agrovet.Application.Authorization;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Transfer.Application.Authorization;
 
-namespace Agrovet.WebApi.Permissions;
+namespace Transfer.WebApi.Permissions;
 
 public class PermissionPolicyProvider : IAuthorizationPolicyProvider
 {
