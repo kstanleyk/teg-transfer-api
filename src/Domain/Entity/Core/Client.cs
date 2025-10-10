@@ -21,13 +21,8 @@ public class Client : Entity<Guid>
     {
     }
 
-    public static Client Create(
-        string email,
-        string phoneNumber,
-        string firstName,
-        string lastName,
-        Currency? defaultCurrency = null,
-        DateTime? createdAt = null)
+    public static Client Create(string email, string phoneNumber, string firstName, string lastName,
+        Currency? defaultCurrency = null, DateTime? createdAt = null)
     {
         DomainGuards.AgainstNullOrWhiteSpace(email);
         DomainGuards.AgainstNullOrWhiteSpace(phoneNumber);

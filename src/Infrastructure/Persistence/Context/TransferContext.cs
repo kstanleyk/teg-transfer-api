@@ -2,11 +2,10 @@
 using Transfer.Domain.Abstractions;
 using Transfer.Domain.Entity.Auth;
 using Transfer.Domain.Entity.Core;
-using Transfer.Domain.Entity.Sales;
 
 namespace Transfer.Infrastructure.Persistence.Context;
 
-public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContext(options)
+public class TransferContext(DbContextOptions<TransferContext> options) : DbContext(options)
 {
     //Auth
     public DbSet<Permission> PermissionSet => Set<Permission>();
@@ -15,12 +14,14 @@ public class AgrovetContext(DbContextOptions<AgrovetContext> options) : DbContex
     public DbSet<User> UserSet => Set<User>();
     public DbSet<UserRole> UserRoleSet => Set<UserRole>();
 
-    //Inventory
-    public virtual DbSet<Warehouse> WarehouseSet { get; set; }
+    //Core
+    public virtual DbSet<Wallet> WalletSet { get; set; }
+    public virtual DbSet<Client> ClientSet { get; set; }
+    public virtual DbSet<Transaction> TransactionSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AgrovetContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TransferContext).Assembly);
         // Configure all entities that inherit from Entity<TId>
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

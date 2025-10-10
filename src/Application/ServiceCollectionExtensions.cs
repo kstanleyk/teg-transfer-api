@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using Transfer.Application.Features.Inventory.Warehouse;
+using Transfer.Application.Features.Client;
 
 
 namespace Transfer.Application;
@@ -18,8 +18,8 @@ public static class ServiceCollectionExtensions
         // Manually register AutoMapper
         services.AddSingleton(_ => new MapperConfiguration(cfg =>
         {
-            // Inventory
-            cfg.AddProfile(new WarehouseProfile());
+            // Core
+            cfg.AddProfile(new ClientProfile());
 
         }).CreateMapper());
 

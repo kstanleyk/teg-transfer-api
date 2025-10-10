@@ -7,19 +7,26 @@ namespace Transfer.Domain.Entity.Core;
 
 public class Wallet : Entity<Guid>
 {
-    public Guid ClientId { get; private set; }
+    public Guid ClientId { get; private init; }
     public Money Balance { get; private set; } = null!;
     public Money AvailableBalance { get; private set; } = null!;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public Currency BaseCurrency { get; private set; } = null!;
+    public Currency BaseCurrency { get; private init; } = null!;
 
     private readonly List<Transaction> _transactions = [];
     public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
 
-    // Protected constructor for EF Core
+    // Protected constructor for EF Core - properly initialize all owned entities
     protected Wallet()
     {
+        // Initialize with default values that EF Core can work with
+        // These will be overwritten when EF Core hydrates the entity
+        BaseCurrency = Currency.XOF;
+        Balance = new Money(0, BaseCurrency);
+        AvailableBalance = new Money(0, BaseCurrency);
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public static Wallet Create(

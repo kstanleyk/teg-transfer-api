@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Transfer.Application.Authorization;
 using Transfer.Domain.Entity.Auth;
-using Transfer.Domain.Entity.Core;
-using Transfer.Domain.ValueObjects;
 
 namespace Transfer.Infrastructure.Persistence.Context;
 
-public class AgrovetDatabaseSeeder(AgrovetContext context)
+public class TransferDatabaseSeeder(TransferContext context)
 {
     public async Task SeedDatabaseAsync()
     {
@@ -15,8 +13,6 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
         await SeedPermissionsAsync();
         await SeedRolesAsync();
         await SeedUsersAsync();
-
-        await SeedWarehousesAsync();
     }
 
     private async Task CheckAndApplyPendingMigrationAsync()
@@ -223,49 +219,6 @@ public class AgrovetDatabaseSeeder(AgrovetContext context)
             }
         }
 
-        await context.SaveChangesAsync();
-    }
-
-    private async Task SeedWarehousesAsync()
-    {
-        if (await context.WarehouseSet.AnyAsync())
-            return;
-
-        var warehouses = new List<Warehouse>();
-
-        // Cameroon Production Warehouse
-        var cameroonAddress = Address.CreateCameroonAddress(
-            city: "Douala",
-            quarter: "Bonaberi",
-            landmark: "Near Douala Port",
-            region: "LT");
-
-        var cameroonWarehouse = Warehouse.Create("Douala Production Facility", cameroonAddress);
-        cameroonWarehouse.SetId("CM001");
-        cameroonWarehouse.SetPublicId(PublicId.CreateUnique().Value);
-        warehouses.Add(cameroonWarehouse);
-
-        // US Warehouses
-        var usWarehouses = new[]
-        {
-            new { Id = "US001", Name = "Miramar FL Distribution Center", Street = "5360 SW 150th Terrace", City = "Miramar", State = "FL", Zip = "33026" },
-            new { Id = "US002", Name = "Laurel MD Distribution Center", Street = "9157 Whiskey Bottom Road", City = "LAUREL", State = "MD", Zip = "20723" },
-            new { Id = "US003", Name = "Burtonsville MD Distribution Center", Street = "4311 Ambrose Court", City = "Burtonsville", State = "MD", Zip = "20866" },
-            new { Id = "US004", Name = "Chicago IL Distribution Center", Street = "1133 Keystone Avenue", City = "Chicago", State = "IL", Zip = "60651" },
-            new { Id = "US005", Name = "Overland Park KS Distribution Center", Street = "10205 West 147 St", City = "Overland Park", State = "KS", Zip = "66221" }
-        };
-
-        foreach (var wh in usWarehouses)
-        {
-            var usAddress = Address.CreateUsAddress(street: wh.Street, city: wh.City, state: wh.State, zipCode: wh.Zip);
-
-            var warehouse = Warehouse.Create(wh.Name, usAddress);
-            warehouse.SetId(wh.Id);
-            warehouse.SetPublicId(PublicId.CreateUnique().Value);
-            warehouses.Add(warehouse);
-        }
-
-        await context.WarehouseSet.AddRangeAsync(warehouses);
         await context.SaveChangesAsync();
     }
 }

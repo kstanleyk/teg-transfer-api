@@ -2,8 +2,15 @@
 
 public record Money
 {
-    public decimal Amount { get; }
-    public Currency Currency { get; }
+    public decimal Amount { get; init; }
+    public Currency Currency { get; init; } = null!;
+
+    // EF Core requires a parameterless constructor
+    private Money()
+    {
+        Amount = 0;
+        // Currency will be set by EF Core
+    }
 
     public Money(decimal amount, Currency currency)
     {

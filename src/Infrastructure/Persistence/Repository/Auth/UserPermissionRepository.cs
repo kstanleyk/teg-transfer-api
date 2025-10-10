@@ -5,7 +5,7 @@ using Transfer.Infrastructure.Persistence.Context;
 
 namespace Transfer.Infrastructure.Persistence.Repository.Auth;
 
-public class UserPermissionRepository(AgrovetContext context) :Disposable, IUserPermissionRepository
+public class UserPermissionRepository(TransferContext context) :Disposable, IUserPermissionRepository
 {
     public async Task<HashSet<string>> GetPermissionsForUserAsync(string userId)
     {

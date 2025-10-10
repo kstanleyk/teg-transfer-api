@@ -8,16 +8,16 @@ namespace Transfer.Infrastructure.Persistence.Repository;
 
 public class DatabaseFactory : Disposable, IDatabaseFactory
 {
-    public DatabaseFactory(AgrovetContext dataContext)
+    public DatabaseFactory(TransferContext dataContext)
     {
         _dataContext = dataContext;
         _db = new NpgsqlConnection(GetContext().Database.GetDbConnection().ConnectionString);
     }
 
-    private readonly AgrovetContext _dataContext;
+    private readonly TransferContext _dataContext;
     private readonly IDbConnection _db;
 
-    public AgrovetContext GetContext()
+    public TransferContext GetContext()
     {
         return _dataContext;
     }
@@ -35,6 +35,6 @@ public class DatabaseFactory : Disposable, IDatabaseFactory
 
 public interface IDatabaseFactory : IDisposable
 {
-    AgrovetContext GetContext();
+    TransferContext GetContext();
     IDbConnection GetConnection();
 }
