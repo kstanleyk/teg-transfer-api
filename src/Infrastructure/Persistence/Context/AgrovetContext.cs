@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Transfer.Domain.Abstractions;
 using Transfer.Domain.Entity.Auth;
-using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Core;
 using Transfer.Domain.Entity.Sales;
 
 namespace Transfer.Infrastructure.Persistence.Context;

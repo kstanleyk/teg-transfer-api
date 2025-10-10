@@ -47,7 +47,7 @@ public class CreateWarehouseCommandHandler(IWarehouseRepository warehouseReposit
 
         var address = CreateAddress(request.Warehouse);
 
-        var warehouse = Transfer.Domain.Entity.Inventory.Warehouse.Create(whr.Name, address);
+        var warehouse = Domain.Entity.Core.Warehouse.Create(whr.Name, address);
 
         warehouse.SetPublicId(PublicId.CreateUnique().Value);
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Core;
 
 namespace Transfer.Infrastructure.Persistence.Configurations.Inventory;
 

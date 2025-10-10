@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Transfer.Application.Helpers;
 using Transfer.Application.Interfaces.Inventory;
-using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Core;
 
 namespace Transfer.Infrastructure.Persistence.Repository.Inventory;
 

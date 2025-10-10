@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Transfer.Application.Authorization;
 using Transfer.Domain.Entity.Auth;
-using Transfer.Domain.Entity.Inventory;
+using Transfer.Domain.Entity.Core;
 using Transfer.Domain.ValueObjects;
 
 namespace Transfer.Infrastructure.Persistence.Context;

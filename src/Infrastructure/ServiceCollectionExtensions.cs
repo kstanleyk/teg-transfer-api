@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
         //Auth
         services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
 
-        //Inventory
+        //Core
         services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 
         return services;

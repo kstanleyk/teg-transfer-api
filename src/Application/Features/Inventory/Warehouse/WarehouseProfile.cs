@@ -7,7 +7,7 @@ public class WarehouseProfile : Profile
 {
     public WarehouseProfile()
     {
-        CreateMap<Transfer.Domain.Entity.Inventory.Warehouse, WarehouseResponse>()
+        CreateMap<Domain.Entity.Core.Warehouse, WarehouseResponse>()
             .ForMember(dest => dest.Street,
                 opt => opt.MapFrom(src => src.Address.Street))
             .ForMember(dest => dest.City,
@@ -21,7 +21,7 @@ public class WarehouseProfile : Profile
             .ForMember(dest => dest.Landmark,
                 opt => opt.MapFrom(src => src.Address.Landmark));
 
-        CreateMap<Transfer.Domain.Entity.Inventory.Warehouse, WarehouseUpdatedResponse>();
-        CreateMap<Transfer.Domain.Entity.Inventory.Warehouse, WarehouseCreatedResponse>();
+        CreateMap<Domain.Entity.Core.Warehouse, WarehouseUpdatedResponse>();
+        CreateMap<Domain.Entity.Core.Warehouse, WarehouseCreatedResponse>();
     }
 }
