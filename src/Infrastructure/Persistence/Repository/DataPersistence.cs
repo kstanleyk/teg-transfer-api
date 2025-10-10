@@ -525,7 +525,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
 }
 
 public abstract class DataRepository<TEntity, TId>(IDatabaseFactory databaseFactory)
-    : DataRepositoryBase<TEntity, AgrovetContext, TId>(databaseFactory.GetContext())
+    : DataRepositoryBase<TEntity, TransferContext, TId>(databaseFactory.GetContext())
     where TEntity : Entity<TId>
 {
     protected IDatabaseFactory DatabaseFactory = databaseFactory;
