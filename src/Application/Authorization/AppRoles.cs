@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Transfer.Application.Authorization
+namespace TegWallet.Application.Authorization
 {
     public static class AppRoles
     {

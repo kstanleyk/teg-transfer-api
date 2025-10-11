@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Transfer.Application.Authorization;
+namespace TegWallet.Application.Authorization;
 
 public class AppPermission(string feature, string action, string group, string description, bool isBasic = false)
 {
@@ -38,6 +38,11 @@ public class AppPermissions
         new AppPermission(AppFeature.Client, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Client", true),
         new AppPermission(AppFeature.Client, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Client"),
         new AppPermission(AppFeature.Client, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Client"),
+
+        new AppPermission(AppFeature.Wallet, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Wallet", true),
+        new AppPermission(AppFeature.Wallet, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Wallet"),
+        new AppPermission(AppFeature.Wallet, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Wallet"),
+        new AppPermission(AppFeature.Wallet, AppAction.Deposit, AppRoleGroup.ManagementHierarchy, "Update Wallet"),
     ];
 
     public static IReadOnlyList<AppPermission> AdminPermissions { get; } =

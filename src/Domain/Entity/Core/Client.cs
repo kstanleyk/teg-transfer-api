@@ -1,9 +1,9 @@
-﻿using Transfer.Domain.Abstractions;
-using Transfer.Domain.Entity.Enum;
-using Transfer.Domain.Exceptions;
-using Transfer.Domain.ValueObjects;
+﻿using TegWallet.Domain.Abstractions;
+using TegWallet.Domain.Entity.Enum;
+using TegWallet.Domain.Exceptions;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Domain.Entity.Core;
+namespace TegWallet.Domain.Entity.Core;
 
 public class Client : Entity<Guid>
 {

@@ -5,13 +5,13 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transfer.Domain", "src\Domain\Transfer.Domain.csproj", "{A0199944-766B-46F2-A310-C730F697E051}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TegWallet.Domain", "src\Domain\TegWallet.Domain.csproj", "{A0199944-766B-46F2-A310-C730F697E051}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transfer.Application", "src\Application\Transfer.Application.csproj", "{827DD3CE-0C3A-4AB8-89BA-EE62F1249DF4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TegWallet.Application", "src\Application\TegWallet.Application.csproj", "{827DD3CE-0C3A-4AB8-89BA-EE62F1249DF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transfer.Infrastructure", "src\Infrastructure\Transfer.Infrastructure.csproj", "{CFA87D0D-C634-4943-96E9-63F1C74B4DD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TegWallet.Infrastructure", "src\Infrastructure\TegWallet.Infrastructure.csproj", "{CFA87D0D-C634-4943-96E9-63F1C74B4DD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transfer.WebApi", "src\WebApi\Transfer.WebApi.csproj", "{F7E2557C-1D8A-4F4D-9EC7-E51066AAAA8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TegWallet.WebApi", "src\WebApi\TegWallet.WebApi.csproj", "{F7E2557C-1D8A-4F4D-9EC7-E51066AAAA8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

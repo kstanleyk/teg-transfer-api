@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Transfer.WebApi.Controllers
+namespace TegWallet.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Transfer.Application.Features.Auth.Permission.Queries;
-using Transfer.WebApi.Services;
+using TegWallet.Application.Features.Auth.Permission.Queries;
+using TegWallet.WebApi.Services;
 
-namespace Transfer.WebApi.Controllers.Auth;
+namespace TegWallet.WebApi.Controllers.Auth;
 
 public class PermissionsController(CurrentUserService currentUserService) : ApiControllerBase<PermissionsController>
 {

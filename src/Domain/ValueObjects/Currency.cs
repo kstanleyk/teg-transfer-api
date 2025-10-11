@@ -1,4 +1,4 @@
-﻿namespace Transfer.Domain.ValueObjects;
+﻿namespace TegWallet.Domain.ValueObjects;
 
 public record Currency
 {

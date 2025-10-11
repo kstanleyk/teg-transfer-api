@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Transfer.Application.Interfaces.Auth;
+using TegWallet.Application.Interfaces.Auth;
 
-namespace Transfer.WebApi.Permissions;
+namespace TegWallet.WebApi.Permissions;
 
 public class PermissionAuthorizationHandler(IUserPermissionRepository userPermissionRepository)
     : AuthorizationHandler<PermissionRequirement>

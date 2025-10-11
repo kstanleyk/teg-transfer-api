@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Authorization
+﻿namespace TegWallet.Application.Authorization
 {
     public static class AppRoleGroup
     {

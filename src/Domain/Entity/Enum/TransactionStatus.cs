@@ -1,4 +1,4 @@
-﻿namespace Transfer.Domain.Entity.Enum;
+﻿namespace TegWallet.Domain.Entity.Enum;
 
 public enum TransactionStatus
 {

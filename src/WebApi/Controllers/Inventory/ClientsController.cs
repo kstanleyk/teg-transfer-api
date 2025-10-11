@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Transfer.Application.Authorization;
-using Transfer.Application.Features.Client.Commands;
-using Transfer.Application.Features.Client.Dto;
-using Transfer.WebApi.Attributes;
+using TegWallet.Application.Authorization;
+using TegWallet.Application.Features.Core.Client.Commands;
+using TegWallet.Application.Features.Core.Client.Dto;
+using TegWallet.WebApi.Attributes;
 
-namespace Transfer.WebApi.Controllers.Inventory;
+namespace TegWallet.WebApi.Controllers.Inventory;
 
 public class ClientsController(IMediator mediator, IMapper mapper) : ApiControllerBase<ClientsController>
 {
@@ -20,7 +20,7 @@ public class ClientsController(IMediator mediator, IMapper mapper) : ApiControll
     //[HttpGet("{publicId:guid}")]
     //[MustHavePermission(AppFeature.Client, AppAction.Read)]
     //public async Task<IActionResult> Get(Guid publicId) =>
-    //    await GetActionResult(async () => Ok(await MediatorSender.Send(new WarehouseQuery { PublicId = publicId })));
+    //    await GetActionResult(async () => Ok(await MediatorSender.Send(new WarehouseQuery { SequentialId = publicId })));
 
     [HttpPost]
     [MustHavePermission(AppFeature.Client, AppAction.Create)]

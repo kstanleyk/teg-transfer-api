@@ -1,8 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
-using Transfer.Domain.Exceptions;
-using Transfer.Domain.ValueObjects;
+using TegWallet.Domain.Exceptions;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Domain.Entity;
+namespace TegWallet.Domain.Entity;
 
 public static class DomainGuards
 {

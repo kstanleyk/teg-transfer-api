@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Transfer.Application.Interfaces.Core;
-using Transfer.Domain.Entity.Core;
+using TegWallet.Application.Interfaces.Core;
+using TegWallet.Domain.Entity.Core;
 
-namespace Transfer.Infrastructure.Persistence.Repository.Core;
+namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
 public class ClientRepository(IDatabaseFactory databaseFactory)
     : DataRepository<Client, Guid>(databaseFactory), IClientRepository

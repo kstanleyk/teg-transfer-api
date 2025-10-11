@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Transfer.Application.Authorization;
+using TegWallet.Application.Authorization;
 
-namespace Transfer.WebApi.Attributes
+namespace TegWallet.WebApi.Attributes
 {
     public class MustHavePermissionAttribute : AuthorizeAttribute
     {

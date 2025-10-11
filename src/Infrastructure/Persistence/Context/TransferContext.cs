@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Transfer.Domain.Abstractions;
-using Transfer.Domain.Entity.Auth;
-using Transfer.Domain.Entity.Core;
+using TegWallet.Domain.Abstractions;
+using TegWallet.Domain.Entity.Auth;
+using TegWallet.Domain.Entity.Core;
 
-namespace Transfer.Infrastructure.Persistence.Context;
+namespace TegWallet.Infrastructure.Persistence.Context;
 
 public class TransferContext(DbContextOptions<TransferContext> options) : DbContext(options)
 {
@@ -17,7 +17,7 @@ public class TransferContext(DbContextOptions<TransferContext> options) : DbCont
     //Core
     public virtual DbSet<Wallet> WalletSet { get; set; }
     public virtual DbSet<Client> ClientSet { get; set; }
-    public virtual DbSet<Transaction> TransactionSet { get; set; }
+    public virtual DbSet<Ledger> LedgerSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,9 +33,9 @@ public class TransferContext(DbContextOptions<TransferContext> options) : DbCont
                 var entity = modelBuilder.Entity(clrType);
 
                 // Check if the entity has these properties
-                if (entity.Metadata.FindProperty("PublicId") != null)
+                if (entity.Metadata.FindProperty("SequentialId") != null)
                 {
-                    entity.Property("PublicId").HasColumnOrder(1000);
+                    entity.Property("SequentialId").HasColumnOrder(1000);
                 }
 
                 if (entity.Metadata.FindProperty("CreatedOn") != null)

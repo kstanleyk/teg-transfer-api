@@ -1,11 +1,11 @@
-﻿using Transfer.Domain.Abstractions;
-using Transfer.Domain.Entity.Enum;
-using Transfer.Domain.Exceptions;
-using Transfer.Domain.ValueObjects;
+﻿using TegWallet.Domain.Abstractions;
+using TegWallet.Domain.Entity.Enum;
+using TegWallet.Domain.Exceptions;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Domain.Entity.Core;
+namespace TegWallet.Domain.Entity.Core;
 
-public class Transaction : Entity<TransactionId>
+public class Ledger : Entity<LedgerId>
 {
     public Guid WalletId { get; private init; }
     public TransactionType Type { get; private init; }
@@ -17,11 +17,11 @@ public class Transaction : Entity<TransactionId>
     public string Description { get; private set; } = string.Empty;
 
     // Protected constructor for EF Core
-    protected Transaction()
+    protected Ledger()
     {
     }
 
-    public static Transaction Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
+    public static Ledger Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
         string? reference = null, string? description = null, DateTime? timestamp = null)
     {
         DomainGuards.AgainstDefault(walletId, nameof(walletId));
@@ -33,9 +33,9 @@ public class Transaction : Entity<TransactionId>
         // Validate status transitions (basic validation)
         ValidateInitialStatus(type, status);
 
-        var transaction = new Transaction
+        var transaction = new Ledger
         {
-            Id = TransactionId.New(),
+            Id = LedgerId.New(),
             WalletId = walletId,
             Type = type,
             Amount = amount,
@@ -104,7 +104,7 @@ public class Transaction : Entity<TransactionId>
         };
     }
 
-    public bool HasChanges(Transaction? other)
+    public bool HasChanges(Ledger? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return false;
@@ -126,7 +126,7 @@ public class Transaction : Entity<TransactionId>
     private static void ValidateAmountForType(TransactionType type, Money amount)
     {
         if (amount.Amount <= 0)
-            throw new DomainException("Transaction amount must be positive");
+            throw new DomainException("Ledger amount must be positive");
 
         Console.WriteLine(amount.Amount);
 
@@ -172,7 +172,12 @@ public class Transaction : Entity<TransactionId>
             TransactionType.Withdrawal => $"Withdrawal of {amount.Amount} {amount.Currency.Code}",
             TransactionType.Purchase => $"Purchase for {amount.Amount} {amount.Currency.Code}",
             TransactionType.ServiceFee => $"Service fee of {amount.Amount} {amount.Currency.Code}",
-            _ => $"Transaction of {amount.Amount} {amount.Currency.Code}"
+            _ => $"Ledger of {amount.Amount} {amount.Currency.Code}"
         };
     }
+}
+
+public record LedgerId(Guid Value)
+{
+    public static LedgerId New() => new(SequentialId.CreateUnique().Value);
 }

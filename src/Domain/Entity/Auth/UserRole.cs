@@ -1,4 +1,4 @@
-﻿namespace Transfer.Domain.Entity.Auth;
+﻿namespace TegWallet.Domain.Entity.Auth;
 
 public class UserRole
 {

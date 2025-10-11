@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Transfer.Infrastructure.Persistence.Context;
+using TegWallet.Infrastructure.Persistence.Context;
 
 #nullable disable
 
-namespace Transfer.Infrastructure.Migrations
+namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TransferContext))]
     partial class TransferContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace Transfer.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.Permission", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.Permission", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(150)
@@ -70,7 +70,7 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("permission", "auth");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.Role", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,7 +97,7 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("role", "auth");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.RolePermission", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid")
@@ -120,7 +120,7 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("role_permission", "auth");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.User", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -164,7 +164,7 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("user", "auth");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.UserRole", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -187,7 +187,7 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("user_role", "auth");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Client", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Client", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -197,11 +197,6 @@ namespace Transfer.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasColumnOrder(1001);
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -226,11 +221,6 @@ namespace Transfer.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone_number");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasColumnOrder(1000);
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -257,16 +247,11 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("client", "core");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Transaction", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasColumnOrder(1001);
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -279,11 +264,6 @@ namespace Transfer.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("failure_reason");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasColumnOrder(1000);
 
                     b.Property<string>("Reference")
                         .IsRequired()
@@ -312,21 +292,21 @@ namespace Transfer.Infrastructure.Migrations
                         .HasColumnName("wallet_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_transaction");
+                        .HasName("pk_ledger");
 
                     b.HasIndex("Timestamp")
-                        .HasDatabaseName("ix_transaction_timestamp");
+                        .HasDatabaseName("ix_ledger_timestamp");
 
                     b.HasIndex("WalletId")
-                        .HasDatabaseName("ix_transaction_wallet_id");
+                        .HasDatabaseName("ix_ledger_wallet_id");
 
                     b.HasIndex("WalletId", "Timestamp")
-                        .HasDatabaseName("ix_transaction_wallet_id_timestamp");
+                        .HasDatabaseName("ix_ledger_wallet_id_timestamp");
 
-                    b.ToTable("transaction", "core");
+                    b.ToTable("ledger", "core");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Wallet", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -347,16 +327,6 @@ namespace Transfer.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasColumnOrder(1001);
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasColumnOrder(1000);
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -371,16 +341,16 @@ namespace Transfer.Infrastructure.Migrations
                     b.ToTable("wallet", "core");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.RolePermission", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.RolePermission", b =>
                 {
-                    b.HasOne("Transfer.Domain.Entity.Auth.Permission", "Permission")
+                    b.HasOne("TegWallet.Domain.Entity.Auth.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_role_permission_permission_permission_id");
 
-                    b.HasOne("Transfer.Domain.Entity.Auth.Role", "Role")
+                    b.HasOne("TegWallet.Domain.Entity.Auth.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -392,16 +362,16 @@ namespace Transfer.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.UserRole", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.UserRole", b =>
                 {
-                    b.HasOne("Transfer.Domain.Entity.Auth.Role", "Role")
+                    b.HasOne("TegWallet.Domain.Entity.Auth.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_role_role_role_id");
 
-                    b.HasOne("Transfer.Domain.Entity.Auth.User", "User")
+                    b.HasOne("TegWallet.Domain.Entity.Auth.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -413,54 +383,54 @@ namespace Transfer.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Transaction", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
                 {
-                    b.HasOne("Transfer.Domain.Entity.Core.Wallet", null)
-                        .WithMany("Transactions")
+                    b.HasOne("TegWallet.Domain.Entity.Core.Wallet", null)
+                        .WithMany("LedgerEntries")
                         .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_transaction_wallet_set_wallet_id");
+                        .HasConstraintName("fk_ledger_wallet_set_wallet_id");
 
-                    b.OwnsOne("Transfer.Domain.ValueObjects.Money", "Amount", b1 =>
+                    b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "Amount", b1 =>
                         {
-                            b1.Property<Guid>("TransactionId")
+                            b1.Property<Guid>("LedgerId")
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,4)")
-                                .HasColumnName("Amount");
+                                .HasColumnName("amount_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("CurrencyCode");
+                                .HasColumnName("amount_currency");
 
-                            b1.HasKey("TransactionId");
+                            b1.HasKey("LedgerId");
 
-                            b1.ToTable("transaction", "core");
+                            b1.ToTable("ledger", "core");
 
                             b1.WithOwner()
-                                .HasForeignKey("TransactionId")
-                                .HasConstraintName("fk_transaction_transaction_id");
+                                .HasForeignKey("LedgerId")
+                                .HasConstraintName("fk_ledger_ledger_id");
                         });
 
                     b.Navigation("Amount")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Wallet", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>
                 {
-                    b.HasOne("Transfer.Domain.Entity.Core.Client", null)
+                    b.HasOne("TegWallet.Domain.Entity.Core.Client", null)
                         .WithOne("Wallet")
-                        .HasForeignKey("Transfer.Domain.Entity.Core.Wallet", "ClientId")
+                        .HasForeignKey("TegWallet.Domain.Entity.Core.Wallet", "ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_wallet_client_client_id");
 
-                    b.OwnsOne("Transfer.Domain.ValueObjects.Money", "AvailableBalance", b1 =>
+                    b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "AvailableBalance", b1 =>
                         {
                             b1.Property<Guid>("WalletId")
                                 .HasColumnType("uuid")
@@ -485,7 +455,7 @@ namespace Transfer.Infrastructure.Migrations
                                 .HasConstraintName("fk_wallet_wallet_id");
                         });
 
-                    b.OwnsOne("Transfer.Domain.ValueObjects.Money", "Balance", b1 =>
+                    b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "Balance", b1 =>
                         {
                             b1.Property<Guid>("WalletId")
                                 .HasColumnType("uuid")
@@ -517,32 +487,32 @@ namespace Transfer.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.Permission", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.Role", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.Role", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Auth.User", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Auth.User", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Client", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Client", b =>
                 {
                     b.Navigation("Wallet")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Transfer.Domain.Entity.Core.Wallet", b =>
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>
                 {
-                    b.Navigation("Transactions");
+                    b.Navigation("LedgerEntries");
                 });
 #pragma warning restore 612, 618
         }

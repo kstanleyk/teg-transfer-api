@@ -2,12 +2,12 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Transfer.Application.Helpers;
-using Transfer.Application.Interfaces;
-using Transfer.Domain.Abstractions;
-using Transfer.Infrastructure.Persistence.Context;
+using TegWallet.Application.Helpers;
+using TegWallet.Application.Interfaces;
+using TegWallet.Domain.Abstractions;
+using TegWallet.Infrastructure.Persistence.Context;
 
-namespace Transfer.Infrastructure.Persistence.Repository;
+namespace TegWallet.Infrastructure.Persistence.Repository;
 
 public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext context) : Disposable, IRepository<TEntity, TId>
     where TEntity : Entity<TId>
@@ -38,7 +38,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
     public virtual async Task<RepositoryActionResult<TEntity>> AddAsync(TEntity entity, int propertyLength)
     {
         if (entity.Id == null)
-            throw new ArgumentNullException(nameof(entity.Id), "Entity PublicId cannot be null.");
+            throw new ArgumentNullException(nameof(entity.Id), "Entity SequentialId cannot be null.");
 
         return await AddAsync(entity, x => x.Id, nameof(entity.Id), propertyLength);
     }
@@ -107,33 +107,6 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
         catch (Exception ex)
         {
             await tx.RollbackAsync();
-            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
-        }
-    }
-
-    public async Task<TEntity?> GetByPublicIdAsync(Guid publicId) =>
-        await DbSet.FirstOrDefaultAsync(x => x.PublicId == publicId);
-
-    public virtual async Task<RepositoryActionResult<TEntity>> UpdateAsyncAsync(Guid publicId, TEntity item)
-    {
-        try
-        {
-            var existingEntity = await GetByPublicIdAsync(publicId);
-            if (existingEntity == null)
-                return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.NotFound);
-
-            return await EditAsync(existingEntity);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
-        }
-        catch (Exception ex)
-        {
             return new RepositoryActionResult<TEntity>(null, RepositoryActionStatus.Error, ex);
         }
     }
@@ -457,7 +430,7 @@ public abstract class DataRepositoryBase<TEntity, TContext, TId>(TContext contex
     protected virtual async Task<TEntity?> ItemToGetAsync(TEntity entity)
     {
         if (entity.Id == null)
-            throw new ArgumentNullException(nameof(entity.Id), "Entity PublicId cannot be null.");
+            throw new ArgumentNullException(nameof(entity.Id), "Entity SequentialId cannot be null.");
 
         return await DbSet.AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id != null && e.Id.Equals(entity.Id));

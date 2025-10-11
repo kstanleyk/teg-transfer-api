@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Transfer.Application.Features.Client.Commands;
-using Transfer.Application.Features.Client.Dto;
-using Transfer.Domain.Entity.Core;
+using TegWallet.Application.Features.Core.Client.Commands;
+using TegWallet.Application.Features.Core.Client.Dto;
 
-namespace Transfer.Application.Features.Client;
+namespace TegWallet.Application.Features.Core.Client;
 
 public class ClientProfile : Profile
 {
@@ -25,7 +19,7 @@ public class ClientProfile : Profile
                 opt => opt.MapFrom(src => src.Status.ToString()));
 
         // Wallet to WalletCreatedDto
-        CreateMap<Wallet, WalletCreatedDto>()
+        CreateMap<Domain.Entity.Core.Wallet, WalletCreatedDto>()
             .ForMember(dest => dest.Balance,
                 opt => opt.MapFrom(src => src.Balance.Amount))
             .ForMember(dest => dest.AvailableBalance,

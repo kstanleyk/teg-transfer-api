@@ -1,6 +1,6 @@
-﻿using Transfer.Domain.Entity.Core;
+﻿using TegWallet.Domain.Entity.Core;
 
-namespace Transfer.Application.Interfaces.Core;
+namespace TegWallet.Application.Interfaces.Core;
 
 public interface IClientRepository : IRepository<Client, Guid>
 {

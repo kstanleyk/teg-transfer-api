@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using MediatR;
-using Transfer.Application.Features.Client.Dto;
-using Transfer.Application.Features.Client.Validators;
-using Transfer.Application.Helpers;
-using Transfer.Application.Helpers.Exceptions;
-using Transfer.Application.Interfaces.Core;
-using Transfer.Domain.ValueObjects;
+using TegWallet.Application.Features.Core.Client.Dto;
+using TegWallet.Application.Features.Core.Client.Validators;
+using TegWallet.Application.Helpers;
+using TegWallet.Application.Helpers.Exceptions;
+using TegWallet.Application.Interfaces.Core;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Application.Features.Client.Commands;
+namespace TegWallet.Application.Features.Core.Client.Commands;
 
 public record RegisterClientCommand(
     string Email,

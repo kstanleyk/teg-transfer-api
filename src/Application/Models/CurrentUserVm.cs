@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Models;
+﻿namespace TegWallet.Application.Models;
 
 public class CurrentUserVm
 {

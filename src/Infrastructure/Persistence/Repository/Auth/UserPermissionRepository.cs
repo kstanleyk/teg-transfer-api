@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Transfer.Application.Helpers;
-using Transfer.Application.Interfaces.Auth;
-using Transfer.Infrastructure.Persistence.Context;
+using TegWallet.Application.Helpers;
+using TegWallet.Application.Interfaces.Auth;
+using TegWallet.Infrastructure.Persistence.Context;
 
-namespace Transfer.Infrastructure.Persistence.Repository.Auth;
+namespace TegWallet.Infrastructure.Persistence.Repository.Auth;
 
 public class UserPermissionRepository(TransferContext context) :Disposable, IUserPermissionRepository
 {

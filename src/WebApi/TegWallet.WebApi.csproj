@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\Infrastructure\Transfer.Infrastructure.csproj" />
+    <ProjectReference Include="..\Infrastructure\TegWallet.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -17,4 +17,5 @@
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
   </ItemGroup>
+
 </Project>

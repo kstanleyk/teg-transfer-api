@@ -1,9 +1,9 @@
-﻿using Transfer.Domain.Entity.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transfer.Domain.ValueObjects;
+using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Infrastructure.Persistence.Configurations.Core;
+namespace TegWallet.Infrastructure.Persistence.Configurations.Core;
 
 public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 {
@@ -62,7 +62,7 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         });
 
         // Configure transactions relationship
-        builder.HasMany(w => w.Transactions)
+        builder.HasMany(w => w.LedgerEntries)
             .WithOne()
             .HasForeignKey(t => t.WalletId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transfer.Domain.Entity.Core;
+using TegWallet.Domain.Entity.Core;
 
-namespace Transfer.Infrastructure.Persistence.Configurations.Core;
+namespace TegWallet.Infrastructure.Persistence.Configurations.Core;
 
 public class ClientConfiguration : IEntityTypeConfiguration<Client>
 {
@@ -22,9 +22,6 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(c => c.CreatedAt).IsRequired();
         builder.Property(c => c.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
 
-        // Data Objects (if any embedded in Client)
-        // In this case, Client doesn't have direct value objects, but has navigation properties
-
         // Indexes
         builder.HasIndex(c => c.Email).IsUnique().HasDatabaseName("IX_Clients_Email");
         builder.HasIndex(c => c.PhoneNumber).HasDatabaseName("IX_Clients_PhoneNumber");
@@ -36,8 +33,5 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .WithOne()
             .HasForeignKey<Wallet>(w => w.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Query filter for soft delete (if implemented)
-        // builder.HasQueryFilter(c => c.Status != ClientStatus.Deleted);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Authorization
+﻿namespace TegWallet.Application.Authorization
 {
     public static class AppAction
     {
@@ -11,5 +11,6 @@
         public const string Validate = nameof(Validate);
         public const string Receive = nameof(Receive);
         public const string Close = nameof(Close);
+        public const string Deposit = nameof(Deposit);
     }
 }

@@ -1,3 +1,3 @@
-﻿namespace Transfer.Application.Helpers.Exceptions;
+﻿namespace TegWallet.Application.Helpers.Exceptions;
 
 public class BadRequestException(string message) : ApplicationException(message);

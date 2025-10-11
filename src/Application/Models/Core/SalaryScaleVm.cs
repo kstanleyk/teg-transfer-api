@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Models.Core
+﻿namespace TegWallet.Application.Models.Core
 {
     public class SalaryScaleVm
     {

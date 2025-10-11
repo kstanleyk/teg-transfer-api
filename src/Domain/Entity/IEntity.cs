@@ -1,4 +1,4 @@
-﻿namespace Transfer.Domain.Entity;
+﻿namespace TegWallet.Domain.Entity;
 
 public interface IEntity<TId>: IEntity
 {

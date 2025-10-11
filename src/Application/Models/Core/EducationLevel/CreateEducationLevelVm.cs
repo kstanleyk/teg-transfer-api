@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Models.Core.EducationLevel;
+﻿namespace TegWallet.Application.Models.Core.EducationLevel;
 
 public class CreateEducationLevelVm
 {
