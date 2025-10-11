@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Helpers;
+﻿namespace TegWallet.Application.Helpers;
 
 public class Result<T>
 {

@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Transfer.Application.Interfaces.Auth;
+using TegWallet.Application.Interfaces.Auth;
 
-namespace Transfer.Application.Features.Auth.Permission.Queries;
+namespace TegWallet.Application.Features.Auth.Permission.Queries;
 
 public record PermissionsQuery : IRequest<string[]>
 {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Transfer.Infrastructure.Migrations
+namespace TegWallet.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -22,8 +22,6 @@ namespace Transfer.Infrastructure.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    public_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     phone_number = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
@@ -91,8 +89,6 @@ namespace Transfer.Infrastructure.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    public_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     client_id = table.Column<Guid>(type: "uuid", nullable: false),
                     BalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
@@ -172,17 +168,15 @@ namespace Transfer.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "transaction",
+                name: "ledger",
                 schema: "core",
                 columns: table => new
                 {
-                    public_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     wallet_id = table.Column<Guid>(type: "uuid", nullable: false),
                     type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    amount_amount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
+                    amount_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     reference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -191,9 +185,9 @@ namespace Transfer.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_transaction", x => x.id);
+                    table.PrimaryKey("pk_ledger", x => x.id);
                     table.ForeignKey(
-                        name: "fk_transaction_wallet_set_wallet_id",
+                        name: "fk_ledger_wallet_set_wallet_id",
                         column: x => x.wallet_id,
                         principalSchema: "core",
                         principalTable: "wallet",
@@ -227,6 +221,24 @@ namespace Transfer.Infrastructure.Migrations
                 column: "status");
 
             migrationBuilder.CreateIndex(
+                name: "ix_ledger_timestamp",
+                schema: "core",
+                table: "ledger",
+                column: "timestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ledger_wallet_id",
+                schema: "core",
+                table: "ledger",
+                column: "wallet_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ledger_wallet_id_timestamp",
+                schema: "core",
+                table: "ledger",
+                columns: new[] { "wallet_id", "timestamp" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_permission_feature_action",
                 schema: "auth",
                 table: "permission",
@@ -245,24 +257,6 @@ namespace Transfer.Infrastructure.Migrations
                 schema: "auth",
                 table: "role_permission",
                 column: "permission_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_transaction_timestamp",
-                schema: "core",
-                table: "transaction",
-                column: "timestamp");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_transaction_wallet_id",
-                schema: "core",
-                table: "transaction",
-                column: "wallet_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_transaction_wallet_id_timestamp",
-                schema: "core",
-                table: "transaction",
-                columns: new[] { "wallet_id", "timestamp" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_email",
@@ -289,24 +283,24 @@ namespace Transfer.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "role_permission",
-                schema: "auth");
+                name: "ledger",
+                schema: "core");
 
             migrationBuilder.DropTable(
-                name: "transaction",
-                schema: "core");
+                name: "role_permission",
+                schema: "auth");
 
             migrationBuilder.DropTable(
                 name: "user_role",
                 schema: "auth");
 
             migrationBuilder.DropTable(
-                name: "permission",
-                schema: "auth");
-
-            migrationBuilder.DropTable(
                 name: "wallet",
                 schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "permission",
+                schema: "auth");
 
             migrationBuilder.DropTable(
                 name: "role",

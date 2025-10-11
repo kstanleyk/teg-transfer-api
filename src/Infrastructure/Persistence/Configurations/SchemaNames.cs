@@ -1,4 +1,4 @@
-﻿namespace Transfer.Infrastructure.Persistence.Configurations;
+﻿namespace TegWallet.Infrastructure.Persistence.Configurations;
 
 internal static class SchemaNames
 {

@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using Transfer.Application.Authorization;
-using Transfer.WebApi.Permissions;
-using Transfer.WebApi.Services;
+using TegWallet.Application.Authorization;
+using TegWallet.WebApi.Permissions;
+using TegWallet.WebApi.Services;
 
-namespace Transfer.WebApi;
+namespace TegWallet.WebApi;
 
 public static class ServiceCollectionExtensions
 {

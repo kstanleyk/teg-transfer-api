@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Transfer.Application.Helpers;
-using Transfer.Infrastructure.Persistence.Context;
+using TegWallet.Application.Helpers;
+using TegWallet.Infrastructure.Persistence.Context;
 
-namespace Transfer.Infrastructure.Persistence.Repository;
+namespace TegWallet.Infrastructure.Persistence.Repository;
 
 public class DatabaseFactory : Disposable, IDatabaseFactory
 {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Transfer.Application.Authorization;
-using Transfer.Domain.Entity.Auth;
+using TegWallet.Application.Authorization;
+using TegWallet.Domain.Entity.Auth;
 
-namespace Transfer.Infrastructure.Persistence.Context;
+namespace TegWallet.Infrastructure.Persistence.Context;
 
 public class TransferDatabaseSeeder(TransferContext context)
 {

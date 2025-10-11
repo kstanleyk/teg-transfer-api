@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using Transfer.Application.Authorization;
+using TegWallet.Application.Authorization;
 
-namespace Transfer.WebApi.Permissions;
+namespace TegWallet.WebApi.Permissions;
 
 public class PermissionPolicyProvider : IAuthorizationPolicyProvider
 {

@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Models.Core.EducationProfile;
+﻿namespace TegWallet.Application.Models.Core.EducationProfile;
 
 public class CreateEducationProfileRequest
 {

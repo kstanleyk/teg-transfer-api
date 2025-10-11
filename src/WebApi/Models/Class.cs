@@ -1,4 +1,4 @@
-﻿namespace Transfer.WebApi.Models;
+﻿namespace TegWallet.WebApi.Models;
 
 public class CurrentUserVm
 {

@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Authorization;
+﻿namespace TegWallet.Application.Authorization;
 
 public static class AppFeature
 {
@@ -10,4 +10,5 @@ public static class AppFeature
 
     //Core
     public const string Client = nameof(Client);
+    public const string Wallet = nameof(Wallet);
 }

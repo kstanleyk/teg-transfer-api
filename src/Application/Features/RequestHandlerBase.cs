@@ -1,6 +1,6 @@
-﻿using Transfer.Application.Helpers;
+﻿using TegWallet.Application.Helpers;
 
-namespace Transfer.Application.Features;
+namespace TegWallet.Application.Features;
 
 public class RequestHandlerBase : Disposable
 {

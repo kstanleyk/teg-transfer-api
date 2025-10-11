@@ -1,21 +1,21 @@
-﻿using Transfer.Domain.Abstractions;
-using Transfer.Domain.Entity.Enum;
-using Transfer.Domain.Exceptions;
-using Transfer.Domain.ValueObjects;
+﻿using TegWallet.Domain.Abstractions;
+using TegWallet.Domain.Entity.Enum;
+using TegWallet.Domain.Exceptions;
+using TegWallet.Domain.ValueObjects;
 
-namespace Transfer.Domain.Entity.Core;
+namespace TegWallet.Domain.Entity.Core;
 
 public class Wallet : Entity<Guid>
 {
     public Guid ClientId { get; private init; }
-    public Money Balance { get; private set; } = null!;
-    public Money AvailableBalance { get; private set; } = null!;
+    public Money Balance { get; private set; }
+    public Money AvailableBalance { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public Currency BaseCurrency { get; private init; } = null!;
+    public Currency BaseCurrency { get; private init; }
 
-    private readonly List<Transaction> _transactions = [];
-    public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
+    private readonly List<Ledger> _ledgerEntries = [];
+    public IReadOnlyList<Ledger> LedgerEntries => _ledgerEntries.AsReadOnly();
 
     // Protected constructor for EF Core - properly initialize all owned entities
     protected Wallet()
@@ -29,10 +29,7 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static Wallet Create(
-        Guid clientId,
-        Currency baseCurrency,
-        DateTime? createdAt = null)
+    public static Wallet Create(Guid clientId, Currency baseCurrency, DateTime? createdAt = null)
     {
         DomainGuards.AgainstDefault(clientId, nameof(clientId));
         DomainGuards.AgainstNull(baseCurrency, nameof(baseCurrency));
@@ -51,7 +48,7 @@ public class Wallet : Entity<Guid>
         return wallet;
     }
 
-    public Transaction Deposit(Money amount, string? reference = null, string? description = null)
+    public Ledger Deposit(Money amount, string? reference = null, string? description = null)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
 
@@ -61,53 +58,48 @@ public class Wallet : Entity<Guid>
         if (amount.Currency != BaseCurrency)
             throw new DomainException($"Deposit must be in base currency: {BaseCurrency.Code}");
 
-        var transaction = Transaction.Create(
-            walletId: Id,
-            type: TransactionType.Deposit,
-            amount: amount,
-            status: TransactionStatus.Pending,
-            reference: reference,
-            description: description ?? $"Deposit of {amount.Amount} {amount.Currency.Code}"
-        );
+        var ledger = Ledger.Create(walletId: Id, type: TransactionType.Deposit, amount: amount,
+            status: TransactionStatus.Pending, reference: reference,
+            description: description ?? $"Deposit of {amount.Amount} {amount.Currency.Code}");
 
-        _transactions.Add(transaction);
+        _ledgerEntries.Add(ledger);
         Balance = Balance + amount;
         UpdatedAt = DateTime.UtcNow;
 
-        //AddDomainEvent(new DepositInitiatedEvent(Id, ClientId, amount, transaction.Id));
-
-        return transaction;
+        return ledger;
     }
 
-    public void ApproveDeposit(TransactionId transactionId)
+    public void ApproveDeposit(LedgerId ledgerId, string approvedBy = "SYSTEM")
     {
-        DomainGuards.AgainstNull(transactionId, nameof(transactionId));
+        DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
+        DomainGuards.AgainstNullOrWhiteSpace(approvedBy, nameof(approvedBy));
 
-        var transaction = _transactions.FirstOrDefault(t => t.Id == transactionId);
-        if (transaction is null)
-            throw new DomainException($"Transaction not found: {transactionId}");
+        var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
+        if (ledger is null)
+            throw new DomainException($"Ledger not found: {ledgerId}");
 
-        if (transaction.Type != TransactionType.Deposit)
+        if (ledger.Type != TransactionType.Deposit)
             throw new DomainException("Only deposit transactions can be approved");
 
-        if (!transaction.IsPending)
+        if (!ledger.IsPending)
             throw new DomainException("Only pending deposits can be approved");
 
-        //var previousAvailableBalance = AvailableBalance;
+        // Update the ledger status
+        ledger.MarkAsCompleted();
 
-        transaction.MarkAsCompleted();
-        AvailableBalance = AvailableBalance + transaction.Amount;
+        // Update wallet balances
+        AvailableBalance = AvailableBalance + ledger.Amount;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RejectDeposit(TransactionId transactionId, string reason)
+    public void RejectDeposit(LedgerId ledgerId, string reason)
     {
-        DomainGuards.AgainstNull(transactionId, nameof(transactionId));
+        DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
 
-        var transaction = _transactions.FirstOrDefault(t => t.Id == transactionId);
+        var transaction = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
         if (transaction is null)
-            throw new DomainException($"Transaction not found: {transactionId}");
+            throw new DomainException($"Ledger not found: {ledgerId}");
 
         if (transaction.Type != TransactionType.Deposit)
             throw new DomainException("Only deposit transactions can be rejected");
@@ -122,7 +114,7 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public Transaction Withdraw(Money amount, string? description = null)
+    public Ledger Withdraw(Money amount, string? description = null)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
 
@@ -138,7 +130,7 @@ public class Wallet : Entity<Guid>
         //var previousBalance = Balance;
         //var previousAvailableBalance = AvailableBalance;
 
-        var transaction = Transaction.Create(
+        var transaction = Ledger.Create(
             walletId: Id,
             type: TransactionType.Withdrawal,
             amount: amount,
@@ -146,7 +138,7 @@ public class Wallet : Entity<Guid>
             description: description ?? $"Withdrawal of {amount.Amount} {amount.Currency.Code}"
         );
 
-        _transactions.Add(transaction);
+        _ledgerEntries.Add(transaction);
         Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
@@ -154,7 +146,7 @@ public class Wallet : Entity<Guid>
         return transaction;
     }
 
-    public Transaction Purchase(Money amount, string description, string supplierDetails)
+    public Ledger Purchase(Money amount, string description, string supplierDetails)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
         DomainGuards.AgainstNullOrWhiteSpace(description, nameof(description));
@@ -169,7 +161,7 @@ public class Wallet : Entity<Guid>
         //var previousBalance = Balance;
         //var previousAvailableBalance = AvailableBalance;
 
-        var transaction = Transaction.Create(
+        var transaction = Ledger.Create(
             walletId: Id,
             type: TransactionType.Purchase,
             amount: amount,
@@ -177,7 +169,7 @@ public class Wallet : Entity<Guid>
             description: $"{description} - {supplierDetails}"
         );
 
-        _transactions.Add(transaction);
+        _ledgerEntries.Add(transaction);
         Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
@@ -185,7 +177,7 @@ public class Wallet : Entity<Guid>
         return transaction;
     }
 
-    public Transaction ChargeServiceFee(Money amount, string description)
+    public Ledger ChargeServiceFee(Money amount, string description)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
         DomainGuards.AgainstNullOrWhiteSpace(description, nameof(description));
@@ -198,10 +190,10 @@ public class Wallet : Entity<Guid>
 
         //var previousBalance = Balance;
         //var previousAvailableBalance = AvailableBalance;
-        var transaction = Transaction.Create(walletId: Id, type: TransactionType.ServiceFee, amount: amount,
+        var transaction = Ledger.Create(walletId: Id, type: TransactionType.ServiceFee, amount: amount,
             status: TransactionStatus.Completed, description: description);
 
-        _transactions.Add(transaction);
+        _ledgerEntries.Add(transaction);
         Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
@@ -242,9 +234,9 @@ public class Wallet : Entity<Guid>
         return Balance.Amount - AvailableBalance.Amount;
     }
 
-    public IReadOnlyList<Transaction> GetPendingDeposits()
+    public IReadOnlyList<Ledger> GetPendingDeposits()
     {
-        return _transactions
+        return _ledgerEntries
             .Where(t => t.Type == TransactionType.Deposit && t.IsPending)
             .ToList()
             .AsReadOnly();

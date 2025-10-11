@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transfer.Domain.Entity.Auth;
+using TegWallet.Domain.Entity.Auth;
 
-namespace Transfer.Infrastructure.Persistence.Configurations.Auth;
+namespace TegWallet.Infrastructure.Persistence.Configurations.Auth;
 
 public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
 {

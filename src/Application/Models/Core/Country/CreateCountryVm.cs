@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Models.Core.Country;
+﻿namespace TegWallet.Application.Models.Core.Country;
 
 public class CreateCountryVm
 {

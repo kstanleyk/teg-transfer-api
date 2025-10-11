@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Transfer.Domain.csproj" />
+    <ProjectReference Include="..\Domain\TegWallet.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

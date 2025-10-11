@@ -1,4 +1,4 @@
-﻿namespace Transfer.Application.Features.Client.Dto;
+﻿namespace TegWallet.Application.Features.Core.Client.Dto;
 
 public record ClientRegisteredDto
 {

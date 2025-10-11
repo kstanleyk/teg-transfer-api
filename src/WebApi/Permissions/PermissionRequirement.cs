@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Transfer.WebApi.Permissions;
+namespace TegWallet.WebApi.Permissions;
 
 public class PermissionRequirement(string permission) : IAuthorizationRequirement
 {

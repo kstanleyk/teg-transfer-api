@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Transfer.Application.Features.Client.Commands;
+using TegWallet.Application.Features.Core.Client.Commands;
 
-namespace Transfer.Application.Features.Client.Validators;
+namespace TegWallet.Application.Features.Core.Client.Validators;
 
 public class RegisterClientCommandValidator : AbstractValidator<RegisterClientCommand>
 {

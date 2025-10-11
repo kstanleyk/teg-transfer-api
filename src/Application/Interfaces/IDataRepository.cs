@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using Transfer.Application.Helpers;
-using Transfer.Domain.Abstractions;
+using TegWallet.Application.Helpers;
+using TegWallet.Domain.Abstractions;
 
-namespace Transfer.Application.Interfaces;
+namespace TegWallet.Application.Interfaces;
 
 public interface IRepository { }
 
@@ -34,6 +34,4 @@ public interface IRepository<TEntity, TId> : IDisposable, IRepository
         TEntity incomingEntity,
         params Expression<Func<TEntity, object>>[] updatedProperties);
     Task<TId[]> GetAllIdsAsync();
-    Task<TEntity?> GetByPublicIdAsync(Guid publicId);
-    Task<RepositoryActionResult<TEntity>> UpdateAsyncAsync(Guid publicId, TEntity item);
 }

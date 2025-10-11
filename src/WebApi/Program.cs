@@ -1,6 +1,6 @@
-using Transfer.Application;
-using Transfer.Infrastructure;
-using Transfer.WebApi;
+using TegWallet.Application;
+using TegWallet.Infrastructure;
+using TegWallet.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

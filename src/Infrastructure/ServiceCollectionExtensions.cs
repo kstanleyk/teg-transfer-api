@@ -2,14 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Transfer.Application.Interfaces.Auth;
-using Transfer.Application.Interfaces.Core;
-using Transfer.Infrastructure.Persistence.Context;
-using Transfer.Infrastructure.Persistence.Repository;
-using Transfer.Infrastructure.Persistence.Repository.Auth;
-using Transfer.Infrastructure.Persistence.Repository.Core;
+using TegWallet.Application.Interfaces.Auth;
+using TegWallet.Application.Interfaces.Core;
+using TegWallet.Infrastructure.Persistence.Context;
+using TegWallet.Infrastructure.Persistence.Repository;
+using TegWallet.Infrastructure.Persistence.Repository.Auth;
+using TegWallet.Infrastructure.Persistence.Repository.Core;
 
-namespace Transfer.Infrastructure;
+namespace TegWallet.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
@@ -28,6 +28,8 @@ public static class ServiceCollectionExtensions
 
         //Core
         services.AddScoped<IClientRepository, ClientRepository>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<ILedgerRepository, LedgerRepository>();
 
         return services;
     }

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Transfer.Application.Helpers;
+namespace TegWallet.Application.Helpers;
 
 public static class Extensions
 {
