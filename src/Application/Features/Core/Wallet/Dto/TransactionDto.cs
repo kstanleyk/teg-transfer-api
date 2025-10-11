@@ -1,5 +1,18 @@
 ﻿namespace TegWallet.Application.Features.Core.Wallet.Dto;
 
+//public class TransactionDto
+//{
+//    public Guid Id { get; set; }
+//    public Guid WalletId { get; set; }
+//    public string Type { get; set; } = null!;
+//    public decimal Amount { get; set; }
+//    public string CurrencyCode { get; set; } = null!;
+//    public string Status { get; set; } = null!;
+//    public string Description { get; set; } = null!;
+//    public DateTime Timestamp { get; set; }
+//    public string Reference { get; set; } = null!;
+//}
+
 public class TransactionDto
 {
     public Guid Id { get; set; }

@@ -18,6 +18,7 @@ public class TransferContext(DbContextOptions<TransferContext> options) : DbCont
     public virtual DbSet<Wallet> WalletSet { get; set; }
     public virtual DbSet<Client> ClientSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
+    public DbSet<PurchaseReservation> PurchaseReservationSet => Set<PurchaseReservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             // Core
             cfg.AddProfile(new ClientProfile());
             cfg.AddProfile(new WalletProfile());
+            cfg.AddProfile(new PurchaseProfile());
         }).CreateMapper());
 
         //services.AddValidatorsFromAssembly(assembly);
