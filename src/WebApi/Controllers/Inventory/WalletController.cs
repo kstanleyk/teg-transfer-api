@@ -157,15 +157,15 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         return Ok(await Mediator.Send(query));
     }
 
-    //[HttpGet("{clientId:guid}/balance/simple")]
-    //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
-    //[ProducesResponseType(typeof(Result<SimpleBalanceDto>), StatusCodes.Status200OK)]
-    //public async Task<IActionResult> GetSimpleBalance(Guid clientId)
-    //{
-    //    var query = new GetSimpleBalanceQuery(clientId);
-    //    var result = await Mediator.Send(query);
-    //    return Ok(result);
-    //}
+    [HttpGet("{clientId:guid}/balance/simple")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<SimpleBalanceDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSimpleBalance(Guid clientId)
+    {
+        var query = new GetSimpleBalanceQuery(clientId);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
 
     //[HttpPost("{clientId:guid}/balance/check-sufficiency")]
     //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
