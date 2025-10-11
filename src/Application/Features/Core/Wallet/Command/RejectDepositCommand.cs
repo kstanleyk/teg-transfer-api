@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
@@ -10,10 +11,10 @@ public record RejectDepositCommand(
     Guid ClientId,
     Guid LedgerId,
     string Reason,
-    string? RejectedBy = null) : IRequest<Result>;
+    string RejectedBy = "System") : IRequest<Result>;
 
-public class RejectDepositCommandHandler(IWalletRepository walletRepository)
-    : IRequestHandler<RejectDepositCommand, Result>
+public class RejectDepositCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<RejectDepositCommand, Result>
 {
     public async Task<Result> Handle(RejectDepositCommand command, CancellationToken cancellationToken)
     {
@@ -30,7 +31,11 @@ public class RejectDepositCommandHandler(IWalletRepository walletRepository)
             throw new ValidationException(validationErrors);
         }
 
-        var result = await walletRepository.RejectDepositAsync(command);
+        var walletValidation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!walletValidation.Success)
+            return Result.Failed(walletValidation.Message);
+
+        var result = await WalletRepository.RejectDepositAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while processing your transaction. Please try again.");
 

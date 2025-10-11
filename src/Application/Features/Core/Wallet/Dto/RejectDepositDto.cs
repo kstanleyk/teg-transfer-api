@@ -3,4 +3,4 @@
 public record RejectDepositDto(
     Guid LedgerId,
     string Reason,
-    string? RejectedBy = null);
+    string RejectedBy = "System");

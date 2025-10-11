@@ -255,8 +255,8 @@ public class Wallet : Entity<Guid>
         if (reservation == null)
             throw new DomainException($"Purchase reservation not found: {reservationId}");
 
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id.Equals(reservation.PurchaseLedgerId));
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id.Equals(reservation.ServiceFeeLedgerId));
 
         if (purchaseLedger == null || serviceFeeLedger == null)
             throw new DomainException("One or both ledger entries not found for reservation");

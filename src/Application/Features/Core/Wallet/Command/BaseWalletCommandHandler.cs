@@ -2,6 +2,7 @@
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
+using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
@@ -26,6 +27,16 @@ public abstract class BaseWalletCommandHandler<TResult>(
             return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Failed("Wallet not found for client");
 
         return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Succeeded((client, wallet));
+    }
+
+    protected Result<Currency> ValidateCurrencyAsync(Domain.Entity.Core.Wallet wallet, string currencyCode)
+    {
+
+        var currency = Currency.FromCode(currencyCode);
+        if (currency != wallet.BaseCurrency)
+            return Result<Currency>.Failed($"Transaction currency ({currency.Code}) must match wallet's base currency ({wallet.BaseCurrency.Code})");
+
+        return Result<Currency>.Succeeded(currency);
     }
 
     protected async Task<Result<(Domain.Entity.Core.Client client, Domain.Entity.Core.Wallet wallet)>> ValidateClientAndWalletAsync(Guid clientId, Guid reservationId)

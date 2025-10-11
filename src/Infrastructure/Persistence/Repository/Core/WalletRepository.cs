@@ -39,6 +39,9 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
 
     public async Task<Wallet?> GetByReservationIdAsync(Guid reservationId) =>
         await DbSet
+            .Include(x=>x.PurchaseReservations)
+            .Include(x=>x.LedgerEntries)
+            .AsNoTracking()
             .FirstOrDefaultAsync(w => w.PurchaseReservations.Any(pr => pr.Id == reservationId));
 
     public async Task<RepositoryActionResult<Ledger>> DepositFundsAsync(DepositFundsCommand command)
@@ -46,17 +49,15 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
-            // Step 1: Get the wallet
             var wallet = await GetByClientIdAsync(command.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.NotFound);
 
-            // Step 2: Create Money value object
+            // Create Money value object
             var currency = Currency.FromCode(command.CurrencyCode);
-
             var amount = new Money(command.Amount, currency);
 
-            // Step 3: Validate currency matches wallet's base currency
+            // Validate currency matches wallet's base currency
             if (amount.Currency != wallet.BaseCurrency)
             {
                 await tx.RollbackAsync();
@@ -98,17 +99,17 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
-            // Step 1: Get the wallet
+            // Get the wallet
             var wallet = await GetByClientIdAsync(command.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.NotFound);
 
-            // Step 2: Create Money value object
+            // Create Money value object
             var currency = Currency.FromCode(command.CurrencyCode);
 
             var amount = new Money(command.Amount, currency);
 
-            // Step 3: Validate currency matches wallet's base currency
+            // Validate currency matches wallet's base currency
             if (amount.Currency != wallet.BaseCurrency)
             {
                 await tx.RollbackAsync();
@@ -150,22 +151,18 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
-            // Step 1: Get the wallet
+            // Get the wallet
             var wallet = await GetByClientIdWithPendingLedgersAsync(command.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
-
-            // Step 2: Get the approved by user (from command or current user service)
-            var approvedBy = command.ApprovedBy ?? "System";
-            //var approvedBy = "SYSTEM";
 
             var entry = Context.Entry(wallet);
 
             if (entry.State == EntityState.Detached)
                 DbSet.Attach(wallet);
 
-            // Step 3: Process the approval
-            wallet.ApproveDeposit(new LedgerId(command.LedgerId), approvedBy);
+            // Process the approval
+            wallet.ApproveDeposit(new LedgerId(command.LedgerId), command.ApprovedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -195,22 +192,18 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
-            // Step 1: Get the wallet
+            // Get the wallet
             var wallet = await GetByClientIdWithPendingLedgersAsync(command.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
-
-            // Step 2: Get the rejected by user (from command or current user service)
-            var rejectedBy = command.RejectedBy ?? "System";
-            //var approvedBy = "SYSTEM";
 
             var entry = Context.Entry(wallet);
 
             if (entry.State == EntityState.Detached)
                 DbSet.Attach(wallet);
 
-            // Step 3: Process the rejection
-            wallet.RejectDeposit(new LedgerId(command.LedgerId), command.Reason, rejectedBy);
+            // Process the rejection
+            wallet.RejectDeposit(new LedgerId(command.LedgerId), command.Reason, command.RejectedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -240,24 +233,23 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
-            // Step 1: Get the wallet
+            // Get the wallet
             var wallet = await GetByClientIdAsync(command.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<ReservedPurchaseDto>(null, RepositoryActionStatus.NotFound);
 
-            // Step 2: Create Money value object
+            // Create Money value object
             var currency = Currency.FromCode(command.CurrencyCode);
             var purchaseAmount = new Money(command.PurchaseAmount, currency);
             var serviceFee = new Money(command.ServiceFeeAmount, currency);
 
-            // Step 3: Validate currency matches wallet's base currency
+            // Validate currency matches wallet's base currency
             if (!wallet.HasSufficientBalanceForPurchase(purchaseAmount, serviceFee))
             {
                 await tx.RollbackAsync();
-                return null;
-                //return Result<ReservedPurchaseDto>.Failed(
-                //    $"Insufficient balance. Available: {wallet.GetAvailableBalance()} {currency.Code}, " +
-                //    $"Required: {purchaseAmount.Amount + serviceFee.Amount} {currency.Code}");
+                throw new InvalidOperationException(
+                    $"Insufficient balance. Available: {wallet.GetAvailableBalance()} {currency.Code}, " +
+                    $"Required: {purchaseAmount.Amount + serviceFee.Amount} {currency.Code}");
             }
 
             var entry = Context.Entry(wallet);

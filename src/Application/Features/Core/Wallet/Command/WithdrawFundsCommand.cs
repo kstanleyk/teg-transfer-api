@@ -33,9 +33,15 @@ public class WithdrawFundsCommandHandler(
             throw new ValidationException(validationErrors);
         }
 
-        var validation = await ValidateClientAndWalletAsync(command.ClientId);
-        if (!validation.Success)
-            return Result<TransactionDto>.Failed(validation.Message);
+        var walletValidation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!walletValidation.Success)
+            return Result<TransactionDto>.Failed(walletValidation.Message);
+
+        var (_, wallet) = walletValidation.Data;
+
+        var currencyValidation = ValidateCurrencyAsync(wallet, command.CurrencyCode);
+        if (!currencyValidation.Success)
+            return Result<TransactionDto>.Failed(walletValidation.Message);
 
         var result = await WalletRepository.WithdrawFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
