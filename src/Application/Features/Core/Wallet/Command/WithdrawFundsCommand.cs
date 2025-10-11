@@ -15,8 +15,8 @@ public record WithdrawFundsCommand(
     string? Description = null) : IRequest<Result<TransactionDto>>;
 
 public class WithdrawFundsCommandHandler(
-    IWalletRepository walletRepository,
-    IMapper mapper) : IRequestHandler<WithdrawFundsCommand, Result<TransactionDto>>
+    IWalletRepository walletRepository, IClientRepository clientRepository,
+    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<WithdrawFundsCommand, Result<TransactionDto>>
 {
     public async Task<Result<TransactionDto>> Handle(WithdrawFundsCommand command, CancellationToken cancellationToken)
     {
@@ -33,7 +33,11 @@ public class WithdrawFundsCommandHandler(
             throw new ValidationException(validationErrors);
         }
 
-        var result = await walletRepository.WithdrawFundsAsync(command);
+        var validation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!validation.Success)
+            return Result<TransactionDto>.Failed(validation.Message);
+
+        var result = await WalletRepository.WithdrawFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your withdrawal. Please try again.");
 

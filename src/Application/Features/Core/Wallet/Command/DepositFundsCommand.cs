@@ -5,7 +5,6 @@ using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
 using TegWallet.Application.Interfaces.Core;
-using TegWallet.Domain.Entity.Enum;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
@@ -19,7 +18,7 @@ public record DepositFundsCommand(
 public class DepositFundsCommandHandler(
     IWalletRepository walletRepository,
     IClientRepository clientRepository,
-    IMapper mapper) : IRequestHandler<DepositFundsCommand, Result<TransactionDto>>
+    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<DepositFundsCommand, Result<TransactionDto>>
 {
     public async Task<Result<TransactionDto>> Handle(DepositFundsCommand command, CancellationToken cancellationToken)
     {
@@ -36,18 +35,11 @@ public class DepositFundsCommandHandler(
             throw new ValidationException(validationErrors);
         }
 
-        var client = await clientRepository.GetAsync(command.ClientId);
-        if (client == null)
-            return Result<TransactionDto>.Failed("Client not found");
+        var validation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!validation.Success)
+            return Result<TransactionDto>.Failed(validation.Message);
 
-        if (client.Status != ClientStatus.Active)
-            return Result<TransactionDto>.Failed("Client account is not active");
-
-        var wallet = await walletRepository.GetByClientIdAsync(command.ClientId);
-        if (wallet == null)
-            return Result<TransactionDto>.Failed("Wallet not found for client");
-
-        var result = await walletRepository.DepositFundsAsync(command);
+        var result = await WalletRepository.DepositFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 

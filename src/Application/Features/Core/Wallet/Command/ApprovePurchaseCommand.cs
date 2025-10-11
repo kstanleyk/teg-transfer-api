@@ -29,7 +29,7 @@ public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository, I
             throw new ValidationException(validationErrors);
         }
 
-        var wallet = await walletRepository.GetByReservationIdAsync(command.ReservationId);
+        var wallet = await WalletRepository.GetByReservationIdAsync(command.ReservationId);
         if (wallet == null)
             return Result.Failed("Wallet not found for reservation");
 
