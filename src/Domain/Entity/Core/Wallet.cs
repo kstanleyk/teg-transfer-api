@@ -92,25 +92,27 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RejectDeposit(LedgerId ledgerId, string reason)
+    public void RejectDeposit(LedgerId ledgerId, string reason, string rejectedBy = "SYSTEM")
     {
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
+        DomainGuards.AgainstNullOrWhiteSpace(rejectedBy, nameof(rejectedBy));
 
-        var transaction = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
-        if (transaction is null)
+        var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
+        if (ledger is null)
             throw new DomainException($"Ledger not found: {ledgerId}");
 
-        if (transaction.Type != TransactionType.Deposit)
+        if (ledger.Type != TransactionType.Deposit)
             throw new DomainException("Only deposit transactions can be rejected");
 
-        if (!transaction.IsPending)
+        if (!ledger.IsPending)
             throw new DomainException("Only pending deposits can be rejected");
 
-        //var previousBalance = Balance;
+        // Update the ledger status with rejection details
+        ledger.MarkAsFailed(reason, rejectedBy);
 
-        transaction.MarkAsFailed(reason);
-        Balance = Balance - transaction.Amount; // Reverse the balance
+        // Reverse the balance (since deposit added to balance when created)
+        Balance = Balance - ledger.Amount;
         UpdatedAt = DateTime.UtcNow;
     }
 

@@ -10,13 +10,13 @@ public class WalletProfile : Profile
 {
     public WalletProfile()
     {
-        // Deposit mappings
         CreateMap<DepositRequestDto, DepositFundsCommand>();
 
-        // Withdrawal mappings
         CreateMap<WithdrawalRequestDto, WithdrawFundsCommand>();
 
         CreateMap<ApproveDepositDto, ApproveDepositCommand>();
+
+        CreateMap<RejectDepositDto, RejectDepositCommand>();
 
         // Ledger to TransactionDto
         CreateMap<Ledger, TransactionDto>()

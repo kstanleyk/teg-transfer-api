@@ -45,4 +45,19 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
         return Ok(result);
     }
+
+    [HttpPost("{clientId:guid}/deposit/reject")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
+    public async Task<IActionResult> RejectDeposit(Guid clientId, [FromBody] RejectDepositDto request)
+    {
+        var command = new RejectDepositCommand(
+            clientId,
+            request.LedgerId,
+            request.Reason,
+            request.RejectedBy);
+
+        var result = await MediatorSender.Send(command);
+
+        return Ok(result);
+    }
 }

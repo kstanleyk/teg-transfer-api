@@ -11,4 +11,5 @@ public interface IWalletRepository : IRepository<Wallet, Guid>
     Task<RepositoryActionResult<Ledger>> WithdrawFundsAsync(WithdrawFundsCommand command);
     Task<RepositoryActionResult<Wallet>> ApproveDepositAsync(ApproveDepositCommand command);
     Task<Wallet?> GetByClientIdWithPendingLedgersAsync(Guid clientId);
+    Task<RepositoryActionResult<Wallet>> RejectDepositAsync(RejectDepositCommand command);
 }

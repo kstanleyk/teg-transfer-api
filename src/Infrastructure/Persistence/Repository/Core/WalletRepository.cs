@@ -169,6 +169,51 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         }
     }
 
+    public async Task<RepositoryActionResult<Wallet>> RejectDepositAsync(RejectDepositCommand command)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Step 1: Get the wallet
+            var wallet = await GetByClientIdWithPendingLedgersAsync(command.ClientId);
+            if (wallet == null)
+                return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
+
+            // Step 2: Get the rejected by user (from command or current user service)
+            var rejectedBy = command.RejectedBy ?? "System";
+            //var approvedBy = "SYSTEM";
+
+            var entry = Context.Entry(wallet);
+
+            if (entry.State == EntityState.Detached)
+                DbSet.Attach(wallet);
+
+            // Step 3: Process the rejection
+            wallet.RejectDeposit(new LedgerId(command.LedgerId), command.Reason, rejectedBy);
+
+            var result = await SaveChangesAsync();
+            if (result > 0) await entry.ReloadAsync();
+
+            await tx.CommitAsync();
+            return new RepositoryActionResult<Wallet>(wallet, RepositoryActionStatus.Updated);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
     protected override void DisposeCore()
     {
         ledgerRepository.Dispose();
