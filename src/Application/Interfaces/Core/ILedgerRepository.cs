@@ -3,7 +3,7 @@ using TegWallet.Domain.Entity.Core;
 
 namespace TegWallet.Application.Interfaces.Core;
 
-public interface ILedgerRepository : IRepository<Ledger, LedgerId>
+public interface ILedgerRepository : IRepository<Ledger, Guid>
 {
     public Task<RepositoryActionResult<IEnumerable<Ledger>>> UpdateLedgersAsync(Ledger[] ledgers);
     Task<List<Ledger>> GetWalletTransactionsByPeriodAsync(Guid walletId, DateTime fromDate, DateTime toDate);

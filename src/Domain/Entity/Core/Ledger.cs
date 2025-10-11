@@ -5,7 +5,7 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class Ledger : Entity<LedgerId>
+public class Ledger : Entity<Guid>
 {
     public Guid WalletId { get; private init; }
     public TransactionType Type { get; private init; }
@@ -46,7 +46,7 @@ public class Ledger : Entity<LedgerId>
 
         var ledger = new Ledger
         {
-            Id = LedgerId.New(),
+            Id = SequentialId.CreateUnique().Value,
             WalletId = walletId,
             Type = type,
             Amount = amount,
@@ -59,34 +59,6 @@ public class Ledger : Entity<LedgerId>
 
         return ledger;
     }
-
-
-    //public static Ledger Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
-    //    string? reference = null, string? description = null, DateTime? timestamp = null)
-    //{
-    //    DomainGuards.AgainstDefault(walletId, nameof(walletId));
-    //    DomainGuards.AgainstNull(amount, nameof(amount));
-
-    //    // Validate amount based on transaction type
-    //    ValidateAmountForType(type, amount);
-
-    //    // Validate status transitions (basic validation)
-    //    ValidateInitialStatus(type, status);
-
-    //    var transaction = new Ledger
-    //    {
-    //        Id = LedgerId.New(),
-    //        WalletId = walletId,
-    //        Type = type,
-    //        Amount = amount,
-    //        Status = status,
-    //        Timestamp = timestamp ?? DateTime.UtcNow,
-    //        Reference = reference?.Trim() ?? string.Empty,
-    //        Description = description?.Trim() ?? GenerateDefaultDescription(type, amount)
-    //    };
-
-    //    return transaction;
-    //}
 
     public void MarkAsCompleted(string approvedBy = "SYSTEM")
     {
@@ -149,20 +121,6 @@ public class Ledger : Entity<LedgerId>
         };
     }
 
-    public bool HasChanges(Ledger? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return false;
-
-        return WalletId != other.WalletId ||
-               Type != other.Type ||
-               !Amount.Equals(other.Amount) ||
-               Status != other.Status ||
-               Reference != other.Reference ||
-               FailureReason != other.FailureReason ||
-               Description != other.Description;
-    }
-
     public bool IsPending => Status == TransactionStatus.Pending;
     public bool IsCompleted => Status == TransactionStatus.Completed;
     public bool IsFailed => Status == TransactionStatus.Failed;
@@ -220,9 +178,4 @@ public class Ledger : Entity<LedgerId>
             _ => $"Ledger of {amount.Amount} {amount.Currency.Code}"
         };
     }
-}
-
-public record LedgerId(Guid Value)
-{
-    public static LedgerId New() => new(SequentialId.CreateUnique().Value);
 }

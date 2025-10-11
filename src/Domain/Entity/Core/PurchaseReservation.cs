@@ -8,8 +8,8 @@ public class PurchaseReservation : Entity<Guid>
 {
     public Guid ClientId { get; private init; }
     public Guid WalletId { get; private init; }
-    public LedgerId PurchaseLedgerId { get; private init; }
-    public LedgerId ServiceFeeLedgerId { get; private init; }
+    public Guid PurchaseLedgerId { get; private init; }
+    public Guid ServiceFeeLedgerId { get; private init; }
     public Money PurchaseAmount { get; private init; }
     public Money ServiceFeeAmount { get; private init; }
     public Money TotalAmount { get; private init; }
@@ -29,8 +29,8 @@ public class PurchaseReservation : Entity<Guid>
     public static PurchaseReservation Create(
         Guid clientId,
         Guid walletId,
-        LedgerId purchaseLedgerId,
-        LedgerId serviceFeeLedgerId,
+        Guid purchaseLedgerId,
+        Guid serviceFeeLedgerId,
         Money purchaseAmount,
         Money serviceFeeAmount,
         string description,

@@ -162,7 +162,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                 DbSet.Attach(wallet);
 
             // Process the approval
-            wallet.ApproveDeposit(new LedgerId(command.LedgerId), command.ApprovedBy);
+            wallet.ApproveDeposit(command.LedgerId, command.ApprovedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -203,7 +203,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                 DbSet.Attach(wallet);
 
             // Process the rejection
-            wallet.RejectDeposit(new LedgerId(command.LedgerId), command.Reason, command.RejectedBy);
+            wallet.RejectDeposit(command.LedgerId, command.Reason, command.RejectedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -270,8 +270,8 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             var dto = new ReservedPurchaseDto
             {
                 ReservationId = reservation.Id,
-                PurchaseLedgerId = purchaseLedger.Id.Value,
-                ServiceFeeLedgerId = serviceFeeLedger.Id.Value,
+                PurchaseLedgerId = purchaseLedger.Id,
+                ServiceFeeLedgerId = serviceFeeLedger.Id,
                 PurchaseAmount = purchaseAmount.Amount,
                 ServiceFeeAmount = serviceFee.Amount,
                 TotalAmount = purchaseAmount.Amount + serviceFee.Amount,

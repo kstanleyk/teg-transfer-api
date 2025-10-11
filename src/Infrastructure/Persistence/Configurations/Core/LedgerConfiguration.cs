@@ -14,7 +14,6 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Id)
-            .HasConversion(ledgerId => ledgerId.Value, value => new LedgerId(value))
             .ValueGeneratedNever();
 
         builder.Property(t => t.WalletId).IsRequired();

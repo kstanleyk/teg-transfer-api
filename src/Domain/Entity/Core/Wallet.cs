@@ -72,7 +72,7 @@ public class Wallet : Entity<Guid>
         return ledger;
     }
 
-    public void ApproveDeposit(LedgerId ledgerId, string approvedBy = "SYSTEM")
+    public void ApproveDeposit(Guid ledgerId, string approvedBy = "SYSTEM")
     {
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(approvedBy, nameof(approvedBy));
@@ -95,7 +95,7 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RejectDeposit(LedgerId ledgerId, string reason, string rejectedBy = "SYSTEM")
+    public void RejectDeposit(Guid ledgerId, string reason, string rejectedBy = "SYSTEM")
     {
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
@@ -204,8 +204,8 @@ public class Wallet : Entity<Guid>
             throw new DomainException($"Insufficient available balance. Available: {AvailableBalance.Amount}, Required: {totalAmount.Amount}");
 
         // Generate ledger IDs first
-        var purchaseLedgerId = LedgerId.New();
-        var serviceFeeLedgerId = LedgerId.New();
+        var purchaseLedgerId = SequentialId.CreateUnique().Value;
+        var serviceFeeLedgerId = SequentialId.CreateUnique().Value;
 
         // Create purchase reservation
         var reservation = PurchaseReservation.Create(
@@ -229,6 +229,8 @@ public class Wallet : Entity<Guid>
             reference: $"PAYMENT_METHOD:{paymentMethod}",
             purchaseReservationId: reservation.Id);
 
+        purchaseLedger.SetId(purchaseLedgerId);
+
         // Create service fee ledger with reservation reference
         var serviceFeeLedger = Ledger.Create(
             walletId: Id,
@@ -237,6 +239,8 @@ public class Wallet : Entity<Guid>
             status: TransactionStatus.Pending,
             description: $"Service fee for {description} - Payment: {paymentMethod}",
             purchaseReservationId: reservation.Id);
+
+        serviceFeeLedger.SetId(serviceFeeLedgerId);
 
         _ledgerEntries.Add(purchaseLedger);
         _ledgerEntries.Add(serviceFeeLedger);
@@ -255,8 +259,8 @@ public class Wallet : Entity<Guid>
         if (reservation == null)
             throw new DomainException($"Purchase reservation not found: {reservationId}");
 
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id.Equals(reservation.PurchaseLedgerId));
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id.Equals(reservation.ServiceFeeLedgerId));
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
 
         if (purchaseLedger == null || serviceFeeLedger == null)
             throw new DomainException("One or both ledger entries not found for reservation");

@@ -27,15 +27,9 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
 
         // LedgerId value objects (stored as GUID)
         builder.Property(pr => pr.PurchaseLedgerId)
-            .HasConversion(
-                ledgerId => ledgerId.Value,
-                value => new LedgerId(value))
             .IsRequired();
 
         builder.Property(pr => pr.ServiceFeeLedgerId)
-            .HasConversion(
-                ledgerId => ledgerId.Value,
-                value => new LedgerId(value))
             .IsRequired();
 
         // Money value objects (stored in separate columns)
