@@ -15,6 +15,21 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
     public async Task<Wallet?> GetByClientIdAsync(Guid clientId) =>
         await DbSet.AsNoTracking().FirstOrDefaultAsync(x => x.ClientId == clientId);
 
+    public async Task<Wallet?> GetByClientIdWithDetailsAsync(Guid clientId)
+    {
+        var wallet = await DbSet
+            .Include(w => w.LedgerEntries
+                .OrderByDescending(l => l.Timestamp)
+                .Take(10)) // Last 10 transactions
+            .Include(w => w.PurchaseReservations
+                .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
+                .OrderByDescending(pr => pr.CreatedAt))
+            .AsSplitQuery() // For better performance with multiple includes
+            .FirstOrDefaultAsync(w => w.ClientId == clientId);
+
+        return wallet;
+    }
+
     public async Task<Wallet?> GetByClientIdWithPendingLedgersAsync(Guid clientId) =>
         await DbSet.AsNoTracking().Include(w => w.LedgerEntries
                 .Where(l => l.Type == TransactionType.Deposit &&
@@ -239,7 +254,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             {
                 await tx.RollbackAsync();
                 return null;
-                //return Result<ReservedPurchaseDto>.Failure(
+                //return Result<ReservedPurchaseDto>.Failed(
                 //    $"Insufficient balance. Available: {wallet.GetAvailableBalance()} {currency.Code}, " +
                 //    $"Required: {purchaseAmount.Amount + serviceFee.Amount} {currency.Code}");
             }

@@ -17,4 +17,5 @@ public interface IWalletRepository : IRepository<Wallet, Guid>
     Task<Wallet?> GetByReservationIdAsync(Guid reservationId);
     Task<RepositoryActionResult<Wallet>> ApprovePurchaseAsync(ApprovePurchaseCommand command);
     Task<RepositoryActionResult<Wallet>> CancelPurchaseAsync(CancelPurchaseCommand command);
+    Task<Wallet?> GetByClientIdWithDetailsAsync(Guid clientId);
 }

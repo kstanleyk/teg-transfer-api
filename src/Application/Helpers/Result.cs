@@ -2,43 +2,50 @@
 
 public class Result<T>
 {
-    public bool IsSuccess { get; }
+    public bool Success { get; }
     public T Data { get; }
-    public string? Error { get; }
-    public Dictionary<string, string[]> ValidationErrors { get; }
+    public string Message { get; }
+    public string[] ValidationErrors { get; }
 
-    private Result(bool isSuccess, T data, string? error, Dictionary<string, string[]>? validationErrors = null)
+    private Result(bool success, T data, string message, string[]? validationErrors = null)
     {
-        IsSuccess = isSuccess;
+        Success = success;
         Data = data;
-        Error = error;
-        ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();
+        Message = message;
+        ValidationErrors = validationErrors ?? [];
     }
 
-    public static Result<T> Success(T value) => new Result<T>(true, value, null);
-    public static Result<T> Failure(string? error) => new Result<T>(false, default!, error);
+    public static Result<T> Succeeded(T value, string message = "Operation completed successfully")
+        => new Result<T>(true, value, message);
 
-    public static Result<T?> ValidationFailure(Dictionary<string, string[]>? validationErrors)
+    public static Result<T> Failed(string message)
+        => new Result<T>(false, default!, message);
+
+    public static Result<T?> ValidationFailure(string[]? validationErrors, string message = "Validation failed")
     {
-        return new Result<T?>(false, default, "Validation failed", validationErrors);
+        return new Result<T?>(false, default, message, validationErrors);
     }
 }
 
 public class Result
 {
-    public bool IsSuccess { get; }
-    public string? Error { get; }
-    public Dictionary<string, string[]> ValidationErrors { get; }
+    public bool Success { get; }
+    public string Message { get; }
+    public string[] ValidationErrors { get; }
 
-    private Result(bool isSuccess, string? error, Dictionary<string, string[]>? validationErrors = null)
+    private Result(bool success, string message, string[]? validationErrors = null)
     {
-        IsSuccess = isSuccess;
-        Error = error;
-        ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();
+        Success = success;
+        Message = message;
+        ValidationErrors = validationErrors ?? Array.Empty<string>();
     }
 
-    public static Result Success() => new Result(true, null);
-    public static Result Failure(string? error) => new Result(false, error);
-    public static Result ValidationFailure(Dictionary<string, string[]>? validationErrors)
-        => new Result(false, "Validation failed", validationErrors);
+    public static Result Succeeded(string message = "Operation completed successfully")
+        => new Result(true, message);
+
+    public static Result Failed(string message)
+        => new Result(false, message);
+
+    public static Result ValidationFailed(string[]? validationErrors, string message = "Validation failed")
+        => new Result(false, message, validationErrors);
 }

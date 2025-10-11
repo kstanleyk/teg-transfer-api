@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
@@ -11,8 +12,8 @@ public record ApprovePurchaseCommand(
     Guid ReservationId,
     string ProcessedBy = "ADMIN") : IRequest<Result>;
 
-public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository)
-    : IRequestHandler<ApprovePurchaseCommand, Result>
+public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<ApprovePurchaseCommand, Result>
 {
     public async Task<Result> Handle(ApprovePurchaseCommand command, CancellationToken cancellationToken)
     {
@@ -28,14 +29,18 @@ public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository)
             throw new ValidationException(validationErrors);
         }
 
-        var wallet = await walletRepository.GetByReservationIdAsync(command.ReservationId);
+        var wallet = await WalletRepository.GetByReservationIdAsync(command.ReservationId);
         if (wallet == null)
-            return Result.Failure("Wallet not found for reservation");
+            return Result.Failed("Wallet not found for reservation");
 
-        var result = await walletRepository.ApprovePurchaseAsync(command);
+        var validation = await ValidateClientAndWalletAsync(wallet.ClientId, command.ReservationId);
+        if (!validation.Success)
+            return Result.Failed(validation.Message);
+
+        var result = await WalletRepository.ApprovePurchaseAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result.Failure("An unexpected error occurred while approving the purchase");
+            return Result.Failed("An unexpected error occurred while approving the purchase");
 
-        return Result.Success();
+        return Result.Succeeded();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
@@ -12,8 +13,8 @@ public record CancelPurchaseCommand(
     string Reason,
     string CancelledBy = "ADMIN") : IRequest<Result>;
 
-public class CancelPurchaseCommandHandler(IWalletRepository walletRepository)
-    : IRequestHandler<CancelPurchaseCommand, Result>
+public class CancelPurchaseCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<CancelPurchaseCommand, Result>
 {
     public async Task<Result> Handle(CancelPurchaseCommand command, CancellationToken cancellationToken)
     {
@@ -29,14 +30,18 @@ public class CancelPurchaseCommandHandler(IWalletRepository walletRepository)
             throw new ValidationException(validationErrors);
         }
 
-        var wallet = await walletRepository.GetByReservationIdAsync(command.ReservationId);
+        var wallet = await WalletRepository.GetByReservationIdAsync(command.ReservationId);
         if (wallet == null)
-            return Result.Failure("Wallet not found for reservation");
+            return Result.Failed("Wallet not found for reservation");
 
-        var result = await walletRepository.CancelPurchaseAsync(command);
+        var validation = await ValidateClientAndWalletAsync(wallet.ClientId, command.ReservationId);
+        if (!validation.Success)
+            return Result.Failed(validation.Message);
+
+        var result = await WalletRepository.CancelPurchaseAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result.Failure("An unexpected error occurred while cancelling the purchase");
+            return Result.Failed("An unexpected error occurred while cancelling the purchase");
 
-        return Result.Success();
+        return Result.Succeeded();
     }
 }

@@ -15,10 +15,10 @@ public record DepositFundsCommand(
     string? Reference = null,
     string? Description = null) : IRequest<Result<TransactionDto>>;
 
-
 public class DepositFundsCommandHandler(
     IWalletRepository walletRepository,
-    IMapper mapper) : IRequestHandler<DepositFundsCommand, Result<TransactionDto>>
+    IClientRepository clientRepository,
+    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<DepositFundsCommand, Result<TransactionDto>>
 {
     public async Task<Result<TransactionDto>> Handle(DepositFundsCommand command, CancellationToken cancellationToken)
     {
@@ -35,11 +35,15 @@ public class DepositFundsCommandHandler(
             throw new ValidationException(validationErrors);
         }
 
-        var result = await walletRepository.DepositFundsAsync(command);
+        var validation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!validation.Success)
+            return Result<TransactionDto>.Failed(validation.Message);
+
+        var result = await WalletRepository.DepositFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result<TransactionDto>.Failure("An unexpected error occurred while processing your deposit. Please try again.");
+            return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
-        return Result<TransactionDto>.Success(transactionDto);
+        return Result<TransactionDto>.Succeeded(transactionDto);
     }
 }

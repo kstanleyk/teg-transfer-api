@@ -78,7 +78,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
         var result = await MediatorSender.Send(command);
 
-        if (result.IsSuccess)
+        if (result.Success)
         {
             var response = new ReservedPurchaseResponseDto
             {
@@ -96,7 +96,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
                 CreatedAt = result.Data.CreatedAt
             };
 
-            return Ok(Result<ReservedPurchaseResponseDto>.Success(response));
+            return Ok(Result<ReservedPurchaseResponseDto>.Succeeded(response));
         }
 
         return Ok(result);
@@ -136,22 +136,58 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         return Ok(result);
     }
 
-    //[HttpGet("purchase/reservations/pending")]
-    //[MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
-    //public async Task<IActionResult> GetPendingPurchaseReservations()
+    [HttpGet("{clientId:guid}")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetWallet(Guid clientId)
+    {
+        var query = new GetWalletByClientIdQuery(clientId);
+        return Ok(await Mediator.Send(query));
+    }
+
+    [HttpGet("{clientId:guid}/balance")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<WalletBalanceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<WalletBalanceDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetWalletBalance(Guid clientId)
+    {
+        var query = new GetWalletBalanceQuery(clientId);
+        return Ok(await Mediator.Send(query));
+    }
+
+    [HttpGet("{clientId:guid}/balance/simple")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<SimpleBalanceDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSimpleBalance(Guid clientId)
+    {
+        var query = new GetSimpleBalanceQuery(clientId);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
+
+    //[HttpPost("{clientId:guid}/balance/check-sufficiency")]
+    //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
+    //[ProducesResponseType(typeof(Result<BalanceSufficiencyDto>), StatusCodes.Status200OK)]
+    //public async Task<IActionResult> CheckBalanceSufficiency(Guid clientId, [FromBody] CheckBalanceRequest request)
     //{
-    //    var query = new GetPendingPurchaseReservationsQuery();
-    //    var result = await MediatorSender.Send(query);
+    //    var query = new CheckBalanceSufficiencyQuery(clientId, request.Amount, request.CurrencyCode);
+    //    var result = await Mediator.Send(query);
     //    return Ok(result);
     //}
 
-    //// Optional: Get client's purchase reservations
-    //[HttpGet("{clientId:guid}/purchase/reservations")]
-    //[MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
-    //public async Task<IActionResult> GetClientPurchaseReservations(Guid clientId, [FromQuery] string? status = null)
+    //[HttpGet("{clientId:guid}/balance/history")]
+    //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
+    //[ProducesResponseType(typeof(Result<BalanceHistoryDto>), StatusCodes.Status200OK)]
+    //public async Task<IActionResult> GetBalanceHistory(
+    //    Guid clientId,
+    //    [FromQuery] DateTime fromDate,
+    //    [FromQuery] DateTime toDate,
+    //    [FromQuery] BalanceHistoryPeriod period = BalanceHistoryPeriod.Daily)
     //{
-    //    var query = new GetClientPurchaseReservationsQuery(clientId, status);
-    //    var result = await MediatorSender.Send(query);
+    //    var query = new GetBalanceHistoryQuery(clientId, fromDate, toDate, period);
+    //    var result = await Mediator.Send(query);
     //    return Ok(result);
     //}
 }
