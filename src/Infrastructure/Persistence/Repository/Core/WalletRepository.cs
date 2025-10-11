@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TegWallet.Application.Features.Core.Wallet.Command;
 using TegWallet.Application.Features.Core.Wallet.Dto;
+using TegWallet.Application.Features.Core.Wallet.Model;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;
@@ -386,6 +387,89 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             await tx.RollbackAsync();
             return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
         }
+    }
+
+    public async Task<BalanceHistoryData> GetBalanceHistoryDataAsync(Guid walletId, DateTime fromDate, DateTime toDate)
+    {
+        try
+        {
+            var wallet = await DbSet
+                .Include(w => w.LedgerEntries)
+                .FirstOrDefaultAsync(w => w.Id == walletId);
+
+            if (wallet == null)
+                throw new InvalidOperationException($"Wallet not found: {walletId}");
+
+            // Get transactions within the period
+            var transactions = await ledgerRepository.GetWalletTransactionsByPeriodAsync(walletId, fromDate, toDate);
+
+            // Calculate starting balance (balance before the period)
+            var startingBalance = await ledgerRepository.GetWalletBalanceAtDateAsync(walletId, fromDate.AddDays(-1));
+
+            // Calculate daily balances
+            var dailyBalances = CalculateDailyBalances(transactions, startingBalance, fromDate, toDate);
+
+            return new BalanceHistoryData
+            {
+                Transactions = transactions,
+                StartingBalance = startingBalance,
+                DailyBalances = dailyBalances
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error retrieving balance history data for wallet {walletId}", ex);
+        }
+    }
+
+    private List<DailyBalance> CalculateDailyBalances(List<Ledger> transactions, decimal startingBalance,
+        DateTime fromDate, DateTime toDate)
+    {
+        var dailyBalances = new List<DailyBalance>();
+        var currentBalance = startingBalance;
+        var currentDate = fromDate.Date;
+
+        // Group transactions by date
+        var transactionsByDate = transactions
+            .Where(t => t.Timestamp.Date >= fromDate.Date && t.Timestamp.Date <= toDate.Date)
+            .GroupBy(t => t.Timestamp.Date)
+            .OrderBy(g => g.Key)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        while (currentDate <= toDate.Date)
+        {
+            if (transactionsByDate.TryGetValue(currentDate, out var dayTransactions))
+            {
+                // Calculate net change for the day
+                var netChange = dayTransactions.Sum(t =>
+                    t.Type == TransactionType.Deposit ? t.Amount.Amount : -t.Amount.Amount);
+
+                currentBalance += netChange;
+
+                dailyBalances.Add(new DailyBalance
+                {
+                    Date = currentDate,
+                    TotalBalance = currentBalance,
+                    AvailableBalance = currentBalance, // Simplified - in reality, we'd need to track available balance separately
+                    TransactionCount = dayTransactions.Count
+                });
+            }
+            else
+            {
+                // No transactions on this day, balance remains the same
+                dailyBalances.Add(new DailyBalance
+                {
+                    Date = currentDate,
+                    TotalBalance = currentBalance,
+                    AvailableBalance = currentBalance,
+                    TransactionCount = 0
+                });
+            }
+
+            currentDate = currentDate.AddDays(1);
+        }
+
+        return dailyBalances;
     }
 
     protected override void DisposeCore()

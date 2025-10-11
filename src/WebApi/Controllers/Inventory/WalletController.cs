@@ -167,27 +167,26 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         return Ok(result);
     }
 
-    //[HttpPost("{clientId:guid}/balance/check-sufficiency")]
-    //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
-    //[ProducesResponseType(typeof(Result<BalanceSufficiencyDto>), StatusCodes.Status200OK)]
-    //public async Task<IActionResult> CheckBalanceSufficiency(Guid clientId, [FromBody] CheckBalanceRequest request)
-    //{
-    //    var query = new CheckBalanceSufficiencyQuery(clientId, request.Amount, request.CurrencyCode);
-    //    var result = await Mediator.Send(query);
-    //    return Ok(result);
-    //}
+    [HttpPost("{clientId:guid}/balance/check-sufficiency")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(BalanceSufficiencyDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CheckBalanceSufficiency(Guid clientId, [FromBody] CheckBalanceRequest request)
+    {
+        var query = new CheckBalanceSufficiencyQuery(clientId, request.Amount, request.CurrencyCode);
+        return Ok(await Mediator.Send(query));
+    }
 
-    //[HttpGet("{clientId:guid}/balance/history")]
-    //[MustHavePermission(AppFeature.Wallet, AppAction.View)]
-    //[ProducesResponseType(typeof(Result<BalanceHistoryDto>), StatusCodes.Status200OK)]
-    //public async Task<IActionResult> GetBalanceHistory(
-    //    Guid clientId,
-    //    [FromQuery] DateTime fromDate,
-    //    [FromQuery] DateTime toDate,
-    //    [FromQuery] BalanceHistoryPeriod period = BalanceHistoryPeriod.Daily)
-    //{
-    //    var query = new GetBalanceHistoryQuery(clientId, fromDate, toDate, period);
-    //    var result = await Mediator.Send(query);
-    //    return Ok(result);
-    //}
+    [HttpGet("{clientId:guid}/balance/history")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(BalanceHistoryDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBalanceHistory(
+        Guid clientId,
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate,
+        [FromQuery] BalanceHistoryPeriod period = BalanceHistoryPeriod.Daily)
+    {
+        var query = new GetBalanceHistoryQuery(clientId, fromDate.ToUtcKind(), toDate.ToUtcKind(), period);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
 }

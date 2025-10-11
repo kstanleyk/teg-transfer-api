@@ -1,5 +1,6 @@
 ﻿using TegWallet.Application.Features.Core.Wallet.Command;
 using TegWallet.Application.Features.Core.Wallet.Dto;
+using TegWallet.Application.Features.Core.Wallet.Model;
 using TegWallet.Application.Helpers;
 using TegWallet.Domain.Entity.Core;
 
@@ -18,4 +19,5 @@ public interface IWalletRepository : IRepository<Wallet, Guid>
     Task<RepositoryActionResult<Wallet>> ApprovePurchaseAsync(ApprovePurchaseCommand command);
     Task<RepositoryActionResult<Wallet>> CancelPurchaseAsync(CancelPurchaseCommand command);
     Task<Wallet?> GetByClientIdWithDetailsAsync(Guid clientId);
+    Task<BalanceHistoryData> GetBalanceHistoryDataAsync(Guid walletId, DateTime fromDate, DateTime toDate);
 }

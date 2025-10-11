@@ -8,16 +8,16 @@ namespace TegWallet.Infrastructure.Persistence.Repository;
 
 public class DatabaseFactory : Disposable, IDatabaseFactory
 {
-    public DatabaseFactory(TransferContext dataContext)
+    public DatabaseFactory(TegWalletContext dataContext)
     {
         _dataContext = dataContext;
         _db = new NpgsqlConnection(GetContext().Database.GetDbConnection().ConnectionString);
     }
 
-    private readonly TransferContext _dataContext;
+    private readonly TegWalletContext _dataContext;
     private readonly IDbConnection _db;
 
-    public TransferContext GetContext()
+    public TegWalletContext GetContext()
     {
         return _dataContext;
     }
@@ -35,6 +35,6 @@ public class DatabaseFactory : Disposable, IDatabaseFactory
 
 public interface IDatabaseFactory : IDisposable
 {
-    TransferContext GetContext();
+    TegWalletContext GetContext();
     IDbConnection GetConnection();
 }

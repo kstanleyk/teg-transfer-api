@@ -4,7 +4,7 @@ using TegWallet.Domain.Entity.Auth;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
 
-public class TransferDatabaseSeeder(TransferContext context)
+public class TegWalletDatabaseSeeder(TegWalletContext context)
 {
     public async Task SeedDatabaseAsync()
     {

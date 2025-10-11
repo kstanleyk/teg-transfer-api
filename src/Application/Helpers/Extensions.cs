@@ -260,7 +260,6 @@ public static class Extensions
         return double.TryParse(obj?.ToString(), out var i) ? i : 0;
     }
 
-
     public static double AddValue(this double initial, double value) => initial + value;
 
     public static int ToIntegerValue(this object obj)

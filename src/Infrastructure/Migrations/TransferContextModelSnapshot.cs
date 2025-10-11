@@ -10,7 +10,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 
 namespace TegWallet.Infrastructure.Migrations
 {
-    [DbContext(typeof(TransferContext))]
+    [DbContext(typeof(TegWalletContext))]
     partial class TransferContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
