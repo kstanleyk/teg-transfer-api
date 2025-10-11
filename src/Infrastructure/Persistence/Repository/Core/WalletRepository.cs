@@ -422,7 +422,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         }
     }
 
-    private List<DailyBalance> CalculateDailyBalances(List<Ledger> transactions, decimal startingBalance,
+    private static List<DailyBalance> CalculateDailyBalances(List<Ledger> transactions, decimal startingBalance,
         DateTime fromDate, DateTime toDate)
     {
         var dailyBalances = new List<DailyBalance>();

@@ -5,6 +5,7 @@ using TegWallet.Application.Features.Core.Wallet.Command;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Query;
 using TegWallet.Application.Helpers;
+using TegWallet.Domain.Entity.Core;
 using TegWallet.WebApi.Attributes;
 
 namespace TegWallet.WebApi.Controllers.Inventory;
@@ -186,6 +187,97 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         [FromQuery] BalanceHistoryPeriod period = BalanceHistoryPeriod.Daily)
     {
         var query = new GetBalanceHistoryQuery(clientId, fromDate.ToUtcKind(), toDate.ToUtcKind(), period);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("{clientId:guid}/purchase-reservations")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetClientPurchaseReservations(
+        Guid clientId,
+        [FromQuery] string? status = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = "CreatedAt",
+        [FromQuery] bool sortDescending = true)
+    {
+        PurchaseReservationStatus? reservationStatus = null;
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<PurchaseReservationStatus>(status, true, out var parsedStatus))
+        {
+            reservationStatus = parsedStatus;
+        }
+
+        var query = new GetClientPurchaseReservationsQuery(
+            clientId,
+            reservationStatus,
+            page,
+            pageSize,
+            sortBy,
+            sortDescending);
+
+        return Ok(await Mediator.Send(query));
+    }
+
+    [HttpGet("{clientId:guid}/purchase-reservations/summary")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<PurchaseReservationSummaryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetClientPurchaseReservationSummary(Guid clientId)
+    {
+        var query = new GetClientPurchaseReservationSummaryQuery(clientId);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("purchase-reservations/{reservationId:guid}")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<PurchaseReservationDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<PurchaseReservationDetailDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPurchaseReservationById(Guid reservationId)
+    {
+        var query = new GetPurchaseReservationByIdQuery(reservationId);
+
+        return Ok(await Mediator.Send(query));
+    }
+
+    [HttpGet("purchase-reservations")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
+    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchPurchaseReservations(
+        [FromQuery] Guid? clientId = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? paymentMethod = null,
+        [FromQuery] string? supplierSearch = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] decimal? minAmount = null,
+        [FromQuery] decimal? maxAmount = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = "CreatedAt",
+        [FromQuery] bool sortDescending = true)
+    {
+        PurchaseReservationStatus? reservationStatus = null;
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<PurchaseReservationStatus>(status, true, out var parsedStatus))
+        {
+            reservationStatus = parsedStatus;
+        }
+
+        var query = new SearchPurchaseReservationsQuery(
+            clientId,
+            reservationStatus,
+            paymentMethod,
+            supplierSearch,
+            fromDate?.ToUtcKind(),
+            toDate?.ToUtcEndOfDay(),
+            minAmount,
+            maxAmount,
+            page,
+            pageSize,
+            sortBy,
+            sortDescending);
+
         var result = await Mediator.Send(query);
         return Ok(result);
     }
