@@ -19,6 +19,8 @@ public class Ledger : Entity<LedgerId>
     public DateTime? ApprovedAt { get; private set; }
     public string RejectedBy { get; private set; } = string.Empty;
     public DateTime? RejectedAt { get; private set; }
+    public string ProcessedBy { get; private set; } = string.Empty;
+    public DateTime? ProcessedAt { get; private set; }
 
     // Protected constructor for EF Core
     protected Ledger()

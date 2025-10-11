@@ -38,6 +38,13 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         builder.Property(t => t.RejectedAt)
             .IsRequired(false);
 
+        builder.Property(t => t.ProcessedBy)
+            .HasMaxLength(100)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(t => t.ProcessedAt)
+            .IsRequired(false);
+
         // Configure Amount as owned entity
         builder.OwnsOne(t => t.Amount, amountBuilder =>
         {
