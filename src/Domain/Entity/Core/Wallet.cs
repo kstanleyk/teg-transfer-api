@@ -92,25 +92,27 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RejectDeposit(LedgerId ledgerId, string reason)
+    public void RejectDeposit(LedgerId ledgerId, string reason, string rejectedBy = "SYSTEM")
     {
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
+        DomainGuards.AgainstNullOrWhiteSpace(rejectedBy, nameof(rejectedBy));
 
-        var transaction = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
-        if (transaction is null)
+        var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
+        if (ledger is null)
             throw new DomainException($"Ledger not found: {ledgerId}");
 
-        if (transaction.Type != TransactionType.Deposit)
+        if (ledger.Type != TransactionType.Deposit)
             throw new DomainException("Only deposit transactions can be rejected");
 
-        if (!transaction.IsPending)
+        if (!ledger.IsPending)
             throw new DomainException("Only pending deposits can be rejected");
 
-        //var previousBalance = Balance;
+        // Update the ledger status with rejection details
+        ledger.MarkAsFailed(reason, rejectedBy);
 
-        transaction.MarkAsFailed(reason);
-        Balance = Balance - transaction.Amount; // Reverse the balance
+        // Reverse the balance (since deposit added to balance when created)
+        Balance = Balance - ledger.Amount;
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -175,6 +177,94 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
 
         return transaction;
+    }
+
+    public (Ledger purchaseLedger, Ledger serviceFeeLedger) ReserveForPurchase(Money purchaseAmount, Money serviceFee,
+        string description, string supplierDetails, string paymentMethod)
+    {
+        DomainGuards.AgainstNull(purchaseAmount, nameof(purchaseAmount));
+        DomainGuards.AgainstNull(serviceFee, nameof(serviceFee));
+        DomainGuards.AgainstNullOrWhiteSpace(description, nameof(description));
+        DomainGuards.AgainstNullOrWhiteSpace(supplierDetails, nameof(supplierDetails));
+        DomainGuards.AgainstNullOrWhiteSpace(paymentMethod, nameof(paymentMethod));
+
+        if (purchaseAmount.Amount <= 0)
+            throw new DomainException("Purchase amount must be positive");
+
+        if (serviceFee.Amount <= 0)
+            throw new DomainException("Service fee amount must be positive");
+
+        var totalAmount = purchaseAmount + serviceFee;
+
+        if (AvailableBalance.Amount < totalAmount.Amount)
+            throw new DomainException($"Insufficient available balance. Available: {AvailableBalance.Amount}, Required: {totalAmount.Amount}");
+
+        // Create pending purchase transaction
+        var purchaseLedger = Ledger.Create(
+            walletId: Id,
+            type: TransactionType.Purchase,
+            amount: purchaseAmount,
+            status: TransactionStatus.Pending, // Now pending instead of completed
+            description: $"{description} - {supplierDetails} - Payment: {paymentMethod}",
+            reference: $"PAYMENT_METHOD:{paymentMethod}");
+
+        // Create pending service fee transaction
+        var serviceFeeLedger = Ledger.Create(
+            walletId: Id,
+            type: TransactionType.ServiceFee,
+            amount: serviceFee,
+            status: TransactionStatus.Pending, // Now pending instead of completed
+            description: $"Service fee for {description} - Payment: {paymentMethod}");
+
+        _ledgerEntries.Add(purchaseLedger);
+        _ledgerEntries.Add(serviceFeeLedger);
+
+        // Reserve funds by deducting from available balance
+        AvailableBalance = AvailableBalance - totalAmount;
+        UpdatedAt = DateTime.UtcNow;
+
+        return (purchaseLedger, serviceFeeLedger);
+    }
+
+    public void CompletePurchase(LedgerId purchaseLedgerId, LedgerId serviceFeeLedgerId, string processedBy = "ADMIN")
+    {
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == purchaseLedgerId);
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == serviceFeeLedgerId);
+
+        if (purchaseLedger == null || serviceFeeLedger == null)
+            throw new DomainException("One or both ledger entries not found");
+
+        if (!purchaseLedger.IsPending || !serviceFeeLedger.IsPending)
+            throw new DomainException("Can only complete pending transactions");
+
+        // Mark both transactions as completed
+        purchaseLedger.MarkAsCompleted(processedBy);
+        serviceFeeLedger.MarkAsCompleted(processedBy);
+
+        // Deduct from main balance (funds were already reserved from available balance)
+        Balance = Balance - purchaseLedger.Amount - serviceFeeLedger.Amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void CancelPurchase(LedgerId purchaseLedgerId, LedgerId serviceFeeLedgerId, string reason, string cancelledBy = "ADMIN")
+    {
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == purchaseLedgerId);
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == serviceFeeLedgerId);
+
+        if (purchaseLedger == null || serviceFeeLedger == null)
+            throw new DomainException("One or both ledger entries not found");
+
+        if (!purchaseLedger.IsPending || !serviceFeeLedger.IsPending)
+            throw new DomainException("Can only cancel pending transactions");
+
+        // Mark both transactions as failed
+        purchaseLedger.MarkAsFailed(reason, cancelledBy);
+        serviceFeeLedger.MarkAsFailed(reason, cancelledBy);
+
+        // Return reserved funds to available balance
+        var totalAmount = purchaseLedger.Amount + serviceFeeLedger.Amount;
+        AvailableBalance = AvailableBalance + totalAmount;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public Ledger ChargeServiceFee(Money amount, string description)
@@ -253,4 +343,3 @@ public class Wallet : Entity<Guid>
                !BaseCurrency.Equals(other.BaseCurrency);
     }
 }
-

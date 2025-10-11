@@ -17,6 +17,10 @@ public class Ledger : Entity<LedgerId>
     public string Description { get; private set; } = string.Empty;
     public string ApprovedBy { get; private set; } = string.Empty;
     public DateTime? ApprovedAt { get; private set; }
+    public string RejectedBy { get; private set; } = string.Empty;
+    public DateTime? RejectedAt { get; private set; }
+    public string ProcessedBy { get; private set; } = string.Empty;
+    public DateTime? ProcessedAt { get; private set; }
 
     // Protected constructor for EF Core
     protected Ledger()
@@ -64,9 +68,11 @@ public class Ledger : Entity<LedgerId>
         ApprovedAt = DateTime.UtcNow;
     }
 
-    public void MarkAsFailed(string reason)
+
+    public void MarkAsFailed(string reason, string rejectedBy = "SYSTEM")
     {
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
+        DomainGuards.AgainstNullOrWhiteSpace(rejectedBy, nameof(rejectedBy));
 
         if (Status == TransactionStatus.Failed)
             return;
@@ -74,9 +80,10 @@ public class Ledger : Entity<LedgerId>
         if (Status == TransactionStatus.Completed)
             throw new DomainException("Cannot mark a completed transaction as failed");
 
-        //var previousStatus = Status;
         Status = TransactionStatus.Failed;
         FailureReason = reason.Trim();
+        RejectedBy = rejectedBy;
+        RejectedAt = DateTime.UtcNow;
     }
 
     public void UpdateReference(string? reference)
