@@ -16,10 +16,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         // Entity Framework
-        services.AddDbContext<TransferContext>(options =>
+        services.AddDbContext<TegWalletContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Data"))
                 .UseSnakeCaseNamingConvention())
-            .AddTransient<TransferDatabaseSeeder>();
+            .AddTransient<TegWalletDatabaseSeeder>();
 
         services.AddScoped<IDatabaseFactory, DatabaseFactory>();
 
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
     {
         using var serviceScope = app.ApplicationServices.CreateScope();
 
-        var seeders = serviceScope.ServiceProvider.GetServices<TransferDatabaseSeeder>();
+        var seeders = serviceScope.ServiceProvider.GetServices<TegWalletDatabaseSeeder>();
 
         foreach (var seeder in seeders) seeder.SeedDatabaseAsync().GetAwaiter().GetResult();
 

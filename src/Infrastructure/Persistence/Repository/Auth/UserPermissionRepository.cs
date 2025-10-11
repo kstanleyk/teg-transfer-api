@@ -5,7 +5,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 
 namespace TegWallet.Infrastructure.Persistence.Repository.Auth;
 
-public class UserPermissionRepository(TransferContext context) :Disposable, IUserPermissionRepository
+public class UserPermissionRepository(TegWalletContext context) :Disposable, IUserPermissionRepository
 {
     public async Task<HashSet<string>> GetPermissionsForUserAsync(string userId)
     {

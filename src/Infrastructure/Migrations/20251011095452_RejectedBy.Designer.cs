@@ -11,7 +11,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 
 namespace TegWallet.Infrastructure.Migrations
 {
-    [DbContext(typeof(TransferContext))]
+    [DbContext(typeof(TegWalletContext))]
     [Migration("20251011095452_RejectedBy")]
     partial class RejectedBy
     {

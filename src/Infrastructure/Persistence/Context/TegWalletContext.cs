@@ -5,7 +5,7 @@ using TegWallet.Domain.Entity.Core;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
 
-public class TransferContext(DbContextOptions<TransferContext> options) : DbContext(options)
+public class TegWalletContext(DbContextOptions<TegWalletContext> options) : DbContext(options)
 {
     //Auth
     public DbSet<Permission> PermissionSet => Set<Permission>();
@@ -22,7 +22,7 @@ public class TransferContext(DbContextOptions<TransferContext> options) : DbCont
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TransferContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TegWalletContext).Assembly);
         // Configure all entities that inherit from Entity<TId>
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

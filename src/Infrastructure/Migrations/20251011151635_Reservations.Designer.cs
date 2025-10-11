@@ -11,7 +11,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 
 namespace TegWallet.Infrastructure.Migrations
 {
-    [DbContext(typeof(TransferContext))]
+    [DbContext(typeof(TegWalletContext))]
     [Migration("20251011151635_Reservations")]
     partial class Reservations
     {
