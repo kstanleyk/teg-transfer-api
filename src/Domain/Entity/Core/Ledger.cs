@@ -15,6 +15,8 @@ public class Ledger : Entity<LedgerId>
     public string Reference { get; private set; } = string.Empty;
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
+    public string ApprovedBy { get; private set; } = string.Empty;
+    public DateTime? ApprovedAt { get; private set; }
 
     // Protected constructor for EF Core
     protected Ledger()
@@ -48,7 +50,7 @@ public class Ledger : Entity<LedgerId>
         return transaction;
     }
 
-    public void MarkAsCompleted()
+    public void MarkAsCompleted(string approvedBy = "SYSTEM")
     {
         if (Status == TransactionStatus.Completed)
             return;
@@ -58,6 +60,8 @@ public class Ledger : Entity<LedgerId>
 
         //var previousStatus = Status;
         Status = TransactionStatus.Completed;
+        ApprovedBy = approvedBy;
+        ApprovedAt = DateTime.UtcNow;
     }
 
     public void MarkAsFailed(string reason)

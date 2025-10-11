@@ -69,9 +69,10 @@ public class Wallet : Entity<Guid>
         return ledger;
     }
 
-    public void ApproveDeposit(LedgerId ledgerId)
+    public void ApproveDeposit(LedgerId ledgerId, string approvedBy = "SYSTEM")
     {
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
+        DomainGuards.AgainstNullOrWhiteSpace(approvedBy, nameof(approvedBy));
 
         var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
         if (ledger is null)
@@ -83,9 +84,10 @@ public class Wallet : Entity<Guid>
         if (!ledger.IsPending)
             throw new DomainException("Only pending deposits can be approved");
 
-        //var previousAvailableBalance = AvailableBalance;
-
+        // Update the ledger status
         ledger.MarkAsCompleted();
+
+        // Update wallet balances
         AvailableBalance = AvailableBalance + ledger.Amount;
         UpdatedAt = DateTime.UtcNow;
     }

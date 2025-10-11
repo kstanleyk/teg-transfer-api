@@ -42,7 +42,9 @@ public class AppPermissions
         new AppPermission(AppFeature.Wallet, AppAction.Read, AppRoleGroup.ManagementHierarchy, "Read Wallet", true),
         new AppPermission(AppFeature.Wallet, AppAction.Create, AppRoleGroup.ManagementHierarchy, "Create Wallet"),
         new AppPermission(AppFeature.Wallet, AppAction.Update, AppRoleGroup.ManagementHierarchy, "Update Wallet"),
-        new AppPermission(AppFeature.Wallet, AppAction.Deposit, AppRoleGroup.ManagementHierarchy, "Update Wallet"),
+        new AppPermission(AppFeature.Wallet, AppAction.Deposit, AppRoleGroup.ManagementHierarchy, "Deposit funds into wallet"),
+        new AppPermission(AppFeature.Wallet, AppAction.Withdraw, AppRoleGroup.ManagementHierarchy, "Withdraw funds from wallet"),
+        new AppPermission(AppFeature.Wallet, AppAction.Approve, AppRoleGroup.ManagementHierarchy, "Approve funds deposit"),
     ];
 
     public static IReadOnlyList<AppPermission> AdminPermissions { get; } =

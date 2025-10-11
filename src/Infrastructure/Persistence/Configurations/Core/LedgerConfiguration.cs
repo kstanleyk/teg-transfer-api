@@ -24,6 +24,7 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         builder.Property(t => t.Reference).HasMaxLength(100);
         builder.Property(t => t.FailureReason).HasMaxLength(500);
         builder.Property(t => t.Description).HasMaxLength(500);
+        builder.Property(t => t.ApprovedBy).HasMaxLength(100);
 
         // Configure Amount as owned entity
         builder.OwnsOne(t => t.Amount, amountBuilder =>
