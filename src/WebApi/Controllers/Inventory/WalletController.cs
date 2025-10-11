@@ -78,7 +78,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
         var result = await MediatorSender.Send(command);
 
-        if (result.IsSuccess)
+        if (result.Success)
         {
             var response = new ReservedPurchaseResponseDto
             {
@@ -96,7 +96,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
                 CreatedAt = result.Data.CreatedAt
             };
 
-            return Ok(Result<ReservedPurchaseResponseDto>.Success(response));
+            return Ok(Result<ReservedPurchaseResponseDto>.Succeeded(response));
         }
 
         return Ok(result);

@@ -239,7 +239,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             {
                 await tx.RollbackAsync();
                 return null;
-                //return Result<ReservedPurchaseDto>.Failure(
+                //return Result<ReservedPurchaseDto>.Failed(
                 //    $"Insufficient balance. Available: {wallet.GetAvailableBalance()} {currency.Code}, " +
                 //    $"Required: {purchaseAmount.Amount + serviceFee.Amount} {currency.Code}");
             }

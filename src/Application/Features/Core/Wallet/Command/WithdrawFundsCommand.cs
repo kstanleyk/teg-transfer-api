@@ -35,9 +35,9 @@ public class WithdrawFundsCommandHandler(
 
         var result = await walletRepository.WithdrawFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result<TransactionDto>.Failure("An unexpected error occurred while processing your withdrawal. Please try again.");
+            return Result<TransactionDto>.Failed("An unexpected error occurred while processing your withdrawal. Please try again.");
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
-        return Result<TransactionDto>.Success(transactionDto);
+        return Result<TransactionDto>.Succeeded(transactionDto);
     }
 }

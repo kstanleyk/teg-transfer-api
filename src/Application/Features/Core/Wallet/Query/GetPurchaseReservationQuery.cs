@@ -16,13 +16,13 @@ public class GetPurchaseReservationQueryHandler(IWalletRepository walletReposito
     {
         var wallet = await walletRepository.GetByClientIdAsync(query.ClientId);
         if (wallet == null)
-            return Result<PurchaseReservationDto>.Failure("Wallet not found");
+            return Result<PurchaseReservationDto>.Failed("Wallet not found");
 
         var reservation = wallet.GetPurchaseReservation(query.ReservationId);
         if (reservation == null)
-            return Result<PurchaseReservationDto>.Failure("Purchase reservation not found");
+            return Result<PurchaseReservationDto>.Failed("Purchase reservation not found");
 
         var dto = mapper.Map<PurchaseReservationDto>(reservation);
-        return Result<PurchaseReservationDto>.Success(dto);
+        return Result<PurchaseReservationDto>.Succeeded(dto);
     }
 }

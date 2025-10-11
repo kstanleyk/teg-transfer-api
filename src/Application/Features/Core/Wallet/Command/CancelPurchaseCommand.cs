@@ -31,12 +31,12 @@ public class CancelPurchaseCommandHandler(IWalletRepository walletRepository)
 
         var wallet = await walletRepository.GetByReservationIdAsync(command.ReservationId);
         if (wallet == null)
-            return Result.Failure("Wallet not found for reservation");
+            return Result.Failed("Wallet not found for reservation");
 
         var result = await walletRepository.CancelPurchaseAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result.Failure("An unexpected error occurred while cancelling the purchase");
+            return Result.Failed("An unexpected error occurred while cancelling the purchase");
 
-        return Result.Success();
+        return Result.Succeeded();
     }
 }

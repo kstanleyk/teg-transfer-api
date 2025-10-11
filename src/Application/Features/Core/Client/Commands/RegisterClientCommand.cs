@@ -38,12 +38,12 @@ public class RegisterClientCommandHandler(
         // Check if client already exists
         var existingClient = await clientRepository.GetByEmailAsync(command.Email);
         if (existingClient != null)
-            return Result<ClientRegisteredDto>.Failure("Client with this email already exists");
+            return Result<ClientRegisteredDto>.Failed("Client with this email already exists");
 
         // Validate currency code
         var currency = GetCurrencyFromCode(command.CurrencyCode);
         if (currency == null)
-            return Result<ClientRegisteredDto>.Failure($"Unsupported currency code: {command.CurrencyCode}");
+            return Result<ClientRegisteredDto>.Failed($"Unsupported currency code: {command.CurrencyCode}");
 
         // Create client (automatically creates wallet)
         var client = Domain.Entity.Core.Client.Create(command.Email.Trim().ToLower(), command.PhoneNumber.Trim(),
@@ -52,11 +52,11 @@ public class RegisterClientCommandHandler(
         // Save to database
         var result = await clientRepository.AddAsync(client);
         if (result.Status != RepositoryActionStatus.Created)
-            return Result<ClientRegisteredDto>.Failure($"An error occured while creating client account");
+            return Result<ClientRegisteredDto>.Failed($"An error occured while creating client account");
 
         // Map to DTO and return
         var clientDto = mapper.Map<ClientRegisteredDto>(result.Entity);
-        return Result<ClientRegisteredDto>.Success(clientDto);
+        return Result<ClientRegisteredDto>.Succeeded(clientDto);
     }
 
     private static Currency? GetCurrencyFromCode(string? code)

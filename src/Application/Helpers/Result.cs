@@ -2,21 +2,21 @@
 
 public class Result<T>
 {
-    public bool IsSuccess { get; }
+    public bool Success { get; }
     public T Data { get; }
     public string? Error { get; }
     public Dictionary<string, string[]> ValidationErrors { get; }
 
-    private Result(bool isSuccess, T data, string? error, Dictionary<string, string[]>? validationErrors = null)
+    private Result(bool success, T data, string? error, Dictionary<string, string[]>? validationErrors = null)
     {
-        IsSuccess = isSuccess;
+        Success = success;
         Data = data;
         Error = error;
         ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();
     }
 
-    public static Result<T> Success(T value) => new Result<T>(true, value, null);
-    public static Result<T> Failure(string? error) => new Result<T>(false, default!, error);
+    public static Result<T> Succeeded(T value) => new Result<T>(true, value, null);
+    public static Result<T> Failed(string? error) => new Result<T>(false, default!, error);
 
     public static Result<T?> ValidationFailure(Dictionary<string, string[]>? validationErrors)
     {
@@ -26,19 +26,19 @@ public class Result<T>
 
 public class Result
 {
-    public bool IsSuccess { get; }
+    public bool Success { get; }
     public string? Error { get; }
     public Dictionary<string, string[]> ValidationErrors { get; }
 
-    private Result(bool isSuccess, string? error, Dictionary<string, string[]>? validationErrors = null)
+    private Result(bool success, string? error, Dictionary<string, string[]>? validationErrors = null)
     {
-        IsSuccess = isSuccess;
+        Success = success;
         Error = error;
         ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();
     }
 
-    public static Result Success() => new Result(true, null);
-    public static Result Failure(string? error) => new Result(false, error);
-    public static Result ValidationFailure(Dictionary<string, string[]>? validationErrors)
+    public static Result Succeeded() => new Result(true, null);
+    public static Result Failed(string? error) => new Result(false, error);
+    public static Result ValidationFailed(Dictionary<string, string[]>? validationErrors)
         => new Result(false, "Validation failed", validationErrors);
 }

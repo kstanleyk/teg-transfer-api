@@ -37,9 +37,9 @@ public class DepositFundsCommandHandler(
 
         var result = await walletRepository.DepositFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result<TransactionDto>.Failure("An unexpected error occurred while processing your deposit. Please try again.");
+            return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
-        return Result<TransactionDto>.Success(transactionDto);
+        return Result<TransactionDto>.Succeeded(transactionDto);
     }
 }

@@ -41,29 +41,29 @@ public class ReservePurchaseCommandHandler(
 
         var client = await clientRepository.GetAsync(command.ClientId);
         if (client == null)
-            return Result<ReservedPurchaseDto>.Failure("Client not found");
+            return Result<ReservedPurchaseDto>.Failed("Client not found");
 
         if (client.Status != ClientStatus.Active)
-            return Result<ReservedPurchaseDto>.Failure("Client account is not active");
+            return Result<ReservedPurchaseDto>.Failed("Client account is not active");
 
         var wallet = await walletRepository.GetByClientIdAsync(command.ClientId);
         if (wallet == null)
-            return Result<ReservedPurchaseDto>.Failure("Wallet not found for client");
+            return Result<ReservedPurchaseDto>.Failed("Wallet not found for client");
 
         try
         {
             var results = await walletRepository.ReservePurchaseAsync(command);
 
-            return Result<ReservedPurchaseDto>.Success(results.Entity);
+            return Result<ReservedPurchaseDto>.Succeeded(results.Entity);
         }
         catch (DomainException ex)
         {
-            return Result<ReservedPurchaseDto>.Failure(ex.Message);
+            return Result<ReservedPurchaseDto>.Failed(ex.Message);
         }
         catch (Exception ex)
         {
             // Log exception
-            return Result<ReservedPurchaseDto>.Failure("An unexpected error occurred while processing your purchase reservation");
+            return Result<ReservedPurchaseDto>.Failed("An unexpected error occurred while processing your purchase reservation");
         }
     }
 }

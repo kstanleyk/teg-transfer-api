@@ -32,8 +32,8 @@ public class RejectDepositCommandHandler(IWalletRepository walletRepository)
 
         var result = await walletRepository.RejectDepositAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
-            return Result.Failure("An unexpected error occurred while processing your transaction. Please try again.");
+            return Result.Failed("An unexpected error occurred while processing your transaction. Please try again.");
 
-        return Result.Success();
+        return Result.Succeeded();
     }
 }
