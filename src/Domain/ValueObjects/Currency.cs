@@ -22,7 +22,7 @@ public record Currency
 
     public static Currency FromCode(string code)
     {
-        return code?.ToUpper() switch
+        return code.ToUpper() switch
         {
             "USD" => USD,
             "NGN" => NGN,

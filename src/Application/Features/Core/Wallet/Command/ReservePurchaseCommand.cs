@@ -1,12 +1,9 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
 using TegWallet.Application.Interfaces.Core;
-using TegWallet.Domain.Entity.Enum;
-using TegWallet.Domain.Exceptions;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
@@ -23,7 +20,8 @@ public record ReservePurchaseCommand(
 public class ReservePurchaseCommandHandler(
     IWalletRepository walletRepository,
     IClientRepository clientRepository)
-    : IRequestHandler<ReservePurchaseCommand, Result<ReservedPurchaseDto>>
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository),
+        IRequestHandler<ReservePurchaseCommand, Result<ReservedPurchaseDto>>
 {
     public async Task<Result<ReservedPurchaseDto>> Handle(ReservePurchaseCommand command, CancellationToken cancellationToken)
     {
@@ -39,31 +37,15 @@ public class ReservePurchaseCommandHandler(
             throw new ValidationException(validationErrors);
         }
 
-        var client = await clientRepository.GetAsync(command.ClientId);
-        if (client == null)
-            return Result<ReservedPurchaseDto>.Failed("Client not found");
+        var validation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!validation.Success)
+            return Result<ReservedPurchaseDto>.Failed(validation.Message);
 
-        if (client.Status != ClientStatus.Active)
-            return Result<ReservedPurchaseDto>.Failed("Client account is not active");
-
-        var wallet = await walletRepository.GetByClientIdAsync(command.ClientId);
-        if (wallet == null)
-            return Result<ReservedPurchaseDto>.Failed("Wallet not found for client");
-
-        try
-        {
-            var results = await walletRepository.ReservePurchaseAsync(command);
-
-            return Result<ReservedPurchaseDto>.Succeeded(results.Entity);
-        }
-        catch (DomainException ex)
-        {
-            return Result<ReservedPurchaseDto>.Failed(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            // Log exception
+        var result = await WalletRepository.ReservePurchaseAsync(command);
+        if(result.Status!= RepositoryActionStatus.Updated)
             return Result<ReservedPurchaseDto>.Failed("An unexpected error occurred while processing your purchase reservation");
-        }
+
+        return Result<ReservedPurchaseDto>.Succeeded(result.Entity!);
+
     }
 }

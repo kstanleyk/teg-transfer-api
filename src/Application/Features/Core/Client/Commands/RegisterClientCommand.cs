@@ -14,7 +14,7 @@ public record RegisterClientCommand(
     string PhoneNumber,
     string FirstName,
     string LastName,
-    string? CurrencyCode) : IRequest<Result<ClientRegisteredDto>>;
+    string CurrencyCode) : IRequest<Result<ClientRegisteredDto>>;
 
 public class RegisterClientCommandHandler(
     IClientRepository clientRepository,
@@ -41,9 +41,7 @@ public class RegisterClientCommandHandler(
             return Result<ClientRegisteredDto>.Failed("Client with this email already exists");
 
         // Validate currency code
-        var currency = GetCurrencyFromCode(command.CurrencyCode);
-        if (currency == null)
-            return Result<ClientRegisteredDto>.Failed($"Unsupported currency code: {command.CurrencyCode}");
+        var currency = Currency.FromCode(command.CurrencyCode);
 
         // Create client (automatically creates wallet)
         var client = Domain.Entity.Core.Client.Create(command.Email.Trim().ToLower(), command.PhoneNumber.Trim(),
@@ -57,16 +55,5 @@ public class RegisterClientCommandHandler(
         // Map to DTO and return
         var clientDto = mapper.Map<ClientRegisteredDto>(result.Entity);
         return Result<ClientRegisteredDto>.Succeeded(clientDto);
-    }
-
-    private static Currency? GetCurrencyFromCode(string? code)
-    {
-        return code?.ToUpper() switch
-        {
-            "USD" => Currency.USD,
-            "NGN" => Currency.NGN,
-            "XOF" => Currency.XOF,
-            _ => null
-        };
     }
 }
