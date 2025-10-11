@@ -61,12 +61,32 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
                 .HasColumnName("AvailableBalanceCurrencyCode");
         });
 
+
         // Configure transactions relationship
         builder.HasMany(w => w.LedgerEntries)
             .WithOne()
             .HasForeignKey(t => t.WalletId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // NEW: PurchaseReservations (one-to-many)
+        builder.HasMany(w => w.PurchaseReservations)
+            .WithOne()
+            .HasForeignKey(pr => pr.WalletId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(w => w.ClientId).IsUnique();
+
+        // Relationship to Client
+        builder.HasOne<Client>()
+            .WithOne(c => c.Wallet)
+            .HasForeignKey<Wallet>(w => w.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        //// Configure backing fields for collections
+        //builder.Metadata.FindNavigation(nameof(Wallet.LedgerEntries))
+        //    ?.SetField("_ledgerEntries");
+
+        //builder.Metadata.FindNavigation(nameof(Wallet.PurchaseReservations))
+        //    ?.SetField("_purchaseReservations");
     }
 }

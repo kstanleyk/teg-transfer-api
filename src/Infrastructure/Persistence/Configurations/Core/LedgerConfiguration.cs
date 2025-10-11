@@ -60,8 +60,30 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
                 .HasMaxLength(3);
         });
 
-        builder.HasIndex(t => t.WalletId);
-        builder.HasIndex(t => t.Timestamp);
-        builder.HasIndex(t => new { t.WalletId, t.Timestamp });
+        builder.Property(l => l.PurchaseReservationId)
+            .IsRequired(false);
+
+        // Indexes
+        builder.HasIndex(l => l.WalletId);
+        builder.HasIndex(l => l.Type);
+        builder.HasIndex(l => l.Status);
+        builder.HasIndex(l => l.Timestamp);
+        builder.HasIndex(l => l.Reference);
+
+        // NEW: Index for PurchaseReservationId
+        builder.HasIndex(l => l.PurchaseReservationId);
+
+        // Relationship to Wallet
+        builder.HasOne<Wallet>()
+            .WithMany(w => w.LedgerEntries)
+            .HasForeignKey(l => l.WalletId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // NEW: Optional relationship to PurchaseReservation
+        builder.HasOne<PurchaseReservation>()
+            .WithMany() // PurchaseReservation doesn't have navigation back to Ledger
+            .HasForeignKey(l => l.PurchaseReservationId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete ledgers when reservation is deleted
     }
 }

@@ -21,25 +21,30 @@ public class Ledger : Entity<LedgerId>
     public DateTime? RejectedAt { get; private set; }
     public string ProcessedBy { get; private set; } = string.Empty;
     public DateTime? ProcessedAt { get; private set; }
+    public Guid? PurchaseReservationId { get; private set; } // New field to link to reservation
 
     // Protected constructor for EF Core
     protected Ledger()
     {
     }
 
-    public static Ledger Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
-        string? reference = null, string? description = null, DateTime? timestamp = null)
+    public static Ledger Create(
+        Guid walletId,
+        TransactionType type,
+        Money amount,
+        TransactionStatus status,
+        string? reference = null,
+        string? description = null,
+        DateTime? timestamp = null,
+        Guid? purchaseReservationId = null) // New optional parameter
     {
         DomainGuards.AgainstDefault(walletId, nameof(walletId));
         DomainGuards.AgainstNull(amount, nameof(amount));
 
-        // Validate amount based on transaction type
         ValidateAmountForType(type, amount);
-
-        // Validate status transitions (basic validation)
         ValidateInitialStatus(type, status);
 
-        var transaction = new Ledger
+        var ledger = new Ledger
         {
             Id = LedgerId.New(),
             WalletId = walletId,
@@ -48,11 +53,40 @@ public class Ledger : Entity<LedgerId>
             Status = status,
             Timestamp = timestamp ?? DateTime.UtcNow,
             Reference = reference?.Trim() ?? string.Empty,
-            Description = description?.Trim() ?? GenerateDefaultDescription(type, amount)
+            Description = description?.Trim() ?? GenerateDefaultDescription(type, amount),
+            PurchaseReservationId = purchaseReservationId
         };
 
-        return transaction;
+        return ledger;
     }
+
+
+    //public static Ledger Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
+    //    string? reference = null, string? description = null, DateTime? timestamp = null)
+    //{
+    //    DomainGuards.AgainstDefault(walletId, nameof(walletId));
+    //    DomainGuards.AgainstNull(amount, nameof(amount));
+
+    //    // Validate amount based on transaction type
+    //    ValidateAmountForType(type, amount);
+
+    //    // Validate status transitions (basic validation)
+    //    ValidateInitialStatus(type, status);
+
+    //    var transaction = new Ledger
+    //    {
+    //        Id = LedgerId.New(),
+    //        WalletId = walletId,
+    //        Type = type,
+    //        Amount = amount,
+    //        Status = status,
+    //        Timestamp = timestamp ?? DateTime.UtcNow,
+    //        Reference = reference?.Trim() ?? string.Empty,
+    //        Description = description?.Trim() ?? GenerateDefaultDescription(type, amount)
+    //    };
+
+    //    return transaction;
+    //}
 
     public void MarkAsCompleted(string approvedBy = "SYSTEM")
     {

@@ -17,6 +17,9 @@ public class Wallet : Entity<Guid>
     private readonly List<Ledger> _ledgerEntries = [];
     public IReadOnlyList<Ledger> LedgerEntries => _ledgerEntries.AsReadOnly();
 
+    private readonly List<PurchaseReservation> _purchaseReservations = [];
+    public IReadOnlyList<PurchaseReservation> PurchaseReservations => _purchaseReservations.AsReadOnly();
+
     // Protected constructor for EF Core - properly initialize all owned entities
     protected Wallet()
     {
@@ -179,8 +182,9 @@ public class Wallet : Entity<Guid>
         return transaction;
     }
 
-    public (Ledger purchaseLedger, Ledger serviceFeeLedger) ReserveForPurchase(Money purchaseAmount, Money serviceFee,
-        string description, string supplierDetails, string paymentMethod)
+    public (PurchaseReservation reservation, Ledger purchaseLedger, Ledger serviceFeeLedger)
+            ReserveForPurchase(Money purchaseAmount, Money serviceFee, string description,
+                string supplierDetails, string paymentMethod)
     {
         DomainGuards.AgainstNull(purchaseAmount, nameof(purchaseAmount));
         DomainGuards.AgainstNull(serviceFee, nameof(serviceFee));
@@ -191,81 +195,143 @@ public class Wallet : Entity<Guid>
         if (purchaseAmount.Amount <= 0)
             throw new DomainException("Purchase amount must be positive");
 
-        if (serviceFee.Amount <= 0)
-            throw new DomainException("Service fee amount must be positive");
+        if (serviceFee.Amount < 0)
+            throw new DomainException("Service fee amount cannot be negative");
 
         var totalAmount = purchaseAmount + serviceFee;
 
         if (AvailableBalance.Amount < totalAmount.Amount)
             throw new DomainException($"Insufficient available balance. Available: {AvailableBalance.Amount}, Required: {totalAmount.Amount}");
 
-        // Create pending purchase transaction
+        // Generate ledger IDs first
+        var purchaseLedgerId = LedgerId.New();
+        var serviceFeeLedgerId = LedgerId.New();
+
+        // Create purchase reservation
+        var reservation = PurchaseReservation.Create(
+            clientId: ClientId,
+            walletId: Id,
+            purchaseLedgerId: purchaseLedgerId,
+            serviceFeeLedgerId: serviceFeeLedgerId,
+            purchaseAmount: purchaseAmount,
+            serviceFeeAmount: serviceFee,
+            description: description,
+            supplierDetails: supplierDetails,
+            paymentMethod: paymentMethod);
+
+        // Create purchase ledger with reservation reference
         var purchaseLedger = Ledger.Create(
             walletId: Id,
             type: TransactionType.Purchase,
             amount: purchaseAmount,
-            status: TransactionStatus.Pending, // Now pending instead of completed
+            status: TransactionStatus.Pending,
             description: $"{description} - {supplierDetails} - Payment: {paymentMethod}",
-            reference: $"PAYMENT_METHOD:{paymentMethod}");
+            reference: $"PAYMENT_METHOD:{paymentMethod}",
+            purchaseReservationId: reservation.Id);
 
-        // Create pending service fee transaction
+        // Create service fee ledger with reservation reference
         var serviceFeeLedger = Ledger.Create(
             walletId: Id,
             type: TransactionType.ServiceFee,
             amount: serviceFee,
-            status: TransactionStatus.Pending, // Now pending instead of completed
-            description: $"Service fee for {description} - Payment: {paymentMethod}");
+            status: TransactionStatus.Pending,
+            description: $"Service fee for {description} - Payment: {paymentMethod}",
+            purchaseReservationId: reservation.Id);
 
         _ledgerEntries.Add(purchaseLedger);
         _ledgerEntries.Add(serviceFeeLedger);
+        _purchaseReservations.Add(reservation);
 
         // Reserve funds by deducting from available balance
         AvailableBalance = AvailableBalance - totalAmount;
         UpdatedAt = DateTime.UtcNow;
 
-        return (purchaseLedger, serviceFeeLedger);
+        return (reservation, purchaseLedger, serviceFeeLedger);
     }
 
-    public void CompletePurchase(LedgerId purchaseLedgerId, LedgerId serviceFeeLedgerId, string processedBy = "ADMIN")
+    public void CompletePurchase(Guid reservationId, string processedBy = "ADMIN")
     {
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == purchaseLedgerId);
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == serviceFeeLedgerId);
+        var reservation = _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+        if (reservation == null)
+            throw new DomainException($"Purchase reservation not found: {reservationId}");
+
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
 
         if (purchaseLedger == null || serviceFeeLedger == null)
-            throw new DomainException("One or both ledger entries not found");
+            throw new DomainException("One or both ledger entries not found for reservation");
 
         if (!purchaseLedger.IsPending || !serviceFeeLedger.IsPending)
             throw new DomainException("Can only complete pending transactions");
 
+        if (!reservation.CanBeCompleted)
+            throw new DomainException("Reservation cannot be completed in its current state");
+
         // Mark both transactions as completed
         purchaseLedger.MarkAsCompleted(processedBy);
         serviceFeeLedger.MarkAsCompleted(processedBy);
+
+        // Complete the reservation
+        reservation.Complete(processedBy);
 
         // Deduct from main balance (funds were already reserved from available balance)
         Balance = Balance - purchaseLedger.Amount - serviceFeeLedger.Amount;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void CancelPurchase(LedgerId purchaseLedgerId, LedgerId serviceFeeLedgerId, string reason, string cancelledBy = "ADMIN")
+    public void CancelPurchase(Guid reservationId, string reason, string cancelledBy = "ADMIN")
     {
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == purchaseLedgerId);
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == serviceFeeLedgerId);
+        var reservation = _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+        if (reservation == null)
+            throw new DomainException($"Purchase reservation not found: {reservationId}");
+
+        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
 
         if (purchaseLedger == null || serviceFeeLedger == null)
-            throw new DomainException("One or both ledger entries not found");
+            throw new DomainException("One or both ledger entries not found for reservation");
 
         if (!purchaseLedger.IsPending || !serviceFeeLedger.IsPending)
             throw new DomainException("Can only cancel pending transactions");
 
+        if (!reservation.CanBeCancelled)
+            throw new DomainException("Reservation cannot be cancelled in its current state");
+
         // Mark both transactions as failed
         purchaseLedger.MarkAsFailed(reason, cancelledBy);
         serviceFeeLedger.MarkAsFailed(reason, cancelledBy);
+
+        // Cancel the reservation
+        reservation.Cancel(reason, cancelledBy);
 
         // Return reserved funds to available balance
         var totalAmount = purchaseLedger.Amount + serviceFeeLedger.Amount;
         AvailableBalance = AvailableBalance + totalAmount;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public PurchaseReservation? GetPurchaseReservation(Guid reservationId)
+    {
+        return _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+    }
+
+    public IReadOnlyList<PurchaseReservation> GetPendingPurchaseReservations()
+    {
+        return _purchaseReservations
+            .Where(r => r.Status == PurchaseReservationStatus.Pending)
+            .ToList()
+            .AsReadOnly();
+    }
+
+    public IReadOnlyList<PurchaseReservation> GetPurchaseReservationsByStatus(PurchaseReservationStatus status)
+    {
+        return _purchaseReservations
+            .Where(r => r.Status == status)
+            .ToList()
+            .AsReadOnly();
+    }
+
+
 
     public Ledger ChargeServiceFee(Money amount, string description)
     {
@@ -340,6 +406,31 @@ public class Wallet : Entity<Guid>
         return ClientId != other.ClientId ||
                !Balance.Equals(other.Balance) ||
                !AvailableBalance.Equals(other.AvailableBalance) ||
-               !BaseCurrency.Equals(other.BaseCurrency);
+               !BaseCurrency.Equals(other.BaseCurrency) ||
+               !_purchaseReservations.SequenceEqual(other._purchaseReservations);
     }
+}
+
+public static class DepositRejectionReasons
+{
+    public const string BankTransferNotVerified = "Bank transfer could not be verified";
+    public const string InsufficientFunds = "Insufficient funds in source account";
+    public const string SuspiciousActivity = "Suspicious activity detected";
+    public const string InvalidReference = "Invalid or missing reference number";
+    public const string AccountFrozen = "Source account is frozen or restricted";
+    public const string DocumentationRequired = "Additional documentation required";
+    public const string AmountMismatch = "Amount does not match expected value";
+    public const string DuplicateTransaction = "Duplicate transaction detected";
+
+    public static readonly string[] AllReasons =
+    [
+        BankTransferNotVerified,
+        InsufficientFunds,
+        SuspiciousActivity,
+        InvalidReference,
+        AccountFrozen,
+        DocumentationRequired,
+        AmountMismatch,
+        DuplicateTransaction
+    ];
 }
