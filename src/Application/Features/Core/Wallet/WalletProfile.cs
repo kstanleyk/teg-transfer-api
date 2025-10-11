@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using TegWallet.Application.Features.Core.Wallet.Command;
 using TegWallet.Application.Features.Core.Wallet.Dto;
+using TegWallet.Application.Features.Core.Wallet.Model;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.ValueObjects;
@@ -82,6 +83,23 @@ public class WalletProfile : Profile
             .ForMember(dest => dest.WalletId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.AvailableBalance, opt => opt.MapFrom(src => src.AvailableBalance.Amount))
             .ForMember(dest => dest.CurrencyCode, opt => opt.MapFrom(src => src.BaseCurrency.Code));
+
+        // Balance history mappings
+        CreateMap<DailyBalance, BalanceSnapshotDto>()
+            .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Date))
+            .ForMember(dest => dest.PeriodLabel, opt => opt.MapFrom(src => src.Date.ToString("MMM dd")))
+            .ForMember(dest => dest.NetChange, opt => opt.Ignore()) // Calculated in handler
+            .ForMember(dest => dest.PendingBalance, opt => opt.Ignore()); // Not available in DailyBalance
+
+        CreateMap<BalanceHistoryData, BalanceHistoryDto>()
+            .ForMember(dest => dest.WalletId, opt => opt.Ignore())
+            .ForMember(dest => dest.ClientId, opt => opt.Ignore())
+            .ForMember(dest => dest.CurrencyCode, opt => opt.Ignore())
+            .ForMember(dest => dest.FromDate, opt => opt.Ignore())
+            .ForMember(dest => dest.ToDate, opt => opt.Ignore())
+            .ForMember(dest => dest.Period, opt => opt.Ignore())
+            .ForMember(dest => dest.Snapshots, opt => opt.Ignore())
+            .ForMember(dest => dest.Summary, opt => opt.Ignore());
     }
 
     private static List<BalanceBreakdownDto> GetBalanceBreakdown(Domain.Entity.Core.Wallet wallet)
