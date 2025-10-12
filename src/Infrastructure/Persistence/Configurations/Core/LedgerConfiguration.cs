@@ -22,18 +22,9 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         builder.Property(t => t.FailureReason).HasMaxLength(200);
         builder.Property(t => t.Description).HasMaxLength(250);
 
-        builder.Property(t => t.CompletionType).HasMaxLength(50).HasDefaultValue(string.Empty);
+        builder.Property(t => t.CompletionType).HasMaxLength(25).HasDefaultValue(string.Empty);
         builder.Property(t => t.CompletedBy).HasMaxLength(100).HasDefaultValue(string.Empty);
         builder.Property(t => t.CompletedAt).IsRequired(false);
-
-        builder.Property(t => t.ApprovedBy).HasMaxLength(100).HasDefaultValue(string.Empty);
-        builder.Property(t => t.ApprovedAt).IsRequired(false);
-
-        builder.Property(t => t.RejectedBy).HasMaxLength(100).HasDefaultValue(string.Empty);
-        builder.Property(t => t.RejectedAt).IsRequired(false);
-
-        builder.Property(t => t.ProcessedBy).HasMaxLength(100).HasDefaultValue(string.Empty);
-        builder.Property(t => t.ProcessedAt).IsRequired(false);
 
         // Configure Amount as owned entity
         builder.OwnsOne(t => t.Amount, amountBuilder =>
@@ -45,7 +36,7 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         });
 
         builder.Property(l => l.ReservationId)
-            .IsRequired(false).HasDefaultValue(string.Empty);
+            .IsRequired(false);
 
         // Indexes
         builder.HasIndex(l => l.WalletId);

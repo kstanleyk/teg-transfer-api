@@ -6,10 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TegWallet.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class ApproveBy : Migration
+    public partial class CompleteTypeChange1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "approved_at",
+                schema: "core",
+                table: "ledger");
+
+            migrationBuilder.DropColumn(
+                name: "approved_by",
+                schema: "core",
+                table: "ledger");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
                 name: "approved_at",
@@ -26,20 +40,6 @@ namespace TegWallet.Infrastructure.Migrations
                 maxLength: 100,
                 nullable: false,
                 defaultValue: "");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "approved_at",
-                schema: "core",
-                table: "ledger");
-
-            migrationBuilder.DropColumn(
-                name: "approved_by",
-                schema: "core",
-                table: "ledger");
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TegWallet.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using TegWallet.Infrastructure.Persistence.Context;
 namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TegWalletContext))]
-    partial class TransferContextModelSnapshot : ModelSnapshot
+    [Migration("20251012052441_CompletionType")]
+    partial class CompletionType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,16 +236,16 @@ namespace TegWallet.Infrastructure.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("IX_Clients_Email");
+                        .HasDatabaseName("ix_client_email");
 
                     b.HasIndex("PhoneNumber")
-                        .HasDatabaseName("IX_Clients_PhoneNumber");
+                        .HasDatabaseName("ix_client_phone_number");
 
                     b.HasIndex("Status")
-                        .HasDatabaseName("IX_Clients_Status");
+                        .HasDatabaseName("ix_client_status");
 
                     b.HasIndex("FirstName", "LastName")
-                        .HasDatabaseName("IX_Clients_Name");
+                        .HasDatabaseName("ix_client_name");
 
                     b.ToTable("client", "core");
                 });
@@ -265,16 +268,34 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("approved_by");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<string>("CompletedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("")
+                        .HasColumnName("completed_by");
+
+                    b.Property<string>("CompletionType")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)")
+                        .HasColumnName("completion_type");
+
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
                         .HasColumnName("description");
 
                     b.Property<string>("FailureReason")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("failure_reason");
 
                     b.Property<DateTime?>("ProcessedAt")
@@ -288,10 +309,6 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasDefaultValue("")
                         .HasColumnName("processed_by");
-
-                    b.Property<Guid?>("ReservationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("purchase_reservation_id");
 
                     b.Property<string>("Reference")
                         .IsRequired()
@@ -310,6 +327,10 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasDefaultValue("")
                         .HasColumnName("rejected_by");
+
+                    b.Property<Guid?>("ReservationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reservation_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -334,11 +355,11 @@ namespace TegWallet.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_ledger");
 
-                    b.HasIndex("ReservationId")
-                        .HasDatabaseName("ix_ledger_purchase_reservation_id");
-
                     b.HasIndex("Reference")
                         .HasDatabaseName("ix_ledger_reference");
+
+                    b.HasIndex("ReservationId")
+                        .HasDatabaseName("ix_ledger_reservation_id");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_ledger_status");
@@ -424,30 +445,30 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnName("wallet_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_purchase_reservations");
+                        .HasName("pk_reservation");
 
                     b.HasIndex("ClientId")
-                        .HasDatabaseName("ix_purchase_reservations_client_id");
+                        .HasDatabaseName("ix_reservation_client_id");
 
                     b.HasIndex("CreatedAt")
-                        .HasDatabaseName("ix_purchase_reservations_created_at");
+                        .HasDatabaseName("ix_reservation_created_at");
 
                     b.HasIndex("PurchaseLedgerId")
-                        .HasDatabaseName("ix_purchase_reservations_purchase_ledger_id");
+                        .HasDatabaseName("ix_reservation_purchase_ledger_id");
 
                     b.HasIndex("ServiceFeeLedgerId")
-                        .HasDatabaseName("ix_purchase_reservations_service_fee_ledger_id");
+                        .HasDatabaseName("ix_reservation_service_fee_ledger_id");
 
                     b.HasIndex("Status")
-                        .HasDatabaseName("ix_purchase_reservations_status");
+                        .HasDatabaseName("ix_reservation_status");
 
                     b.HasIndex("WalletId")
-                        .HasDatabaseName("ix_purchase_reservations_wallet_id");
+                        .HasDatabaseName("ix_reservation_wallet_id");
 
                     b.HasIndex("WalletId", "Status")
-                        .HasDatabaseName("ix_purchase_reservations_wallet_id_status");
+                        .HasDatabaseName("ix_reservation_wallet_id_status");
 
-                    b.ToTable("purchase_reservations", "core");
+                    b.ToTable("reservation", "core");
                 });
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>
@@ -461,7 +482,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)")
-                        .HasColumnName("BaseCurrencyCode");
+                        .HasColumnName("base_currency");
 
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid")
@@ -533,7 +554,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_ledger_purchase_reservation_set_purchase_reservation_id");
+                        .HasConstraintName("fk_ledger_purchase_reservation_set_reservation_id");
 
                     b.HasOne("TegWallet.Domain.Entity.Core.Wallet", null)
                         .WithMany("Ledgers")
@@ -578,7 +599,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_purchase_reservations_wallet_set_wallet_id");
+                        .HasConstraintName("fk_reservation_wallet_set_wallet_id");
 
                     b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "PurchaseAmount", b1 =>
                         {
@@ -589,21 +610,21 @@ namespace TegWallet.Infrastructure.Migrations
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 4)
                                 .HasColumnType("numeric(18,4)")
-                                .HasColumnName("PurchaseAmount");
+                                .HasColumnName("purchase_amount_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("PurchaseCurrency");
+                                .HasColumnName("purchase_amount_currency");
 
                             b1.HasKey("ReservationId");
 
-                            b1.ToTable("purchase_reservations", "core");
+                            b1.ToTable("reservation", "core");
 
                             b1.WithOwner()
                                 .HasForeignKey("ReservationId")
-                                .HasConstraintName("fk_purchase_reservations_purchase_reservations_id");
+                                .HasConstraintName("fk_reservation_reservation_id");
                         });
 
                     b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "ServiceFeeAmount", b1 =>
@@ -615,21 +636,21 @@ namespace TegWallet.Infrastructure.Migrations
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 4)
                                 .HasColumnType("numeric(18,4)")
-                                .HasColumnName("ServiceFeeAmount");
+                                .HasColumnName("service_fee_amount_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("ServiceFeeCurrency");
+                                .HasColumnName("service_fee_amount_currency");
 
                             b1.HasKey("ReservationId");
 
-                            b1.ToTable("purchase_reservations", "core");
+                            b1.ToTable("reservation", "core");
 
                             b1.WithOwner()
                                 .HasForeignKey("ReservationId")
-                                .HasConstraintName("fk_purchase_reservations_purchase_reservations_id");
+                                .HasConstraintName("fk_reservation_reservation_id");
                         });
 
                     b.OwnsOne("TegWallet.Domain.ValueObjects.Money", "TotalAmount", b1 =>
@@ -641,21 +662,21 @@ namespace TegWallet.Infrastructure.Migrations
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 4)
                                 .HasColumnType("numeric(18,4)")
-                                .HasColumnName("TotalAmount");
+                                .HasColumnName("total_amount_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("TotalCurrency");
+                                .HasColumnName("total_amount_currency");
 
                             b1.HasKey("ReservationId");
 
-                            b1.ToTable("purchase_reservations", "core");
+                            b1.ToTable("reservation", "core");
 
                             b1.WithOwner()
                                 .HasForeignKey("ReservationId")
-                                .HasConstraintName("fk_purchase_reservations_purchase_reservations_id");
+                                .HasConstraintName("fk_reservation_reservation_id");
                         });
 
                     b.Navigation("PurchaseAmount")
@@ -685,13 +706,13 @@ namespace TegWallet.Infrastructure.Migrations
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,4)")
-                                .HasColumnName("AvailableBalanceAmount");
+                                .HasColumnName("available_balance_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("AvailableBalanceCurrencyCode");
+                                .HasColumnName("available_balance_currency");
 
                             b1.HasKey("WalletId");
 
@@ -710,13 +731,13 @@ namespace TegWallet.Infrastructure.Migrations
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,4)")
-                                .HasColumnName("BalanceAmount");
+                                .HasColumnName("balance_amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("BalanceCurrencyCode");
+                                .HasColumnName("balance_currency");
 
                             b1.HasKey("WalletId");
 

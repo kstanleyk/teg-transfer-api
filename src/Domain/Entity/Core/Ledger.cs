@@ -15,15 +15,9 @@ public class Ledger : Entity<Guid>
     public string Reference { get; private set; } = string.Empty;
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public string ApprovedBy { get; private set; } = string.Empty;
-    public string CompletionType { get; private set; } = string.Empty;
+    public string CompletionType { get; private set; } 
     public DateTime? CompletedAt { get; private set; }
     public string CompletedBy { get; private set; } = string.Empty;
-    public DateTime? ApprovedAt { get; private set; }
-    public string RejectedBy { get; private set; } = string.Empty;
-    public DateTime? RejectedAt { get; private set; }
-    public string ProcessedBy { get; private set; } = string.Empty;
-    public DateTime? ProcessedAt { get; private set; }
     public Guid? ReservationId { get; private set; } 
 
     // Protected constructor for EF Core
@@ -63,7 +57,7 @@ public class Ledger : Entity<Guid>
         return ledger;
     }
 
-    public void MarkAsCompleted(CompletionTypes completionType,  string completedBy = "SYSTEM")
+    public void MarkAsCompleted(string completionType,  string completedBy = "SYSTEM")
     {
         if (Status == TransactionStatus.Completed)
             return;
@@ -73,10 +67,8 @@ public class Ledger : Entity<Guid>
 
         //var previousStatus = Status;
         Status = TransactionStatus.Completed;
-        ApprovedBy = completedBy;
-        ApprovedAt = DateTime.UtcNow;
 
-        CompletionType = nameof(completionType);
+        CompletionType = completionType;
         CompletedBy = completedBy;
         CompletedAt = DateTime.UtcNow;
     }
@@ -95,10 +87,8 @@ public class Ledger : Entity<Guid>
 
         Status = TransactionStatus.Failed;
         FailureReason = reason.Trim();
-        RejectedBy = rejectedBy;
-        RejectedAt = DateTime.UtcNow;
 
-        CompletionType = nameof(CompletionTypes.Rejection);
+        CompletionType = CompletionTypes.Rejection;
         CompletedBy = rejectedBy;
         CompletedAt = DateTime.UtcNow;
     }
