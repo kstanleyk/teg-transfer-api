@@ -44,7 +44,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             .AsNoTracking()
             .FirstOrDefaultAsync(w => w.Reservations.Any(pr => pr.Id == reservationId));
 
-    public async Task<RepositoryActionResult<Ledger>> DepositFundsAsync(DepositFundsCommand command)
+    public async Task<RepositoryActionResult<Ledger>> RequestDepositFundsAsync(RequestDepositFundsCommand command)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
@@ -61,7 +61,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             if (amount.Currency != wallet.BaseCurrency)
             {
                 await tx.RollbackAsync();
-                throw new InvalidOperationException($"Deposit currency ({amount.Currency.Code}) must match wallet's base currency ({wallet.BaseCurrency.Code})");
+                throw new InvalidOperationException($"RequestDeposit currency ({amount.Currency.Code}) must match wallet's base currency ({wallet.BaseCurrency.Code})");
             }
 
             var entry = Context.Entry(wallet);
@@ -69,7 +69,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             if (entry.State == EntityState.Detached)
                 DbSet.Attach(wallet);
 
-            var ledger = wallet.Deposit(amount, command.Reference, command.Description);
+            var ledger = wallet.RequestDeposit(amount, command.Reference, command.Description);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -94,65 +94,13 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         }
     }
 
-    public async Task<RepositoryActionResult<Ledger>> WithdrawFundsAsync(WithdrawFundsCommand command)
+    public async Task<RepositoryActionResult<Wallet>> ApproveDepositFundsAsync(ApproveDepositFundsCommand fundsCommand)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
             // Get the wallet
-            var wallet = await GetByClientIdAsync(command.ClientId);
-            if (wallet == null)
-                return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.NotFound);
-
-            // Create Money value object
-            var currency = Currency.FromCode(command.CurrencyCode);
-
-            var amount = new Money(command.Amount, currency);
-
-            // Validate currency matches wallet's base currency
-            if (amount.Currency != wallet.BaseCurrency)
-            {
-                await tx.RollbackAsync();
-                throw new InvalidOperationException($"Deposit currency ({amount.Currency.Code}) must match wallet's base currency ({wallet.BaseCurrency.Code})");
-            }
-
-            var entry = Context.Entry(wallet);
-
-            if (entry.State == EntityState.Detached)
-                DbSet.Attach(wallet);
-
-            var ledger = wallet.Withdraw(amount, command.Description);
-
-            var result = await SaveChangesAsync();
-            if (result > 0) await entry.ReloadAsync();
-
-            await tx.CommitAsync();
-            return new RepositoryActionResult<Ledger>(ledger, RepositoryActionStatus.Updated);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.Error, ex);
-        }
-        catch (Exception ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.Error, ex);
-        }
-    }
-
-    public async Task<RepositoryActionResult<Wallet>> ApproveDepositAsync(ApproveDepositCommand command)
-    {
-        await using var tx = await Context.Database.BeginTransactionAsync();
-        try
-        {
-            // Get the wallet
-            var wallet = await GetByClientIdWithPendingLedgersAsync(command.ClientId);
+            var wallet = await GetByClientIdWithPendingLedgersAsync(fundsCommand.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
 
@@ -162,7 +110,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                 DbSet.Attach(wallet);
 
             // Process the approval
-            wallet.ApproveDeposit(command.LedgerId, command.ApprovedBy);
+            wallet.ApproveDeposit(fundsCommand.LedgerId, fundsCommand.ApprovedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();
@@ -187,13 +135,13 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         }
     }
 
-    public async Task<RepositoryActionResult<Wallet>> RejectDepositAsync(RejectDepositCommand command)
+    public async Task<RepositoryActionResult<Wallet>> RejectDepositAsync(RejectDepositFundsCommand fundsCommand)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
             // Get the wallet
-            var wallet = await GetByClientIdWithPendingLedgersAsync(command.ClientId);
+            var wallet = await GetByClientIdWithPendingLedgersAsync(fundsCommand.ClientId);
             if (wallet == null)
                 return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
 
@@ -203,7 +151,142 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                 DbSet.Attach(wallet);
 
             // Process the rejection
-            wallet.RejectDeposit(command.LedgerId, command.Reason, command.RejectedBy);
+            wallet.RejectDeposit(fundsCommand.LedgerId, fundsCommand.Reason, fundsCommand.RejectedBy);
+
+            var result = await SaveChangesAsync();
+            if (result > 0) await entry.ReloadAsync();
+
+            await tx.CommitAsync();
+            return new RepositoryActionResult<Wallet>(wallet, RepositoryActionStatus.Updated);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<Ledger>> RequestWithdrawFundsAsync(RequestWithdrawFundsCommand command)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Get the wallet
+            var wallet = await GetByClientIdAsync(command.ClientId);
+            if (wallet == null)
+                return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.NotFound);
+
+            // Create Money value object
+            var currency = Currency.FromCode(command.CurrencyCode);
+
+            var amount = new Money(command.Amount, currency);
+
+            // Validate currency matches wallet's base currency
+            if (amount.Currency != wallet.BaseCurrency)
+            {
+                await tx.RollbackAsync();
+                throw new InvalidOperationException($"RequestDeposit currency ({amount.Currency.Code}) must match wallet's base currency ({wallet.BaseCurrency.Code})");
+            }
+
+            var entry = Context.Entry(wallet);
+
+            if (entry.State == EntityState.Detached)
+                DbSet.Attach(wallet);
+
+            var ledger = wallet.RequestWithdrawal(amount, command.Description);
+
+            var result = await SaveChangesAsync();
+            if (result > 0) await entry.ReloadAsync();
+
+            await tx.CommitAsync();
+            return new RepositoryActionResult<Ledger>(ledger, RepositoryActionStatus.Updated);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Ledger>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<Wallet>> ApproveWithdrawFundsAsync(
+        ApproveWithdrawFundsCommand fundsCommand)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Get the wallet
+            var wallet = await GetByClientIdWithPendingLedgersAsync(fundsCommand.ClientId);
+            if (wallet == null)
+                return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
+
+            var entry = Context.Entry(wallet);
+
+            if (entry.State == EntityState.Detached)
+                DbSet.Attach(wallet);
+
+            // Process the approval
+            wallet.ApproveWithdrawal(fundsCommand.LedgerId, fundsCommand.ApprovedBy);
+
+            var result = await SaveChangesAsync();
+            if (result > 0) await entry.ReloadAsync();
+
+            await tx.CommitAsync();
+            return new RepositoryActionResult<Wallet>(wallet, RepositoryActionStatus.Updated);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<Wallet>> RejectWithdrawFundsAsync(RejectWithdrawFundsCommand fundsCommand)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Get the wallet
+            var wallet = await GetByClientIdWithPendingLedgersAsync(fundsCommand.ClientId);
+            if (wallet == null)
+                return new RepositoryActionResult<Wallet>(null, RepositoryActionStatus.NotFound);
+
+            var entry = Context.Entry(wallet);
+
+            if (entry.State == EntityState.Detached)
+                DbSet.Attach(wallet);
+
+            // Process the rejection
+            wallet.RejectWithdrawal(fundsCommand.LedgerId, fundsCommand.Reason, fundsCommand.RejectedBy);
 
             var result = await SaveChangesAsync();
             if (result > 0) await entry.ReloadAsync();

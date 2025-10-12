@@ -8,21 +8,21 @@ using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
-public record DepositFundsCommand(
+public record RequestDepositFundsCommand(
     Guid ClientId,
     decimal Amount,
     string CurrencyCode,
     string? Reference = null,
     string? Description = null) : IRequest<Result<TransactionDto>>;
 
-public class DepositFundsCommandHandler(
+public class RequestDepositFundsCommandHandler(
     IWalletRepository walletRepository,
     IClientRepository clientRepository,
-    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<DepositFundsCommand, Result<TransactionDto>>
+    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<RequestDepositFundsCommand, Result<TransactionDto>>
 {
-    public async Task<Result<TransactionDto>> Handle(DepositFundsCommand command, CancellationToken cancellationToken)
+    public async Task<Result<TransactionDto>> Handle(RequestDepositFundsCommand command, CancellationToken cancellationToken)
     {
-        var validator = new DepositFundsCommandValidator();
+        var validator = new RequestDepositFundsCommandValidator();
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -45,7 +45,7 @@ public class DepositFundsCommandHandler(
         if (!currencyValidation.Success)
             return Result<TransactionDto>.Failed(walletValidation.Message);
 
-        var result = await WalletRepository.DepositFundsAsync(command);
+        var result = await WalletRepository.RequestDepositFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 

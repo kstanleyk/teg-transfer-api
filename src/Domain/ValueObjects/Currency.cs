@@ -18,7 +18,8 @@ public record Currency
 
     public static readonly Currency USD = new("USD", "$", 2);
     public static readonly Currency NGN = new("NGN", "₦", 2);
-    public static readonly Currency XOF = new("XOF", "CFA", 0);
+    public static readonly Currency XOF = new("XOF", "CFA", 2);
+    public static readonly Currency CNY = new("CNY", "¥", 2);
 
     public static Currency FromCode(string code)
     {
@@ -27,6 +28,7 @@ public record Currency
             "USD" => USD,
             "NGN" => NGN,
             "XOF" => XOF,
+            "CNY" => CNY,
             _ => throw new ArgumentException($"Unsupported currency code: {code}")
         };
     }

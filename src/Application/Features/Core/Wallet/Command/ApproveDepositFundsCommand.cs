@@ -7,19 +7,19 @@ using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
-public record ApproveDepositCommand(
+public record ApproveDepositFundsCommand(
     Guid ClientId,
     Guid LedgerId,
     string ApprovedBy = "System") : IRequest<Result>;
 
 
-public class ApproveDepositCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
-    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<ApproveDepositCommand, Result>
+public class ApproveDepositFundsCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<ApproveDepositFundsCommand, Result>
 {
-    public async Task<Result> Handle(ApproveDepositCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ApproveDepositFundsCommand fundsCommand, CancellationToken cancellationToken)
     {
-        var validator = new ApproveDepositCommandValidator();
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        var validator = new ApproveDepositFundsCommandValidator();
+        var validationResult = await validator.ValidateAsync(fundsCommand, cancellationToken);
 
         if (!validationResult.IsValid)
         {
@@ -31,11 +31,11 @@ public class ApproveDepositCommandHandler(IWalletRepository walletRepository, IC
             throw new ValidationException(validationErrors);
         }
 
-        var walletValidation = await ValidateClientAndWalletAsync(command.ClientId);
+        var walletValidation = await ValidateClientAndWalletAsync(fundsCommand.ClientId);
         if (!walletValidation.Success)
             return Result.Failed(walletValidation.Message);
 
-        var result = await WalletRepository.ApproveDepositAsync(command);
+        var result = await WalletRepository.ApproveDepositFundsAsync(fundsCommand);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while processing your transaction. Please try again.");
 

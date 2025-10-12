@@ -51,19 +51,19 @@ public class Wallet : Aggregate<Guid>
         return wallet;
     }
 
-    public Ledger Deposit(Money amount, string? reference = null, string? description = null)
+    public Ledger RequestDeposit(Money amount, string? reference = null, string? description = null)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
 
         if (amount.Amount <= 0)
-            throw new DomainException("Deposit amount must be positive");
+            throw new DomainException("RequestDeposit amount must be positive");
 
         if (amount.Currency != BaseCurrency)
-            throw new DomainException($"Deposit must be in base currency: {BaseCurrency.Code}");
+            throw new DomainException($"RequestDeposit must be in base currency: {BaseCurrency.Code}");
 
         var ledger = Ledger.Create(walletId: Id, type: TransactionType.Deposit, amount: amount,
             status: TransactionStatus.Pending, reference: reference,
-            description: description ?? $"Deposit of {amount.Amount} {amount.Currency.Code}");
+            description: description ?? $"RequestDeposit of {amount.Amount} {amount.Currency.Code}");
 
         _ledgers.Add(ledger);
         Balance = Balance + amount;
@@ -88,7 +88,7 @@ public class Wallet : Aggregate<Guid>
             throw new DomainException("Only pending deposits can be approved");
 
         // Update the ledger status
-        ledger.MarkAsCompleted(CompletionTypes.Approval);
+        ledger.MarkAsCompleted(CompletionTypes.Approval, approvedBy);
 
         // Update wallet balances
         AvailableBalance = AvailableBalance + ledger.Amount;
@@ -119,7 +119,7 @@ public class Wallet : Aggregate<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public Ledger Withdraw(Money amount, string? description = null)
+    public Ledger RequestWithdrawal(Money amount, string? description = null)
     {
         DomainGuards.AgainstNull(amount, nameof(amount));
 
@@ -139,16 +139,62 @@ public class Wallet : Aggregate<Guid>
             walletId: Id,
             type: TransactionType.Withdrawal,
             amount: amount,
-            status: TransactionStatus.Completed,
+            status: TransactionStatus.Pending,
             description: description ?? $"Withdrawal of {amount.Amount} {amount.Currency.Code}"
         );
 
         _ledgers.Add(transaction);
-        Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
 
         return transaction;
+    }
+
+    public void ApproveWithdrawal(Guid ledgerId, string approvedBy = "SYSTEM")
+    {
+        DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
+        DomainGuards.AgainstNullOrWhiteSpace(approvedBy, nameof(approvedBy));
+
+        var ledger = _ledgers.FirstOrDefault(t => t.Id == ledgerId);
+        if (ledger is null)
+            throw new DomainException($"Ledger not found: {ledgerId}");
+
+        if (ledger.Type != TransactionType.Withdrawal)
+            throw new DomainException("Only withdrawal transactions can be approved");
+
+        if (!ledger.IsPending)
+            throw new DomainException("Only pending withdrawals can be approved");
+
+        // Update the ledger status
+        ledger.MarkAsCompleted(CompletionTypes.Approval, approvedBy);
+
+        // Update wallet balances
+        Balance = Balance - ledger.Amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RejectWithdrawal(Guid ledgerId, string reason, string rejectedBy = "SYSTEM")
+    {
+        DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
+        DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
+        DomainGuards.AgainstNullOrWhiteSpace(rejectedBy, nameof(rejectedBy));
+
+        var ledger = _ledgers.FirstOrDefault(t => t.Id == ledgerId);
+        if (ledger is null)
+            throw new DomainException($"Ledger not found: {ledgerId}");
+
+        if (ledger.Type != TransactionType.Withdrawal)
+            throw new DomainException("Only withdrawal transactions can be rejected");
+
+        if (!ledger.IsPending)
+            throw new DomainException("Only pending withdrawals can be rejected");
+
+        // Update the ledger status with rejection details
+        ledger.MarkAsFailed(reason, rejectedBy);
+
+        // Reverse the balance (since withdrawal request subtracted from the balance when created)
+        AvailableBalance = AvailableBalance + ledger.Amount;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public (Reservation reservation, Ledger purchaseLedger, Ledger serviceFeeLedger)

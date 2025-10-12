@@ -3,17 +3,17 @@ using TegWallet.Application.Features.Core.Wallet.Command;
 
 namespace TegWallet.Application.Features.Core.Wallet.Validators;
 
-public class DepositFundsCommandValidator : AbstractValidator<DepositFundsCommand>
+public class RequestDepositFundsCommandValidator : AbstractValidator<RequestDepositFundsCommand>
 {
-    public DepositFundsCommandValidator()
+    public RequestDepositFundsCommandValidator()
     {
         RuleFor(x => x.ClientId)
             .NotEmpty().WithMessage("Client ID is required")
             .NotEqual(Guid.Empty).WithMessage("Client ID must be a valid GUID");
 
         RuleFor(x => x.Amount)
-            .GreaterThan(0).WithMessage("Deposit amount must be greater than 0")
-            .LessThan(1_000_000).WithMessage("Deposit amount cannot exceed 1,000,000");
+            .GreaterThan(0).WithMessage("RequestDeposit amount must be greater than 0")
+            .LessThan(1_000_000).WithMessage("RequestDeposit amount cannot exceed 1,000,000");
 
         RuleFor(x => x.CurrencyCode)
             .NotEmpty().WithMessage("Currency code is required")
@@ -44,7 +44,7 @@ public class DepositFundsCommandValidator : AbstractValidator<DepositFundsComman
         return supportedCurrencies.Contains(currencyCode?.ToUpper());
     }
 
-    private bool HaveMinimumAmountForCurrency(DepositFundsCommand command)
+    private bool HaveMinimumAmountForCurrency(RequestDepositFundsCommand command)
     {
         var minAmounts = new Dictionary<string, decimal>
         {
@@ -61,7 +61,7 @@ public class DepositFundsCommandValidator : AbstractValidator<DepositFundsComman
         return true;
     }
 
-    private async Task<bool> NotExceedDailyDepositLimit(DepositFundsCommand command, CancellationToken cancellationToken)
+    private async Task<bool> NotExceedDailyDepositLimit(RequestDepositFundsCommand command, CancellationToken cancellationToken)
     {
         // This would typically check against a database or cache
         // For now, we'll implement a simple check

@@ -3,9 +3,9 @@ using TegWallet.Application.Features.Core.Wallet.Command;
 
 namespace TegWallet.Application.Features.Core.Wallet.Validators;
 
-public class RejectDepositCommandValidator : AbstractValidator<RejectDepositCommand>
+public class RejectDepositFundsCommandValidator : AbstractValidator<RejectDepositFundsCommand>
 {
-    public RejectDepositCommandValidator()
+    public RejectDepositFundsCommandValidator()
     {
         RuleFor(x => x.ClientId)
             .NotEmpty().WithMessage("Client ID is required")

@@ -155,7 +155,7 @@ public class Ledger : Entity<Guid>
         {
             case TransactionType.Deposit:
                 if (status != TransactionStatus.Pending && status != TransactionStatus.Completed)
-                    throw new DomainException("Deposit transactions must start as Pending or Completed");
+                    throw new DomainException("RequestDeposit transactions must start as Pending or Completed");
                 break;
             case TransactionType.Withdrawal:
             case TransactionType.Purchase:
@@ -172,7 +172,7 @@ public class Ledger : Entity<Guid>
     {
         return type switch
         {
-            TransactionType.Deposit => $"Deposit of {amount.Amount} {amount.Currency.Code}",
+            TransactionType.Deposit => $"RequestDeposit of {amount.Amount} {amount.Currency.Code}",
             TransactionType.Withdrawal => $"Withdrawal of {amount.Amount} {amount.Currency.Code}",
             TransactionType.Purchase => $"Purchase for {amount.Amount} {amount.Currency.Code}",
             TransactionType.ServiceFee => $"Service fee of {amount.Amount} {amount.Currency.Code}",
