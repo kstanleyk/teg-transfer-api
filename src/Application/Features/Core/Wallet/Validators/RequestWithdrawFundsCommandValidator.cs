@@ -3,9 +3,9 @@ using TegWallet.Application.Features.Core.Wallet.Command;
 
 namespace TegWallet.Application.Features.Core.Wallet.Validators;
 
-public class WithdrawFundsCommandValidator : AbstractValidator<WithdrawFundsCommand>
+public class RequestWithdrawFundsCommandValidator : AbstractValidator<RequestWithdrawFundsCommand>
 {
-    public WithdrawFundsCommandValidator()
+    public RequestWithdrawFundsCommandValidator()
     {
         RuleFor(x => x.ClientId)
             .NotEmpty().WithMessage("Client ID is required")
@@ -41,7 +41,7 @@ public class WithdrawFundsCommandValidator : AbstractValidator<WithdrawFundsComm
         return supportedCurrencies.Contains(currencyCode?.ToUpper());
     }
 
-    private bool HaveMinimumAmountForCurrency(WithdrawFundsCommand command)
+    private bool HaveMinimumAmountForCurrency(RequestWithdrawFundsCommand command)
     {
         var minAmounts = new Dictionary<string, decimal>
         {
@@ -58,7 +58,7 @@ public class WithdrawFundsCommandValidator : AbstractValidator<WithdrawFundsComm
         return true;
     }
 
-    private async Task<bool> HasSufficientBalance(WithdrawFundsCommand command, CancellationToken cancellationToken)
+    private async Task<bool> HasSufficientBalance(RequestWithdrawFundsCommand command, CancellationToken cancellationToken)
     {
         // This is a basic check. The domain will do the actual balance validation.
         // In a real implementation, you might want to check the available balance here

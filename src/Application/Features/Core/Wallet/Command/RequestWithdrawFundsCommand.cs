@@ -8,19 +8,19 @@ using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
-public record WithdrawFundsCommand(
+public record RequestWithdrawFundsCommand(
     Guid ClientId,
     decimal Amount,
     string CurrencyCode,
     string? Description = null) : IRequest<Result<TransactionDto>>;
 
-public class WithdrawFundsCommandHandler(
+public class RequestWithdrawFundsCommandHandler(
     IWalletRepository walletRepository, IClientRepository clientRepository,
-    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<WithdrawFundsCommand, Result<TransactionDto>>
+    IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<RequestWithdrawFundsCommand, Result<TransactionDto>>
 {
-    public async Task<Result<TransactionDto>> Handle(WithdrawFundsCommand command, CancellationToken cancellationToken)
+    public async Task<Result<TransactionDto>> Handle(RequestWithdrawFundsCommand command, CancellationToken cancellationToken)
     {
-        var validator = new WithdrawFundsCommandValidator();
+        var validator = new RequestWithdrawFundsCommandValidator();
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -43,7 +43,7 @@ public class WithdrawFundsCommandHandler(
         if (!currencyValidation.Success)
             return Result<TransactionDto>.Failed(walletValidation.Message);
 
-        var result = await WalletRepository.WithdrawFundsAsync(command);
+        var result = await WalletRepository.RequestWithdrawFundsAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your withdrawal. Please try again.");
 

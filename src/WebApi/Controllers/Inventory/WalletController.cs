@@ -18,18 +18,8 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     [MustHavePermission(AppFeature.Wallet, AppAction.Deposit)]
     public async Task<IActionResult> DepositFunds(Guid clientId, [FromBody] DepositRequestDto request)
     {
-        var command = new DepositFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Reference,
+        var command = new RequestDepositFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Reference,
             request.Description);
-
-        var result = await MediatorSender.Send(command);
-        return Ok(result);
-    }
-
-    [HttpPost("{clientId:guid}/withdraw")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Withdraw)]
-    public async Task<IActionResult> WithdrawFunds(Guid clientId, [FromBody] WithdrawalRequestDto request)
-    {
-        var command = new WithdrawFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Description);
 
         var result = await MediatorSender.Send(command);
         return Ok(result);
@@ -39,7 +29,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
     public async Task<IActionResult> ApproveDeposit(Guid clientId, [FromBody] ApproveDepositDto request)
     {
-        var command = new ApproveDepositCommand(
+        var command = new ApproveDepositFundsCommand(
             clientId,
             request.LedgerId,
             request.ApprovedBy);
@@ -53,7 +43,46 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
     public async Task<IActionResult> RejectDeposit(Guid clientId, [FromBody] RejectDepositDto request)
     {
-        var command = new RejectDepositCommand(
+        var command = new RejectDepositFundsCommand(
+            clientId,
+            request.LedgerId,
+            request.Reason,
+            request.RejectedBy);
+
+        var result = await MediatorSender.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{clientId:guid}/withdraw")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Withdraw)]
+    public async Task<IActionResult> WithdrawFunds(Guid clientId, [FromBody] WithdrawalRequestDto request)
+    {
+        var command = new RequestWithdrawFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Description);
+
+        var result = await MediatorSender.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("{clientId:guid}/withdraw/approve")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
+    public async Task<IActionResult> ApproveWithdrawal(Guid clientId, [FromBody] ApproveWithdrawalDto request)
+    {
+        var command = new ApproveWithdrawFundsCommand(
+            clientId,
+            request.LedgerId,
+            request.ApprovedBy);
+
+        var result = await MediatorSender.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{clientId:guid}/withdraw/reject")]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
+    public async Task<IActionResult> RejectWithdrawal(Guid clientId, [FromBody] RejectWithdrawalDto request)
+    {
+        var command = new RejectWithdrawFundsCommand(
             clientId,
             request.LedgerId,
             request.Reason,
