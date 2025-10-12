@@ -19,10 +19,10 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
     public async Task<Wallet?> GetByClientIdWithDetailsAsync(Guid clientId)
     {
         var wallet = await DbSet
-            .Include(w => w.LedgerEntries
+            .Include(w => w.Ledgers
                 .OrderByDescending(l => l.Timestamp)
                 .Take(10)) // Last 10 transactions
-            .Include(w => w.PurchaseReservations
+            .Include(w => w.Reservations
                 .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
                 .OrderByDescending(pr => pr.CreatedAt))
             .AsSplitQuery() // For better performance with multiple includes
@@ -32,17 +32,17 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
     }
 
     public async Task<Wallet?> GetByClientIdWithPendingLedgersAsync(Guid clientId) =>
-        await DbSet.AsNoTracking().Include(w => w.LedgerEntries
+        await DbSet.AsNoTracking().Include(w => w.Ledgers
                 .Where(l => l.Type == TransactionType.Deposit &&
                             l.Status == TransactionStatus.Pending))
             .FirstOrDefaultAsync(x => x.ClientId == clientId);
 
     public async Task<Wallet?> GetByReservationIdAsync(Guid reservationId) =>
         await DbSet
-            .Include(x=>x.PurchaseReservations)
-            .Include(x=>x.LedgerEntries)
+            .Include(x=>x.Reservations)
+            .Include(x=>x.Ledgers)
             .AsNoTracking()
-            .FirstOrDefaultAsync(w => w.PurchaseReservations.Any(pr => pr.Id == reservationId));
+            .FirstOrDefaultAsync(w => w.Reservations.Any(pr => pr.Id == reservationId));
 
     public async Task<RepositoryActionResult<Ledger>> DepositFundsAsync(DepositFundsCommand command)
     {
@@ -386,7 +386,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         try
         {
             var wallet = await DbSet
-                .Include(w => w.LedgerEntries)
+                .Include(w => w.Ledgers)
                 .FirstOrDefaultAsync(w => w.Id == walletId);
 
             if (wallet == null)

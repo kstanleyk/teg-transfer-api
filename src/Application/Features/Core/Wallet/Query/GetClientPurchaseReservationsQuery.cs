@@ -17,7 +17,7 @@ public record GetClientPurchaseReservationsQuery(
     : IRequest<PagedResponse<PurchaseReservationDto>>;
 
 public class GetClientPurchaseReservationsQueryHandler(
-        IPurchaseReservationRepository purchaseReservationRepository,
+        IReservationRepository reservationRepository,
         IClientRepository clientRepository,
         IMapper mapper)
         : IRequestHandler<GetClientPurchaseReservationsQuery, PagedResponse<PurchaseReservationDto>>
@@ -32,7 +32,7 @@ public class GetClientPurchaseReservationsQueryHandler(
             throw new InvalidOperationException($"Client not found: {query.ClientId}");
 
         // Get paged reservations
-        var pagedResult = await purchaseReservationRepository.GetPagedReservationsByClientIdAsync(
+        var pagedResult = await reservationRepository.GetPagedReservationsByClientIdAsync(
             query.ClientId,
             query.Status,
             query.Page,

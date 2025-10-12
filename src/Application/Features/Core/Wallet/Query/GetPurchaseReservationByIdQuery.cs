@@ -28,8 +28,8 @@ public class GetPurchaseReservationByIdQueryHandler(
         if (reservation == null)
             throw new InvalidOperationException($"Purchase reservation not found: {query.ReservationId}");
 
-        var purchaseLedger = wallet.LedgerEntries.FirstOrDefault(l => l.Id == reservation.PurchaseLedgerId);
-        var serviceFeeLedger = wallet.LedgerEntries.FirstOrDefault(l => l.Id == reservation.ServiceFeeLedgerId);
+        var purchaseLedger = wallet.Ledgers.FirstOrDefault(l => l.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = wallet.Ledgers.FirstOrDefault(l => l.Id == reservation.ServiceFeeLedgerId);
 
         var detailDto = _mapper.Map<PurchaseReservationDetailDto>(reservation);
         detailDto.PurchaseLedger = _mapper.Map<TransactionDto>(purchaseLedger);

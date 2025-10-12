@@ -16,12 +16,15 @@ public class Ledger : Entity<Guid>
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public string ApprovedBy { get; private set; } = string.Empty;
+    public string CompletionType { get; private set; } = string.Empty;
+    public DateTime? CompletedAt { get; private set; }
+    public string CompletedBy { get; private set; } = string.Empty;
     public DateTime? ApprovedAt { get; private set; }
     public string RejectedBy { get; private set; } = string.Empty;
     public DateTime? RejectedAt { get; private set; }
     public string ProcessedBy { get; private set; } = string.Empty;
     public DateTime? ProcessedAt { get; private set; }
-    public Guid? PurchaseReservationId { get; private set; } // New field to link to reservation
+    public Guid? ReservationId { get; private set; } 
 
     // Protected constructor for EF Core
     protected Ledger()
@@ -54,13 +57,13 @@ public class Ledger : Entity<Guid>
             Timestamp = timestamp ?? DateTime.UtcNow,
             Reference = reference?.Trim() ?? string.Empty,
             Description = description?.Trim() ?? GenerateDefaultDescription(type, amount),
-            PurchaseReservationId = purchaseReservationId
+            ReservationId = purchaseReservationId
         };
 
         return ledger;
     }
 
-    public void MarkAsCompleted(string approvedBy = "SYSTEM")
+    public void MarkAsCompleted(CompletionTypes completionType,  string completedBy = "SYSTEM")
     {
         if (Status == TransactionStatus.Completed)
             return;
@@ -70,8 +73,12 @@ public class Ledger : Entity<Guid>
 
         //var previousStatus = Status;
         Status = TransactionStatus.Completed;
-        ApprovedBy = approvedBy;
+        ApprovedBy = completedBy;
         ApprovedAt = DateTime.UtcNow;
+
+        CompletionType = nameof(completionType);
+        CompletedBy = completedBy;
+        CompletedAt = DateTime.UtcNow;
     }
 
 
@@ -90,6 +97,10 @@ public class Ledger : Entity<Guid>
         FailureReason = reason.Trim();
         RejectedBy = rejectedBy;
         RejectedAt = DateTime.UtcNow;
+
+        CompletionType = nameof(CompletionTypes.Rejection);
+        CompletedBy = rejectedBy;
+        CompletedAt = DateTime.UtcNow;
     }
 
     public void UpdateReference(string? reference)

@@ -11,8 +11,8 @@ public class PurchaseReservationProfile : Profile
     {
         // Existing mappings...
 
-        // PurchaseReservation to PurchaseReservationDto mapping
-        CreateMap<PurchaseReservation, PurchaseReservationDto>()
+        // Reservation to PurchaseReservationDto mapping
+        CreateMap<Reservation, PurchaseReservationDto>()
             .ForMember(dest => dest.PurchaseAmount, opt => opt.MapFrom(src => src.PurchaseAmount.Amount))
             .ForMember(dest => dest.ServiceFeeAmount, opt => opt.MapFrom(src => src.ServiceFeeAmount.Amount))
             .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.TotalAmount.Amount))
@@ -28,7 +28,7 @@ public class PurchaseReservationProfile : Profile
                 src.Status == PurchaseReservationStatus.Pending));
 
         // PagedResult to PagedResponse mapping
-        CreateMap<PagedResult<PurchaseReservation>, PagedResponse<PurchaseReservationDto>>()
+        CreateMap<PagedResult<Reservation>, PagedResponse<PurchaseReservationDto>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.Page))
             .ForMember(dest => dest.PageSize, opt => opt.MapFrom(src => src.PageSize))

@@ -44,16 +44,16 @@ public class WalletProfile : Profile
             .ForMember(dest => dest.CurrencyCode, opt => opt.MapFrom(src => src.BaseCurrency.Code))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => DetermineWalletStatus(src)))
             .ForMember(dest => dest.RecentTransactions, opt => opt.MapFrom(src =>
-                src.LedgerEntries
+                src.Ledgers
                     .OrderByDescending(l => l.Timestamp)
                     .Take(10)))
             .ForMember(dest => dest.ActiveReservations, opt => opt.MapFrom(src =>
-                src.PurchaseReservations
+                src.Reservations
                     .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
                     .OrderByDescending(pr => pr.CreatedAt)));
 
-        // PurchaseReservation to PurchaseReservationDto mapping
-        CreateMap<PurchaseReservation, PurchaseReservationDto>()
+        // Reservation to PurchaseReservationDto mapping
+        CreateMap<Reservation, PurchaseReservationDto>()
             .ForMember(dest => dest.PurchaseAmount, opt => opt.MapFrom(src => src.PurchaseAmount.Amount))
             .ForMember(dest => dest.ServiceFeeAmount, opt => opt.MapFrom(src => src.ServiceFeeAmount.Amount))
             .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.TotalAmount.Amount))
@@ -121,7 +121,7 @@ public class WalletProfile : Profile
             new BalanceBreakdownDto
             {
                 Type = "Pending Deposits",
-                Amount = wallet.LedgerEntries
+                Amount = wallet.Ledgers
                     .Where(l => l.Type == TransactionType.Deposit && l.Status == TransactionStatus.Pending)
                     .Sum(l => l.Amount.Amount),
                 Description = "Deposits awaiting approval"
@@ -134,7 +134,7 @@ public class WalletProfile : Profile
 
     private static decimal CalculateReservedBalance(Domain.Entity.Core.Wallet wallet)
     {
-        return wallet.PurchaseReservations
+        return wallet.Reservations
             .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
             .Sum(pr => pr.TotalAmount.Amount);
     }
@@ -150,7 +150,7 @@ public class WalletProfile : Profile
             return BalanceStatus.LowBalance;
 
         // Check if no activity in last 30 days
-        var lastTransaction = wallet.LedgerEntries
+        var lastTransaction = wallet.Ledgers
             .OrderByDescending(l => l.Timestamp)
             .FirstOrDefault();
 
@@ -167,7 +167,7 @@ public class WalletProfile : Profile
             return WalletStatus.LowBalance;
 
         // Check if no transactions in last 30 days
-        var lastTransactionDate = wallet.LedgerEntries
+        var lastTransactionDate = wallet.Ledgers
             .OrderByDescending(l => l.Timestamp)
             .FirstOrDefault()?.Timestamp ?? wallet.CreatedAt;
 

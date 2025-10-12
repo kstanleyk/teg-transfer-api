@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerRepository, LedgerRepository>();
-        services.AddScoped<IPurchaseReservationRepository, PurchaseReservationRepository>();
+        services.AddScoped<IReservationRepository, ReservationRepository>();
 
         return services;
     }

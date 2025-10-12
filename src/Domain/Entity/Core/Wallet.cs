@@ -5,7 +5,7 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class Wallet : Entity<Guid>
+public class Wallet : Aggregate<Guid>
 {
     public Guid ClientId { get; private init; }
     public Money Balance { get; private set; }
@@ -14,11 +14,11 @@ public class Wallet : Entity<Guid>
     public DateTime UpdatedAt { get; private set; }
     public Currency BaseCurrency { get; private init; }
 
-    private readonly List<Ledger> _ledgerEntries = [];
-    public IReadOnlyList<Ledger> LedgerEntries => _ledgerEntries.AsReadOnly();
+    private readonly List<Ledger> _ledgers = [];
+    public IReadOnlyList<Ledger> Ledgers => _ledgers.AsReadOnly();
 
-    private readonly List<PurchaseReservation> _purchaseReservations = [];
-    public IReadOnlyList<PurchaseReservation> PurchaseReservations => _purchaseReservations.AsReadOnly();
+    private readonly List<Reservation> _reservations = [];
+    public IReadOnlyList<Reservation> Reservations => _reservations.AsReadOnly();
 
     // Protected constructor for EF Core - properly initialize all owned entities
     protected Wallet()
@@ -65,7 +65,7 @@ public class Wallet : Entity<Guid>
             status: TransactionStatus.Pending, reference: reference,
             description: description ?? $"Deposit of {amount.Amount} {amount.Currency.Code}");
 
-        _ledgerEntries.Add(ledger);
+        _ledgers.Add(ledger);
         Balance = Balance + amount;
         UpdatedAt = DateTime.UtcNow;
 
@@ -77,7 +77,7 @@ public class Wallet : Entity<Guid>
         DomainGuards.AgainstNull(ledgerId, nameof(ledgerId));
         DomainGuards.AgainstNullOrWhiteSpace(approvedBy, nameof(approvedBy));
 
-        var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
+        var ledger = _ledgers.FirstOrDefault(t => t.Id == ledgerId);
         if (ledger is null)
             throw new DomainException($"Ledger not found: {ledgerId}");
 
@@ -88,7 +88,7 @@ public class Wallet : Entity<Guid>
             throw new DomainException("Only pending deposits can be approved");
 
         // Update the ledger status
-        ledger.MarkAsCompleted();
+        ledger.MarkAsCompleted(CompletionTypes.Approval);
 
         // Update wallet balances
         AvailableBalance = AvailableBalance + ledger.Amount;
@@ -101,7 +101,7 @@ public class Wallet : Entity<Guid>
         DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
         DomainGuards.AgainstNullOrWhiteSpace(rejectedBy, nameof(rejectedBy));
 
-        var ledger = _ledgerEntries.FirstOrDefault(t => t.Id == ledgerId);
+        var ledger = _ledgers.FirstOrDefault(t => t.Id == ledgerId);
         if (ledger is null)
             throw new DomainException($"Ledger not found: {ledgerId}");
 
@@ -143,7 +143,7 @@ public class Wallet : Entity<Guid>
             description: description ?? $"Withdrawal of {amount.Amount} {amount.Currency.Code}"
         );
 
-        _ledgerEntries.Add(transaction);
+        _ledgers.Add(transaction);
         Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
@@ -151,38 +151,7 @@ public class Wallet : Entity<Guid>
         return transaction;
     }
 
-    public Ledger Purchase(Money amount, string description, string supplierDetails)
-    {
-        DomainGuards.AgainstNull(amount, nameof(amount));
-        DomainGuards.AgainstNullOrWhiteSpace(description, nameof(description));
-        DomainGuards.AgainstNullOrWhiteSpace(supplierDetails, nameof(supplierDetails));
-
-        if (amount.Amount <= 0)
-            throw new DomainException("Purchase amount must be positive");
-
-        if (AvailableBalance.Amount < amount.Amount)
-            throw new DomainException($"Insufficient available balance. Available: {AvailableBalance.Amount}, Required: {amount.Amount}");
-
-        //var previousBalance = Balance;
-        //var previousAvailableBalance = AvailableBalance;
-
-        var transaction = Ledger.Create(
-            walletId: Id,
-            type: TransactionType.Purchase,
-            amount: amount,
-            status: TransactionStatus.Completed,
-            description: $"{description} - {supplierDetails}"
-        );
-
-        _ledgerEntries.Add(transaction);
-        Balance = Balance - amount;
-        AvailableBalance = AvailableBalance - amount;
-        UpdatedAt = DateTime.UtcNow;
-
-        return transaction;
-    }
-
-    public (PurchaseReservation reservation, Ledger purchaseLedger, Ledger serviceFeeLedger)
+    public (Reservation reservation, Ledger purchaseLedger, Ledger serviceFeeLedger)
             ReserveForPurchase(Money purchaseAmount, Money serviceFee, string description,
                 string supplierDetails, string paymentMethod)
     {
@@ -208,7 +177,7 @@ public class Wallet : Entity<Guid>
         var serviceFeeLedgerId = SequentialId.CreateUnique().Value;
 
         // Create purchase reservation
-        var reservation = PurchaseReservation.Create(
+        var reservation = Reservation.Create(
             clientId: ClientId,
             walletId: Id,
             purchaseLedgerId: purchaseLedgerId,
@@ -242,9 +211,9 @@ public class Wallet : Entity<Guid>
 
         serviceFeeLedger.SetId(serviceFeeLedgerId);
 
-        _ledgerEntries.Add(purchaseLedger);
-        _ledgerEntries.Add(serviceFeeLedger);
-        _purchaseReservations.Add(reservation);
+        _ledgers.Add(purchaseLedger);
+        _ledgers.Add(serviceFeeLedger);
+        _reservations.Add(reservation);
 
         // Reserve funds by deducting from available balance
         AvailableBalance = AvailableBalance - totalAmount;
@@ -255,12 +224,12 @@ public class Wallet : Entity<Guid>
 
     public void CompletePurchase(Guid reservationId, string processedBy = "ADMIN")
     {
-        var reservation = _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+        var reservation = _reservations.FirstOrDefault(r => r.Id == reservationId);
         if (reservation == null)
             throw new DomainException($"Purchase reservation not found: {reservationId}");
 
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
+        var purchaseLedger = _ledgers.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = _ledgers.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
 
         if (purchaseLedger == null || serviceFeeLedger == null)
             throw new DomainException("One or both ledger entries not found for reservation");
@@ -272,8 +241,8 @@ public class Wallet : Entity<Guid>
             throw new DomainException("Reservation cannot be completed in its current state");
 
         // Mark both transactions as completed
-        purchaseLedger.MarkAsCompleted(processedBy);
-        serviceFeeLedger.MarkAsCompleted(processedBy);
+        purchaseLedger.MarkAsCompleted(CompletionTypes.Processed, processedBy);
+        serviceFeeLedger.MarkAsCompleted(CompletionTypes.Processed, processedBy);
 
         // Complete the reservation
         reservation.Complete(processedBy);
@@ -285,12 +254,12 @@ public class Wallet : Entity<Guid>
 
     public void CancelPurchase(Guid reservationId, string reason, string cancelledBy = "ADMIN")
     {
-        var reservation = _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+        var reservation = _reservations.FirstOrDefault(r => r.Id == reservationId);
         if (reservation == null)
             throw new DomainException($"Purchase reservation not found: {reservationId}");
 
-        var purchaseLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
-        var serviceFeeLedger = _ledgerEntries.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
+        var purchaseLedger = _ledgers.FirstOrDefault(t => t.Id == reservation.PurchaseLedgerId);
+        var serviceFeeLedger = _ledgers.FirstOrDefault(t => t.Id == reservation.ServiceFeeLedgerId);
 
         if (purchaseLedger == null || serviceFeeLedger == null)
             throw new DomainException("One or both ledger entries not found for reservation");
@@ -314,28 +283,10 @@ public class Wallet : Entity<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public PurchaseReservation? GetPurchaseReservation(Guid reservationId)
+    public Reservation? GetPurchaseReservation(Guid reservationId)
     {
-        return _purchaseReservations.FirstOrDefault(r => r.Id == reservationId);
+        return _reservations.FirstOrDefault(r => r.Id == reservationId);
     }
-
-    public IReadOnlyList<PurchaseReservation> GetPendingPurchaseReservations()
-    {
-        return _purchaseReservations
-            .Where(r => r.Status == PurchaseReservationStatus.Pending)
-            .ToList()
-            .AsReadOnly();
-    }
-
-    public IReadOnlyList<PurchaseReservation> GetPurchaseReservationsByStatus(PurchaseReservationStatus status)
-    {
-        return _purchaseReservations
-            .Where(r => r.Status == status)
-            .ToList()
-            .AsReadOnly();
-    }
-
-
 
     public Ledger ChargeServiceFee(Money amount, string description)
     {
@@ -353,7 +304,7 @@ public class Wallet : Entity<Guid>
         var transaction = Ledger.Create(walletId: Id, type: TransactionType.ServiceFee, amount: amount,
             status: TransactionStatus.Completed, description: description);
 
-        _ledgerEntries.Add(transaction);
+        _ledgers.Add(transaction);
         Balance = Balance - amount;
         AvailableBalance = AvailableBalance - amount;
         UpdatedAt = DateTime.UtcNow;
@@ -392,26 +343,6 @@ public class Wallet : Entity<Guid>
     public decimal GetPendingBalance()
     {
         return Balance.Amount - AvailableBalance.Amount;
-    }
-
-    public IReadOnlyList<Ledger> GetPendingDeposits()
-    {
-        return _ledgerEntries
-            .Where(t => t.Type == TransactionType.Deposit && t.IsPending)
-            .ToList()
-            .AsReadOnly();
-    }
-
-    public bool HasChanges(Wallet? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return false;
-
-        return ClientId != other.ClientId ||
-               !Balance.Equals(other.Balance) ||
-               !AvailableBalance.Equals(other.AvailableBalance) ||
-               !BaseCurrency.Equals(other.BaseCurrency) ||
-               !_purchaseReservations.SequenceEqual(other._purchaseReservations);
     }
 }
 

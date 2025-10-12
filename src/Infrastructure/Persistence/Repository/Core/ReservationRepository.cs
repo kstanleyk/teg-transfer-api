@@ -5,10 +5,10 @@ using TegWallet.Domain.Entity.Core;
 
 namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
-public class PurchaseReservationRepository(IDatabaseFactory databaseFactory)
-    : DataRepository<PurchaseReservation, Guid>(databaseFactory), IPurchaseReservationRepository
+public class ReservationRepository(IDatabaseFactory databaseFactory)
+    : DataRepository<Reservation, Guid>(databaseFactory), IReservationRepository
 {
-    public async Task<IReadOnlyList<PurchaseReservation>> GetReservationsByClientIdAsync(Guid clientId,
+    public async Task<IReadOnlyList<Reservation>> GetReservationsByClientIdAsync(Guid clientId,
         PurchaseReservationStatus? status = null)
     {
         var query = DbSet
@@ -27,7 +27,7 @@ public class PurchaseReservationRepository(IDatabaseFactory databaseFactory)
         return reservations.AsReadOnly();
     }
 
-    public async Task<PagedResult<PurchaseReservation>> GetPagedReservationsByClientIdAsync(
+    public async Task<PagedResult<Reservation>> GetPagedReservationsByClientIdAsync(
         Guid clientId,
         PurchaseReservationStatus? status = null,
         int page = 1,
@@ -61,7 +61,7 @@ public class PurchaseReservationRepository(IDatabaseFactory databaseFactory)
             .AsNoTracking()
             .ToListAsync();
 
-        return new PagedResult<PurchaseReservation>
+        return new PagedResult<Reservation>
         {
             Items = reservations,
             Page = page,
@@ -70,8 +70,8 @@ public class PurchaseReservationRepository(IDatabaseFactory databaseFactory)
         };
     }
 
-    private static IQueryable<PurchaseReservation> ApplySorting(
-        IQueryable<PurchaseReservation> query,
+    private static IQueryable<Reservation> ApplySorting(
+        IQueryable<Reservation> query,
         string? sortBy,
         bool sortDescending)
     {

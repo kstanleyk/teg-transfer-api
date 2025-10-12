@@ -8,8 +8,8 @@ public class PurchaseProfile : Profile
 {
     public PurchaseProfile()
     {
-        CreateMap<PurchaseReservation, PurchaseReservationDto>();
-        CreateMap<PurchaseReservation, ReservedPurchaseDto>()
+        CreateMap<Reservation, PurchaseReservationDto>();
+        CreateMap<Reservation, ReservedPurchaseDto>()
             .ForMember(dest => dest.PurchaseLedgerId, opt => opt.MapFrom(src => src.PurchaseLedgerId))
             .ForMember(dest => dest.ServiceFeeLedgerId, opt => opt.MapFrom(src => src.ServiceFeeLedgerId));
     }

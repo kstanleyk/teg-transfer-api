@@ -11,7 +11,7 @@ public record GetClientPurchaseReservationSummaryQuery(Guid ClientId)
     : IRequest<Result<PurchaseReservationSummaryDto>>;
 
 public class GetClientPurchaseReservationSummaryQueryHandler(
-    IPurchaseReservationRepository purchaseReservationRepository,
+    IReservationRepository reservationRepository,
     IClientRepository clientRepository)
     : IRequestHandler<GetClientPurchaseReservationSummaryQuery, Result<PurchaseReservationSummaryDto>>
 {
@@ -26,7 +26,7 @@ public class GetClientPurchaseReservationSummaryQueryHandler(
             if (client == null)
                 return Result<PurchaseReservationSummaryDto>.Failed($"Client not found: {query.ClientId}");
 
-            var reservations = await purchaseReservationRepository.GetReservationsByClientIdAsync(query.ClientId);
+            var reservations = await reservationRepository.GetReservationsByClientIdAsync(query.ClientId);
 
             var summary = new PurchaseReservationSummaryDto
             {

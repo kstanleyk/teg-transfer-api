@@ -3,11 +3,11 @@ using TegWallet.Domain.Entity.Core;
 
 namespace TegWallet.Application.Interfaces.Core;
 
-public interface IPurchaseReservationRepository : IRepository<PurchaseReservation, Guid>
+public interface IReservationRepository : IRepository<Reservation, Guid>
 {
-    Task<IReadOnlyList<PurchaseReservation>> GetReservationsByClientIdAsync(Guid clientId, PurchaseReservationStatus? status = null);
+    Task<IReadOnlyList<Reservation>> GetReservationsByClientIdAsync(Guid clientId, PurchaseReservationStatus? status = null);
 
-    Task<PagedResult<PurchaseReservation>> GetPagedReservationsByClientIdAsync(
+    Task<PagedResult<Reservation>> GetPagedReservationsByClientIdAsync(
         Guid clientId,
         PurchaseReservationStatus? status = null,
         int page = 1,
