@@ -5,7 +5,7 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class Ledger : Entity<LedgerId>
+public class Ledger : Entity<Guid>
 {
     public Guid WalletId { get; private init; }
     public TransactionType Type { get; private init; }
@@ -15,13 +15,10 @@ public class Ledger : Entity<LedgerId>
     public string Reference { get; private set; } = string.Empty;
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public string ApprovedBy { get; private set; } = string.Empty;
-    public DateTime? ApprovedAt { get; private set; }
-    public string RejectedBy { get; private set; } = string.Empty;
-    public DateTime? RejectedAt { get; private set; }
-    public string ProcessedBy { get; private set; } = string.Empty;
-    public DateTime? ProcessedAt { get; private set; }
-    public Guid? PurchaseReservationId { get; private set; } // New field to link to reservation
+    public string CompletionType { get; private set; } 
+    public DateTime? CompletedAt { get; private set; }
+    public string CompletedBy { get; private set; } = string.Empty;
+    public Guid? ReservationId { get; private set; } 
 
     // Protected constructor for EF Core
     protected Ledger()
@@ -46,7 +43,7 @@ public class Ledger : Entity<LedgerId>
 
         var ledger = new Ledger
         {
-            Id = LedgerId.New(),
+            Id = SequentialId.CreateUnique().Value,
             WalletId = walletId,
             Type = type,
             Amount = amount,
@@ -54,41 +51,13 @@ public class Ledger : Entity<LedgerId>
             Timestamp = timestamp ?? DateTime.UtcNow,
             Reference = reference?.Trim() ?? string.Empty,
             Description = description?.Trim() ?? GenerateDefaultDescription(type, amount),
-            PurchaseReservationId = purchaseReservationId
+            ReservationId = purchaseReservationId
         };
 
         return ledger;
     }
 
-
-    //public static Ledger Create(Guid walletId, TransactionType type, Money amount, TransactionStatus status,
-    //    string? reference = null, string? description = null, DateTime? timestamp = null)
-    //{
-    //    DomainGuards.AgainstDefault(walletId, nameof(walletId));
-    //    DomainGuards.AgainstNull(amount, nameof(amount));
-
-    //    // Validate amount based on transaction type
-    //    ValidateAmountForType(type, amount);
-
-    //    // Validate status transitions (basic validation)
-    //    ValidateInitialStatus(type, status);
-
-    //    var transaction = new Ledger
-    //    {
-    //        Id = LedgerId.New(),
-    //        WalletId = walletId,
-    //        Type = type,
-    //        Amount = amount,
-    //        Status = status,
-    //        Timestamp = timestamp ?? DateTime.UtcNow,
-    //        Reference = reference?.Trim() ?? string.Empty,
-    //        Description = description?.Trim() ?? GenerateDefaultDescription(type, amount)
-    //    };
-
-    //    return transaction;
-    //}
-
-    public void MarkAsCompleted(string approvedBy = "SYSTEM")
+    public void MarkAsCompleted(string completionType,  string completedBy = "SYSTEM")
     {
         if (Status == TransactionStatus.Completed)
             return;
@@ -98,8 +67,10 @@ public class Ledger : Entity<LedgerId>
 
         //var previousStatus = Status;
         Status = TransactionStatus.Completed;
-        ApprovedBy = approvedBy;
-        ApprovedAt = DateTime.UtcNow;
+
+        CompletionType = completionType;
+        CompletedBy = completedBy;
+        CompletedAt = DateTime.UtcNow;
     }
 
 
@@ -116,8 +87,10 @@ public class Ledger : Entity<LedgerId>
 
         Status = TransactionStatus.Failed;
         FailureReason = reason.Trim();
-        RejectedBy = rejectedBy;
-        RejectedAt = DateTime.UtcNow;
+
+        CompletionType = CompletionTypes.Rejection;
+        CompletedBy = rejectedBy;
+        CompletedAt = DateTime.UtcNow;
     }
 
     public void UpdateReference(string? reference)
@@ -147,20 +120,6 @@ public class Ledger : Entity<LedgerId>
             (TransactionStatus.Pending, TransactionStatus.Pending) => true,
             _ => false
         };
-    }
-
-    public bool HasChanges(Ledger? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return false;
-
-        return WalletId != other.WalletId ||
-               Type != other.Type ||
-               !Amount.Equals(other.Amount) ||
-               Status != other.Status ||
-               Reference != other.Reference ||
-               FailureReason != other.FailureReason ||
-               Description != other.Description;
     }
 
     public bool IsPending => Status == TransactionStatus.Pending;
@@ -220,9 +179,4 @@ public class Ledger : Entity<LedgerId>
             _ => $"Ledger of {amount.Amount} {amount.Currency.Code}"
         };
     }
-}
-
-public record LedgerId(Guid Value)
-{
-    public static LedgerId New() => new(SequentialId.CreateUnique().Value);
 }

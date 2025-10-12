@@ -4,12 +4,12 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class PurchaseReservation : Entity<Guid>
+public class Reservation : Entity<Guid>
 {
     public Guid ClientId { get; private init; }
     public Guid WalletId { get; private init; }
-    public LedgerId PurchaseLedgerId { get; private init; }
-    public LedgerId ServiceFeeLedgerId { get; private init; }
+    public Guid PurchaseLedgerId { get; private init; }
+    public Guid ServiceFeeLedgerId { get; private init; }
     public Money PurchaseAmount { get; private init; }
     public Money ServiceFeeAmount { get; private init; }
     public Money TotalAmount { get; private init; }
@@ -24,18 +24,10 @@ public class PurchaseReservation : Entity<Guid>
     public string? ProcessedBy { get; private set; }
 
     // Private constructor for EF Core
-    private PurchaseReservation() { }
+    protected Reservation() { }
 
-    public static PurchaseReservation Create(
-        Guid clientId,
-        Guid walletId,
-        LedgerId purchaseLedgerId,
-        LedgerId serviceFeeLedgerId,
-        Money purchaseAmount,
-        Money serviceFeeAmount,
-        string description,
-        string supplierDetails,
-        string paymentMethod)
+    public static Reservation Create(Guid clientId, Guid walletId, Guid purchaseLedgerId, Guid serviceFeeLedgerId,
+        Money purchaseAmount, Money serviceFeeAmount, string description, string supplierDetails, string paymentMethod)
     {
         DomainGuards.AgainstDefault(clientId, nameof(clientId));
         DomainGuards.AgainstDefault(walletId, nameof(walletId));
@@ -53,7 +45,7 @@ public class PurchaseReservation : Entity<Guid>
         if (serviceFeeAmount.Amount < 0)
             throw new DomainException("Service fee amount cannot be negative");
 
-        var reservation = new PurchaseReservation
+        var reservation = new Reservation
         {
             Id = Guid.NewGuid(),
             ClientId = clientId,

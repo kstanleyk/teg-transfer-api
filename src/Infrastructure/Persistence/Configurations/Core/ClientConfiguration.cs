@@ -23,10 +23,10 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(c => c.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
 
         // Indexes
-        builder.HasIndex(c => c.Email).IsUnique().HasDatabaseName("IX_Clients_Email");
-        builder.HasIndex(c => c.PhoneNumber).HasDatabaseName("IX_Clients_PhoneNumber");
-        builder.HasIndex(c => new { c.FirstName, c.LastName }).HasDatabaseName("IX_Clients_Name");
-        builder.HasIndex(c => c.Status).HasDatabaseName("IX_Clients_Status");
+        builder.HasIndex(c => c.Email).IsUnique().HasDatabaseName("ix_client_email");
+        builder.HasIndex(c => c.PhoneNumber).HasDatabaseName("ix_client_phone_number");
+        builder.HasIndex(c => new { c.FirstName, c.LastName }).HasDatabaseName("ix_client_name");
+        builder.HasIndex(c => c.Status).HasDatabaseName("ix_client_status");
 
         // Relationships
         builder.HasOne(c => c.Wallet)

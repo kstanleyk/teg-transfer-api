@@ -1,6 +1,18 @@
 ﻿namespace TegWallet.Application.Features.Core.Wallet.Dto;
 
-public class PurchaseReservationDto
+public class PurchaseReservationSummaryDto
+{
+    public int TotalReservations { get; set; }
+    public int PendingCount { get; set; }
+    public int CompletedCount { get; set; }
+    public int CancelledCount { get; set; }
+    public decimal TotalPurchaseAmount { get; set; }
+    public decimal TotalServiceFeeAmount { get; set; }
+    public decimal TotalAmount { get; set; }
+    public string CurrencyCode { get; set; } = null!;
+}
+
+public class PurchaseReservationDto1
 {
     public Guid Id { get; set; }
     public Guid ClientId { get; set; }
@@ -20,7 +32,9 @@ public class PurchaseReservationDto
     public DateTime? CancelledAt { get; set; }
     public string? CancellationReason { get; set; }
     public string? ProcessedBy { get; set; }
-    public int DaysPending { get; set; }
+
+    // Additional calculated properties
+    public int? DaysPending { get; set; }
     public bool CanBeApproved { get; set; }
     public bool CanBeCancelled { get; set; }
 }

@@ -10,7 +10,7 @@ namespace TegWallet.Application.Features.Core.Wallet.Command;
 public record ApproveDepositCommand(
     Guid ClientId,
     Guid LedgerId,
-    string? ApprovedBy = null) : IRequest<Result>;
+    string ApprovedBy = "System") : IRequest<Result>;
 
 
 public class ApproveDepositCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
@@ -31,9 +31,9 @@ public class ApproveDepositCommandHandler(IWalletRepository walletRepository, IC
             throw new ValidationException(validationErrors);
         }
 
-        var validation = await ValidateClientAndWalletAsync(command.ClientId);
-        if (!validation.Success)
-            return Result.Failed(validation.Message);
+        var walletValidation = await ValidateClientAndWalletAsync(command.ClientId);
+        if (!walletValidation.Success)
+            return Result.Failed(walletValidation.Message);
 
         var result = await WalletRepository.ApproveDepositAsync(command);
         if (result.Status != RepositoryActionStatus.Updated)

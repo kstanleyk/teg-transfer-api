@@ -7,7 +7,7 @@ using TegWallet.Domain.Entity.Enum;
 namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
 public class LedgerRepository(IDatabaseFactory databaseFactory)
-    : DataRepository<Ledger, LedgerId>(databaseFactory), ILedgerRepository
+    : DataRepository<Ledger, Guid>(databaseFactory), ILedgerRepository
 {
     public async Task<RepositoryActionResult<IEnumerable<Ledger>>> UpdateLedgersAsync(Ledger[] ledgers)
     {

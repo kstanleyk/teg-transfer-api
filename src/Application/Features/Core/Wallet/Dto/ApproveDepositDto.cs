@@ -2,4 +2,4 @@
 
 public record ApproveDepositDto(
     Guid LedgerId,
-    string? ApprovedBy = null);
+    string ApprovedBy = "System");

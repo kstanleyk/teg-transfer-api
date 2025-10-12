@@ -91,13 +91,13 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     client_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    BalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    BalanceCurrencyCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                    AvailableBalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    AvailableBalanceCurrencyCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    balance_amount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
+                    balance_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    available_balance_amount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
+                    available_balance_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    BaseCurrencyCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
+                    base_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -168,6 +168,44 @@ namespace TegWallet.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "reservation",
+                schema: "core",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    client_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    wallet_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    purchase_ledger_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    service_fee_ledger_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    purchase_amount_amount = table.Column<decimal>(type: "numeric(18,4)", precision: 18, scale: 4, nullable: false),
+                    purchase_amount_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    service_fee_amount_amount = table.Column<decimal>(type: "numeric(18,4)", precision: 18, scale: 4, nullable: false),
+                    service_fee_amount_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    total_amount_amount = table.Column<decimal>(type: "numeric(18,4)", precision: 18, scale: 4, nullable: false),
+                    total_amount_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    supplier_details = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    payment_method = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    completed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    cancelled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    cancellation_reason = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    processed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_reservation", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_reservation_wallet_set_wallet_id",
+                        column: x => x.wallet_id,
+                        principalSchema: "core",
+                        principalTable: "wallet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger",
                 schema: "core",
                 columns: table => new
@@ -180,12 +218,29 @@ namespace TegWallet.Infrastructure.Migrations
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     reference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    failure_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    failure_reason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    description = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    approved_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
+                    completion_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
+                    completed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    completed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
+                    approved_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    rejected_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
+                    rejected_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    processed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
+                    processed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    reservation_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_ledger", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_ledger_purchase_reservation_set_reservation_id",
+                        column: x => x.reservation_id,
+                        principalSchema: "core",
+                        principalTable: "reservation",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_ledger_wallet_set_wallet_id",
                         column: x => x.wallet_id,
@@ -196,28 +251,46 @@ namespace TegWallet.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clients_Email",
+                name: "ix_client_email",
                 schema: "core",
                 table: "client",
                 column: "email",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clients_Name",
+                name: "ix_client_name",
                 schema: "core",
                 table: "client",
                 columns: new[] { "first_name", "last_name" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clients_PhoneNumber",
+                name: "ix_client_phone_number",
                 schema: "core",
                 table: "client",
                 column: "phone_number");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clients_Status",
+                name: "ix_client_status",
                 schema: "core",
                 table: "client",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ledger_reference",
+                schema: "core",
+                table: "ledger",
+                column: "reference");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ledger_reservation_id",
+                schema: "core",
+                table: "ledger",
+                column: "reservation_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ledger_status",
+                schema: "core",
+                table: "ledger",
                 column: "status");
 
             migrationBuilder.CreateIndex(
@@ -227,16 +300,16 @@ namespace TegWallet.Infrastructure.Migrations
                 column: "timestamp");
 
             migrationBuilder.CreateIndex(
+                name: "ix_ledger_type",
+                schema: "core",
+                table: "ledger",
+                column: "type");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_ledger_wallet_id",
                 schema: "core",
                 table: "ledger",
                 column: "wallet_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_ledger_wallet_id_timestamp",
-                schema: "core",
-                table: "ledger",
-                columns: new[] { "wallet_id", "timestamp" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_permission_feature_action",
@@ -244,6 +317,48 @@ namespace TegWallet.Infrastructure.Migrations
                 table: "permission",
                 columns: new[] { "feature", "action" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_client_id",
+                schema: "core",
+                table: "reservation",
+                column: "client_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_created_at",
+                schema: "core",
+                table: "reservation",
+                column: "created_at");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_purchase_ledger_id",
+                schema: "core",
+                table: "reservation",
+                column: "purchase_ledger_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_service_fee_ledger_id",
+                schema: "core",
+                table: "reservation",
+                column: "service_fee_ledger_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_status",
+                schema: "core",
+                table: "reservation",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_wallet_id",
+                schema: "core",
+                table: "reservation",
+                column: "wallet_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_reservation_wallet_id_status",
+                schema: "core",
+                table: "reservation",
+                columns: new[] { "wallet_id", "status" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_role_name",
@@ -295,7 +410,7 @@ namespace TegWallet.Infrastructure.Migrations
                 schema: "auth");
 
             migrationBuilder.DropTable(
-                name: "wallet",
+                name: "reservation",
                 schema: "core");
 
             migrationBuilder.DropTable(
@@ -309,6 +424,10 @@ namespace TegWallet.Infrastructure.Migrations
             migrationBuilder.DropTable(
                 name: "user",
                 schema: "auth");
+
+            migrationBuilder.DropTable(
+                name: "wallet",
+                schema: "core");
 
             migrationBuilder.DropTable(
                 name: "client",

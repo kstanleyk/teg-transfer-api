@@ -18,7 +18,7 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options) : DbCo
     public virtual DbSet<Wallet> WalletSet { get; set; }
     public virtual DbSet<Client> ClientSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
-    public DbSet<PurchaseReservation> PurchaseReservationSet => Set<PurchaseReservation>();
+    public DbSet<Reservation> PurchaseReservationSet => Set<Reservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

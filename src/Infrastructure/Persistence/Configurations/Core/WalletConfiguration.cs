@@ -24,24 +24,21 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
                 currency => currency.Code,
                 code => Currency.FromCode(code))
             .IsRequired()
-            .HasMaxLength(3)
-            .HasColumnName("BaseCurrencyCode");
+            .HasMaxLength(3);
 
         // Configure Balance as owned entity
         builder.OwnsOne(w => w.Balance, balanceBuilder =>
         {
             balanceBuilder.Property(m => m.Amount)
                 .IsRequired()
-                .HasColumnType("decimal(18,4)")
-                .HasColumnName("BalanceAmount");
+                .HasColumnType("decimal(18,4)");
 
             balanceBuilder.Property(m => m.Currency)
                 .HasConversion(
                     currency => currency.Code,
                     code => Currency.FromCode(code))
                 .IsRequired()
-                .HasMaxLength(3)
-                .HasColumnName("BalanceCurrencyCode");
+                .HasMaxLength(3);
         });
 
         // Configure AvailableBalance as owned entity
@@ -49,27 +46,25 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         {
             availableBalanceBuilder.Property(m => m.Amount)
                 .IsRequired()
-                .HasColumnType("decimal(18,4)")
-                .HasColumnName("AvailableBalanceAmount");
+                .HasColumnType("decimal(18,4)");
 
             availableBalanceBuilder.Property(m => m.Currency)
                 .HasConversion(
                     currency => currency.Code,
                     code => Currency.FromCode(code))
                 .IsRequired()
-                .HasMaxLength(3)
-                .HasColumnName("AvailableBalanceCurrencyCode");
+                .HasMaxLength(3);
         });
 
 
         // Configure transactions relationship
-        builder.HasMany(w => w.LedgerEntries)
+        builder.HasMany(w => w.Ledgers)
             .WithOne()
             .HasForeignKey(t => t.WalletId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // NEW: PurchaseReservations (one-to-many)
-        builder.HasMany(w => w.PurchaseReservations)
+        // Reservations (one-to-many)
+        builder.HasMany(w => w.Reservations)
             .WithOne()
             .HasForeignKey(pr => pr.WalletId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -81,12 +76,5 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
             .WithOne(c => c.Wallet)
             .HasForeignKey<Wallet>(w => w.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        //// Configure backing fields for collections
-        //builder.Metadata.FindNavigation(nameof(Wallet.LedgerEntries))
-        //    ?.SetField("_ledgerEntries");
-
-        //builder.Metadata.FindNavigation(nameof(Wallet.PurchaseReservations))
-        //    ?.SetField("_purchaseReservations");
     }
 }

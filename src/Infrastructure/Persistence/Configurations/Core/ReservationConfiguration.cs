@@ -5,12 +5,12 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Configurations.Core;
 
-public class PurchaseReservationConfiguration : IEntityTypeConfiguration<PurchaseReservation>
+public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
 {
-    public void Configure(EntityTypeBuilder<PurchaseReservation> builder)
+    public void Configure(EntityTypeBuilder<Reservation> builder)
     {
         // Table name
-        builder.ToTable("purchase_reservations", SchemaNames.Core);
+        builder.ToTable("reservation", SchemaNames.Core);
 
         // Primary Key
         builder.HasKey(pr => pr.Id);
@@ -27,22 +27,15 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
 
         // LedgerId value objects (stored as GUID)
         builder.Property(pr => pr.PurchaseLedgerId)
-            .HasConversion(
-                ledgerId => ledgerId.Value,
-                value => new LedgerId(value))
             .IsRequired();
 
         builder.Property(pr => pr.ServiceFeeLedgerId)
-            .HasConversion(
-                ledgerId => ledgerId.Value,
-                value => new LedgerId(value))
             .IsRequired();
 
         // Money value objects (stored in separate columns)
         builder.OwnsOne(pr => pr.PurchaseAmount, money =>
         {
             money.Property(m => m.Amount)
-                .HasColumnName("PurchaseAmount")
                 .HasPrecision(18, 4)
                 .IsRequired();
 
@@ -50,7 +43,6 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
                 .HasConversion(
                     currency => currency.Code,
                     code => Currency.FromCode(code))
-                .HasColumnName("PurchaseCurrency")
                 .HasMaxLength(3)
                 .IsRequired();
         });
@@ -58,7 +50,6 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
         builder.OwnsOne(pr => pr.ServiceFeeAmount, money =>
         {
             money.Property(m => m.Amount)
-                .HasColumnName("ServiceFeeAmount")
                 .HasPrecision(18, 4)
                 .IsRequired();
 
@@ -66,7 +57,6 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
                 .HasConversion(
                     currency => currency.Code,
                     code => Currency.FromCode(code))
-                .HasColumnName("ServiceFeeCurrency")
                 .HasMaxLength(3)
                 .IsRequired();
         });
@@ -74,7 +64,6 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
         builder.OwnsOne(pr => pr.TotalAmount, money =>
         {
             money.Property(m => m.Amount)
-                .HasColumnName("TotalAmount")
                 .HasPrecision(18, 4)
                 .IsRequired();
 
@@ -82,7 +71,6 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
                 .HasConversion(
                     currency => currency.Code,
                     code => Currency.FromCode(code))
-                .HasColumnName("TotalCurrency")
                 .HasMaxLength(3)
                 .IsRequired();
         });
@@ -136,11 +124,8 @@ public class PurchaseReservationConfiguration : IEntityTypeConfiguration<Purchas
 
         // Relationships
         builder.HasOne<Wallet>()
-            .WithMany(w => w.PurchaseReservations)
+            .WithMany(w => w.Reservations)
             .HasForeignKey(pr => pr.WalletId)
             .OnDelete(DeleteBehavior.Cascade); // Delete reservations when wallet is deleted
-
-        // Note: We don't configure a direct relationship to Ledger entities here
-        // because they are managed through the Wallet aggregate
     }
 }
