@@ -14,6 +14,7 @@ services.AddApiServices(configuration, host, allowedCorsOrigins);
 services.AddApplicationDependencies();
 services.AddInfrastructureDependencies(configuration);
 services.AddJwtAuthentication(configuration);
+services.AddVersioning();
 
 var app = builder.Build();
 

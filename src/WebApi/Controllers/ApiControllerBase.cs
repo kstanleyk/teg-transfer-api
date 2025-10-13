@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TegWallet.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ApiControllerBase<T> : ControllerBase
     {

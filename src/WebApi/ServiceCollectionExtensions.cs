@@ -1,4 +1,5 @@
 using System.Reflection;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -104,6 +105,30 @@ public static class ServiceCollectionExtensions
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+
+        return services;
+    }
+
+    public static IServiceCollection AddVersioning(this IServiceCollection services)
+    {
+        services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true; // Adds headers: api-supported-versions, api-deprecated-versions
+                // You can also set ApiVersionReader (see next step)
+
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader(),               // /api/v1/controller
+                    new QueryStringApiVersionReader("api-version") // /api/controller?api-version=1.0
+                );
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV"; // e.g. "v1"
+                options.SubstituteApiVersionInUrl = true;
+            });
 
         return services;
     }

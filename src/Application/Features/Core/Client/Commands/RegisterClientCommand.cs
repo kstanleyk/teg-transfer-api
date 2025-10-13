@@ -54,6 +54,6 @@ public class RegisterClientCommandHandler(
 
         // Map to DTO and return
         var clientDto = mapper.Map<ClientRegisteredDto>(result.Entity);
-        return Result<ClientRegisteredDto>.Succeeded(clientDto);
+        return Result<ClientRegisteredDto>.Succeeded(clientDto,"Client account created successfully.");
     }
 }

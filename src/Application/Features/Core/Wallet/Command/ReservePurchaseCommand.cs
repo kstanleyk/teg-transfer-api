@@ -45,7 +45,7 @@ public class ReservePurchaseCommandHandler(
         if(result.Status!= RepositoryActionStatus.Updated)
             return Result<ReservedPurchaseDto>.Failed("An unexpected error occurred while processing your purchase reservation");
 
-        return Result<ReservedPurchaseDto>.Succeeded(result.Entity!);
+        return Result<ReservedPurchaseDto>.Succeeded(result.Entity!, "Service purchase request completed successfully, pending admin validation");
 
     }
 }

@@ -38,6 +38,6 @@ public class ApproveWithdrawFundsCommandHandler(IWalletRepository walletReposito
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while processing your transaction. Please try again.");
 
-        return Result.Succeeded();
+        return Result.Succeeded("Withdraw funds request approved successfully.");
     }
 }
