@@ -19,13 +19,13 @@ public class PurchaseReservationProfile : Profile
             .ForMember(dest => dest.CurrencyCode, opt => opt.MapFrom(src => src.PurchaseAmount.Currency.Code))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.DaysPending, opt => opt.MapFrom(src =>
-                src.Status == PurchaseReservationStatus.Pending
+                src.Status == ReservationStatus.Pending
                     ? (DateTime.UtcNow - src.CreatedAt).Days
                     : (int?)null))
             .ForMember(dest => dest.CanBeApproved, opt => opt.MapFrom(src =>
-                src.Status == PurchaseReservationStatus.Pending))
+                src.Status == ReservationStatus.Pending))
             .ForMember(dest => dest.CanBeCancelled, opt => opt.MapFrom(src =>
-                src.Status == PurchaseReservationStatus.Pending));
+                src.Status == ReservationStatus.Pending));
 
         // PagedResult to PagedResponse mapping
         CreateMap<PagedResult<Reservation>, PagedResponse<PurchaseReservationDto>>()

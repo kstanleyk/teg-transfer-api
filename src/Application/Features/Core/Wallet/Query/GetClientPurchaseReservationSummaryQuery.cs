@@ -31,9 +31,9 @@ public class GetClientPurchaseReservationSummaryQueryHandler(
             var summary = new PurchaseReservationSummaryDto
             {
                 TotalReservations = reservations.Count,
-                PendingCount = reservations.Count(r => r.Status == PurchaseReservationStatus.Pending),
-                CompletedCount = reservations.Count(r => r.Status == PurchaseReservationStatus.Completed),
-                CancelledCount = reservations.Count(r => r.Status == PurchaseReservationStatus.Cancelled),
+                PendingCount = reservations.Count(r => r.Status == ReservationStatus.Pending),
+                CompletedCount = reservations.Count(r => r.Status == ReservationStatus.Completed),
+                CancelledCount = reservations.Count(r => r.Status == ReservationStatus.Cancelled),
                 TotalPurchaseAmount = reservations.Sum(r => r.PurchaseAmount.Amount),
                 TotalServiceFeeAmount = reservations.Sum(r => r.ServiceFeeAmount.Amount),
                 TotalAmount = reservations.Sum(r => r.TotalAmount.Amount),

@@ -49,7 +49,7 @@ public class WalletProfile : Profile
                     .Take(10)))
             .ForMember(dest => dest.ActiveReservations, opt => opt.MapFrom(src =>
                 src.Reservations
-                    .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
+                    .Where(pr => pr.Status == ReservationStatus.Pending)
                     .OrderByDescending(pr => pr.CreatedAt)));
 
         // Reservation to PurchaseReservationDto mapping
@@ -135,7 +135,7 @@ public class WalletProfile : Profile
     private static decimal CalculateReservedBalance(Domain.Entity.Core.Wallet wallet)
     {
         return wallet.Reservations
-            .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
+            .Where(pr => pr.Status == ReservationStatus.Pending)
             .Sum(pr => pr.TotalAmount.Amount);
     }
 

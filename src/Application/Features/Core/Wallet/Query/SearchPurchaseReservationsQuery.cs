@@ -9,7 +9,7 @@ namespace TegWallet.Application.Features.Core.Wallet.Query;
 
 public record SearchPurchaseReservationsQuery(
     Guid? ClientId = null,
-    PurchaseReservationStatus? Status = null,
+    ReservationStatus? Status = null,
     string? PaymentMethod = null,
     string? SupplierSearch = null,
     DateTime? FromDate = null,

@@ -233,8 +233,8 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         [FromQuery] string? sortBy = "CreatedAt",
         [FromQuery] bool sortDescending = true)
     {
-        PurchaseReservationStatus? reservationStatus = null;
-        if (!string.IsNullOrEmpty(status) && Enum.TryParse<PurchaseReservationStatus>(status, true, out var parsedStatus))
+        ReservationStatus? reservationStatus = null;
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<ReservationStatus>(status, true, out var parsedStatus))
         {
             reservationStatus = parsedStatus;
         }
@@ -288,8 +288,8 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         [FromQuery] string? sortBy = "CreatedAt",
         [FromQuery] bool sortDescending = true)
     {
-        PurchaseReservationStatus? reservationStatus = null;
-        if (!string.IsNullOrEmpty(status) && Enum.TryParse<PurchaseReservationStatus>(status, true, out var parsedStatus))
+        ReservationStatus? reservationStatus = null;
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<ReservationStatus>(status, true, out var parsedStatus))
         {
             reservationStatus = parsedStatus;
         }

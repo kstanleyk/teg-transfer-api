@@ -96,6 +96,10 @@ public static class ServiceCollectionExtensions
                 .Build();
 
             config.Filters.Add(new AuthorizeFilter(policy));
+        })
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         });
 
 
