@@ -4,8 +4,8 @@ using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
-using TegWallet.Application.Interfaces;
 using TegWallet.Application.Interfaces.Core;
+using TegWallet.Application.Interfaces.Localization;
 
 namespace TegWallet.Application.Features.Core.Wallet.Command;
 
@@ -19,7 +19,7 @@ public record RequestDepositFundsCommand(
 public class RequestDepositFundsCommandHandler(
     IWalletRepository walletRepository,
     IClientRepository clientRepository,
-    ILocalizationService localizer,
+    IAppLocalizer localizer,
     IMapper mapper) : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<RequestDepositFundsCommand, Result<TransactionDto>>
 {
     public async Task<Result<TransactionDto>> Handle(RequestDepositFundsCommand command, CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ public class RequestDepositFundsCommandHandler(
         if (result.Status != RepositoryActionStatus.Updated)
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 
-        string message = localizer.GetString("DepositRequestSuccess");
+        var message = localizer["OrderCreatedSuccess"];
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
         return Result<TransactionDto>.Succeeded(transactionDto,message);

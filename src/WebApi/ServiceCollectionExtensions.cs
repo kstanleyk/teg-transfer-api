@@ -7,8 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Reflection;
 using TegWallet.Application.Authorization;
-using TegWallet.Application.Interfaces;
-using TegWallet.Infrastructure;
+using TegWallet.Application.Interfaces.Localization;
+using TegWallet.WebApi.Localization;
 using TegWallet.WebApi.Permissions;
 using TegWallet.WebApi.Services;
 
@@ -142,17 +142,42 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddLocalizationServices(this IServiceCollection services)
     {
-        services.AddTransient<ILocalizationService, LocalizationService>();
         services.AddLocalization(options => options.ResourcesPath = "Resources");
-        services.Configure<RequestLocalizationOptions>(options =>
-        {
-            string[] supportedCultures = ["en", "fr"];
-            options.DefaultRequestCulture = new RequestCulture("en");
-            options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
-            options.SupportedUICultures = options.SupportedCultures;
-        });
+        services.AddSingleton<IAppLocalizer, AppLocalizer>();
 
         return services;
+    }
+
+    public static WebApplication UseLocalizationServices(this WebApplication app)
+    {
+        var supportedCultures = new[]
+        {
+            new CultureInfo("en"),
+            new CultureInfo("fr")
+        };
+
+        var queryProvider = new QueryStringRequestCultureProvider
+        {
+            QueryStringKey = "lang",
+            UIQueryStringKey = "lang"
+        };
+
+        var localizationOptions = new RequestLocalizationOptions
+        {
+            DefaultRequestCulture = new RequestCulture("en"),
+            SupportedCultures = supportedCultures,
+            SupportedUICultures = supportedCultures,
+            RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                queryProvider,
+                new CookieRequestCultureProvider(),
+                new AcceptLanguageHeaderRequestCultureProvider()
+            }
+        };
+
+        app.UseRequestLocalization(localizationOptions);
+
+        return app;
     }
 }
 

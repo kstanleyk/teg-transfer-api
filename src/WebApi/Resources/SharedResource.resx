@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DepositRequestSuccess" xml:space="preserve">
-    <value>Deposit funds request completed successfully, pending admin validation</value>
+  <data name="OrderCreatedSuccess" xml:space="preserve">
+    <value>Order created successfully.</value>
+  </data>
+  <data name="OrderCreationFailed" xml:space="preserve">
+    <value>Failed to create order, please try again.</value>
   </data>
 </root>

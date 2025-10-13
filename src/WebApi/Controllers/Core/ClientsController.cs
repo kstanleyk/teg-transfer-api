@@ -2,6 +2,8 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 using TegWallet.Application.Authorization;
 using TegWallet.Application.Features.Core.Client.Commands;
 using TegWallet.Application.Features.Core.Client.Dto;
@@ -34,4 +36,15 @@ public class ClientsController(IMediator mediator, IMapper mapper) : ApiControll
     //    var result = await MediatorSender.Send(command);
     //    return Ok(result);
     //}
+
+    [AllowAnonymous]
+    [HttpGet("culture")]
+    public IActionResult GetCulture()
+    {
+        return Ok(new
+        {
+            Culture = System.Globalization.CultureInfo.CurrentCulture.Name,
+            UICulture = System.Globalization.CultureInfo.CurrentUICulture.Name
+        });
+    }
 }
