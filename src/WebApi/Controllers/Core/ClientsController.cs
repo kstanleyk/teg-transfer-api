@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
 using TegWallet.Application.Authorization;
 using TegWallet.Application.Features.Core.Client.Commands;
 using TegWallet.Application.Features.Core.Client.Dto;
@@ -13,7 +14,7 @@ namespace TegWallet.WebApi.Controllers.Core;
 
 [ApiVersion("1.0")]
 //[ApiVersion("2.0")]
-public class ClientsController(IMediator mediator, IMapper mapper) : ApiControllerBase<ClientsController>
+public class ClientsController(IMediator mediator, IMapper mapper,IStringLocalizer<SharedResources> _localizer) : ApiControllerBase<ClientsController>
 {
     public IMediator Mediator { get; } = mediator;
 
@@ -44,7 +45,8 @@ public class ClientsController(IMediator mediator, IMapper mapper) : ApiControll
         return Ok(new
         {
             Culture = System.Globalization.CultureInfo.CurrentCulture.Name,
-            UICulture = System.Globalization.CultureInfo.CurrentUICulture.Name
+            UICulture = System.Globalization.CultureInfo.CurrentUICulture.Name,
+            ResourceName = _localizer["OrderCreatedSuccess"]
         });
     }
 }

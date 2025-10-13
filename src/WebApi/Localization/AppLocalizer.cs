@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Localization;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.Extensions.Localization;
 using TegWallet.Application.Interfaces.Localization;
 
 namespace TegWallet.WebApi.Localization;
@@ -11,9 +11,9 @@ public class AppLocalizer : IAppLocalizer
     public AppLocalizer(IStringLocalizerFactory factory)
     {
         // SharedResource is just a marker class
-        //var type = typeof(SharedResource);
+        //var type = typeof(SharedResources);
         //_localizer = factory.Create(type);
-        _localizer = factory.Create("SharedResource", Assembly.GetExecutingAssembly().GetName().Name);
+        _localizer = factory.Create("SharedResources", Assembly.GetExecutingAssembly().GetName().Name);
     }
 
     public string this[string key] => _localizer[key];
@@ -24,5 +24,3 @@ public class AppLocalizer : IAppLocalizer
         return arguments.Length == 0 ? value.Value : string.Format(value.Value, arguments);
     }
 }
-
-public class SharedResource { }
