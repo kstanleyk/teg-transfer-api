@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using TegWallet.Application;
 using TegWallet.Infrastructure;
 using TegWallet.WebApi;
@@ -15,6 +16,7 @@ services.AddApplicationDependencies();
 services.AddInfrastructureDependencies(configuration);
 services.AddJwtAuthentication(configuration);
 services.AddVersioning();
+services.AddLocalizationServices();
 
 var app = builder.Build();
 
@@ -31,6 +33,7 @@ app.UseCors(allowedCorsOrigins);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 app.MapControllers();
 
 app.Run();

@@ -1,10 +1,14 @@
-using System.Reflection;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
+using System.Reflection;
 using TegWallet.Application.Authorization;
+using TegWallet.Application.Interfaces;
+using TegWallet.Infrastructure;
 using TegWallet.WebApi.Permissions;
 using TegWallet.WebApi.Services;
 
@@ -102,7 +106,6 @@ public static class ServiceCollectionExtensions
             options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         });
 
-
         services.AddHttpContextAccessor();
         services.AddScoped<CurrentUserService>();
         services.AddScoped<TokenInfoService>();
@@ -133,6 +136,21 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV"; // e.g. "v1"
                 options.SubstituteApiVersionInUrl = true;
             });
+
+        return services;
+    }
+
+    public static IServiceCollection AddLocalizationServices(this IServiceCollection services)
+    {
+        services.AddTransient<ILocalizationService, LocalizationService>();
+        services.AddLocalization(options => options.ResourcesPath = "Resources");
+        services.Configure<RequestLocalizationOptions>(options =>
+        {
+            string[] supportedCultures = ["en", "fr"];
+            options.DefaultRequestCulture = new RequestCulture("en");
+            options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+            options.SupportedUICultures = options.SupportedCultures;
+        });
 
         return services;
     }
