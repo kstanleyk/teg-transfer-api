@@ -14,7 +14,10 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
     : DataRepository<Wallet, Guid>(databaseFactory), IWalletRepository
 {
     public async Task<Wallet?> GetByClientIdAsync(Guid clientId) =>
-        await DbSet.AsNoTracking().FirstOrDefaultAsync(x => x.ClientId == clientId);
+        await DbSet
+            .Include(x=>x.Ledgers)
+            .Include(x=>x.Reservations)
+            .AsNoTracking().FirstOrDefaultAsync(x => x.ClientId == clientId);
 
     public async Task<Wallet?> GetByClientIdWithDetailsAsync(Guid clientId)
     {
@@ -23,7 +26,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                 .OrderByDescending(l => l.Timestamp)
                 .Take(10)) // Last 10 transactions
             .Include(w => w.Reservations
-                .Where(pr => pr.Status == PurchaseReservationStatus.Pending)
+                .Where(pr => pr.Status == ReservationStatus.Pending)
                 .OrderByDescending(pr => pr.CreatedAt))
             .AsSplitQuery() // For better performance with multiple includes
             .FirstOrDefaultAsync(w => w.ClientId == clientId);

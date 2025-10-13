@@ -11,7 +11,7 @@ public class WalletBalanceDto
     public string CurrencyCode { get; set; } = null!;
     public DateTime LastUpdated { get; set; }
     public BalanceStatus Status { get; set; }
-    public List<BalanceBreakdownDto> Breakdown { get; set; } = new();
+    public List<BalanceBreakdownDto> Breakdown { get; set; } = [];
 }
 
 public class BalanceBreakdownDto

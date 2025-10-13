@@ -12,8 +12,8 @@ using TegWallet.Infrastructure.Persistence.Context;
 namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TegWalletContext))]
-    [Migration("20251012052441_CompletionType")]
-    partial class CompletionType
+    [Migration("20251013060400_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,18 +256,6 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("approved_at");
-
-                    b.Property<string>("ApprovedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("")
-                        .HasColumnName("approved_by");
-
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at");
@@ -282,8 +270,10 @@ namespace TegWallet.Infrastructure.Migrations
 
                     b.Property<string>("CompletionType")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(25)
                         .HasColumnType("character varying(25)")
+                        .HasDefaultValue("")
                         .HasColumnName("completion_type");
 
                     b.Property<string>("Description")
@@ -298,35 +288,11 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("failure_reason");
 
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("processed_at");
-
-                    b.Property<string>("ProcessedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("")
-                        .HasColumnName("processed_by");
-
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("reference");
-
-                    b.Property<DateTime?>("RejectedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("rejected_at");
-
-                    b.Property<string>("RejectedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("")
-                        .HasColumnName("rejected_by");
 
                     b.Property<Guid?>("ReservationId")
                         .HasColumnType("uuid")

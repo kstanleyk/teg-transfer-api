@@ -16,7 +16,7 @@ public class Reservation : Entity<Guid>
     public string Description { get; private init; }
     public string SupplierDetails { get; private init; }
     public string PaymentMethod { get; private init; }
-    public PurchaseReservationStatus Status { get; private set; }
+    public ReservationStatus Status { get; private set; }
     public DateTime CreatedAt { get; private init; }
     public DateTime? CompletedAt { get; private set; }
     public DateTime? CancelledAt { get; private set; }
@@ -58,7 +58,7 @@ public class Reservation : Entity<Guid>
             Description = description.Trim(),
             SupplierDetails = supplierDetails.Trim(),
             PaymentMethod = paymentMethod.Trim(),
-            Status = PurchaseReservationStatus.Pending,
+            Status = ReservationStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -67,33 +67,33 @@ public class Reservation : Entity<Guid>
 
     public void Complete(string processedBy = "ADMIN")
     {
-        if (Status != PurchaseReservationStatus.Pending)
+        if (Status != ReservationStatus.Pending)
             throw new DomainException("Only pending reservations can be completed");
 
-        Status = PurchaseReservationStatus.Completed;
+        Status = ReservationStatus.Completed;
         ProcessedBy = processedBy;
         CompletedAt = DateTime.UtcNow;
     }
 
     public void Cancel(string reason, string cancelledBy = "ADMIN")
     {
-        if (Status != PurchaseReservationStatus.Pending)
+        if (Status != ReservationStatus.Pending)
             throw new DomainException("Only pending reservations can be cancelled");
 
-        Status = PurchaseReservationStatus.Cancelled;
+        Status = ReservationStatus.Cancelled;
         CancellationReason = reason.Trim();
         ProcessedBy = cancelledBy;
         CancelledAt = DateTime.UtcNow;
     }
 
-    public bool CanBeCompleted => Status == PurchaseReservationStatus.Pending;
-    public bool CanBeCancelled => Status == PurchaseReservationStatus.Pending;
-    public bool IsPending => Status == PurchaseReservationStatus.Pending;
-    public bool IsCompleted => Status == PurchaseReservationStatus.Completed;
-    public bool IsCancelled => Status == PurchaseReservationStatus.Cancelled;
+    public bool CanBeCompleted => Status == ReservationStatus.Pending;
+    public bool CanBeCancelled => Status == ReservationStatus.Pending;
+    public bool IsPending => Status == ReservationStatus.Pending;
+    public bool IsCompleted => Status == ReservationStatus.Completed;
+    public bool IsCancelled => Status == ReservationStatus.Cancelled;
 }
 
-public enum PurchaseReservationStatus
+public enum ReservationStatus
 {
     Pending = 1,
     Completed = 2,

@@ -220,15 +220,9 @@ namespace TegWallet.Infrastructure.Migrations
                     reference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     failure_reason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    approved_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
-                    completion_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
+                    completion_type = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false, defaultValue: ""),
                     completed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     completed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
-                    approved_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    rejected_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
-                    rejected_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    processed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: ""),
-                    processed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     reservation_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>

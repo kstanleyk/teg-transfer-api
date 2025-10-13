@@ -9,7 +9,7 @@ public class ReservationRepository(IDatabaseFactory databaseFactory)
     : DataRepository<Reservation, Guid>(databaseFactory), IReservationRepository
 {
     public async Task<IReadOnlyList<Reservation>> GetReservationsByClientIdAsync(Guid clientId,
-        PurchaseReservationStatus? status = null)
+        ReservationStatus? status = null)
     {
         var query = DbSet
             .Where(pr => pr.ClientId == clientId);
@@ -29,7 +29,7 @@ public class ReservationRepository(IDatabaseFactory databaseFactory)
 
     public async Task<PagedResult<Reservation>> GetPagedReservationsByClientIdAsync(
         Guid clientId,
-        PurchaseReservationStatus? status = null,
+        ReservationStatus? status = null,
         int page = 1,
         int pageSize = 20,
         string? sortBy = null,
