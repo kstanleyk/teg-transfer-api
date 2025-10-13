@@ -41,4 +41,10 @@ public class RejectDepositFundsCommandHandler(IWalletRepository walletRepository
 
         return Result.Succeeded("Deposit funds request cancelled successfully.");
     }
+
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
+    }
 }

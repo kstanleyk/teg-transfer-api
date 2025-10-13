@@ -40,4 +40,10 @@ public class ApproveWithdrawFundsCommandHandler(IWalletRepository walletReposito
 
         return Result.Succeeded("Withdraw funds request approved successfully.");
     }
+
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
+    }
 }

@@ -29,20 +29,6 @@ public static class ServiceCollectionExtensions
                     ValidateAudience = false,
                 };
                 options.RequireHttpsMetadata = false;
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = ctx =>
-                    {
-                        Console.WriteLine($"Auth failed: {ctx.Exception}");
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = _ =>
-                    {
-                        Console.WriteLine("Token validated successfully!");
-                        return Task.CompletedTask;
-                    }
-                };
             });
 
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>()
@@ -95,11 +81,12 @@ public static class ServiceCollectionExtensions
 
         services.AddControllersWithViews(config =>
         {
-            var policy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
+            //var policy = new AuthorizationPolicyBuilder()
+            //    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            //    .RequireAuthenticatedUser()
+            //    .Build();
 
-            config.Filters.Add(new AuthorizeFilter(policy));
+            //config.Filters.Add(new AuthorizeFilter(policy));
         })
         .AddJsonOptions(options =>
         {

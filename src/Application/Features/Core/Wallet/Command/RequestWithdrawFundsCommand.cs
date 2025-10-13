@@ -50,4 +50,10 @@ public class RequestWithdrawFundsCommandHandler(
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
         return Result<TransactionDto>.Succeeded(transactionDto, "Withdraw funds request completed successfully, pending admin validation");
     }
+
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
+    }
 }

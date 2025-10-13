@@ -43,4 +43,10 @@ public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository, I
 
         return Result.Succeeded("Purchase service request approved successfully.");
     }
+
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
+    }
 }

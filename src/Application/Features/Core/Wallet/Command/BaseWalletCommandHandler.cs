@@ -8,7 +8,7 @@ namespace TegWallet.Application.Features.Core.Wallet.Command;
 
 public abstract class BaseWalletCommandHandler<TResult>(
     IWalletRepository walletRepository,
-    IClientRepository clientRepository)
+    IClientRepository clientRepository): RequestHandlerBase
 {
     protected readonly IWalletRepository WalletRepository = walletRepository;
     protected readonly IClientRepository ClientRepository = clientRepository;

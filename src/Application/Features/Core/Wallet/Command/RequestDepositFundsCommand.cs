@@ -56,4 +56,10 @@ public class RequestDepositFundsCommandHandler(
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
         return Result<TransactionDto>.Succeeded(transactionDto,message);
     }
+
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
+    }
 }

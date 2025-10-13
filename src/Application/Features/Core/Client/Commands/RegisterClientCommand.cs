@@ -18,7 +18,7 @@ public record RegisterClientCommand(
 
 public class RegisterClientCommandHandler(
     IClientRepository clientRepository,
-    IMapper mapper) : IRequestHandler<RegisterClientCommand, Result<ClientRegisteredDto>>
+    IMapper mapper) : RequestHandlerBase, IRequestHandler<RegisterClientCommand, Result<ClientRegisteredDto>>
 {
     public async Task<Result<ClientRegisteredDto>> Handle(RegisterClientCommand command, CancellationToken cancellationToken)
     {
@@ -55,5 +55,10 @@ public class RegisterClientCommandHandler(
         // Map to DTO and return
         var clientDto = mapper.Map<ClientRegisteredDto>(result.Entity);
         return Result<ClientRegisteredDto>.Succeeded(clientDto,"Client account created successfully.");
+    }
+
+    protected override void DisposeCore()
+    {
+        clientRepository.Dispose();
     }
 }

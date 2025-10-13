@@ -2,13 +2,9 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
-using TegWallet.Application.Authorization;
 using TegWallet.Application.Features.Core.Client.Commands;
 using TegWallet.Application.Features.Core.Client.Dto;
-using TegWallet.WebApi.Attributes;
 
 namespace TegWallet.WebApi.Controllers.Core;
 
@@ -20,7 +16,6 @@ public class ClientsController(IMediator mediator, IMapper mapper,IStringLocaliz
 
     [MapToApiVersion("1.0")]
     [HttpPost]
-    [MustHavePermission(AppFeature.Client, AppAction.Create)]
     public async Task<IActionResult> RegisterClientV1([FromBody] RegisterClientDto dto)
     {
         var command = mapper.Map<RegisterClientCommand>(dto);
@@ -28,17 +23,7 @@ public class ClientsController(IMediator mediator, IMapper mapper,IStringLocaliz
         return Ok(result);
     }
 
-    //[MapToApiVersion("2.0")]
-    //[HttpPost]
-    //[MustHavePermission(AppFeature.Client, AppAction.Create)]
-    //public async Task<IActionResult> RegisterClientV2([FromBody] RegisterClientDto dto)
-    //{
-    //    var command = mapper.Map<RegisterClientCommand>(dto);
-    //    var result = await MediatorSender.Send(command);
-    //    return Ok(result);
-    //}
-
-    [AllowAnonymous]
+    [MapToApiVersion("1.0")]
     [HttpGet("culture")]
     public IActionResult GetCulture()
     {

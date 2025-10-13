@@ -7,7 +7,6 @@ namespace TegWallet.WebApi.Controllers
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ApiControllerBase<T> : ControllerBase
     {
         private ISender _sender;

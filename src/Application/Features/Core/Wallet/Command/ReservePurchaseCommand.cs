@@ -46,6 +46,11 @@ public class ReservePurchaseCommandHandler(
             return Result<ReservedPurchaseDto>.Failed("An unexpected error occurred while processing your purchase reservation");
 
         return Result<ReservedPurchaseDto>.Succeeded(result.Entity!, "Service purchase request completed successfully, pending admin validation");
+    }
 
+    protected override void DisposeCore()
+    {
+        WalletRepository.Dispose();
+        ClientRepository.Dispose();
     }
 }

@@ -7,7 +7,7 @@ public record Currency
     public int DecimalPlaces { get; init; }
 
     // EF Core requires a parameterless constructor
-    private Currency() { }
+    protected Currency() { }
 
     public Currency(string code, string symbol, int decimalPlaces)
     {
