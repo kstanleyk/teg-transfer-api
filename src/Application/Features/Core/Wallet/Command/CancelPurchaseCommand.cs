@@ -42,6 +42,6 @@ public class CancelPurchaseCommandHandler(IWalletRepository walletRepository, IC
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while cancelling the purchase");
 
-        return Result.Succeeded();
+        return Result.Succeeded("Purchase service request cancelled successfully.");
     }
 }

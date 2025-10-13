@@ -39,6 +39,6 @@ public class RejectDepositFundsCommandHandler(IWalletRepository walletRepository
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while processing your transaction. Please try again.");
 
-        return Result.Succeeded();
+        return Result.Succeeded("Deposit funds request cancelled successfully.");
     }
 }

@@ -48,6 +48,6 @@ public class RequestWithdrawFundsCommandHandler(
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your withdrawal. Please try again.");
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
-        return Result<TransactionDto>.Succeeded(transactionDto);
+        return Result<TransactionDto>.Succeeded(transactionDto, "Withdraw funds request completed successfully, pending admin validation");
     }
 }

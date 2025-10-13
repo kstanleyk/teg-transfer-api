@@ -41,6 +41,6 @@ public class ApprovePurchaseCommandHandler(IWalletRepository walletRepository, I
         if (result.Status != RepositoryActionStatus.Updated)
             return Result.Failed("An unexpected error occurred while approving the purchase");
 
-        return Result.Succeeded();
+        return Result.Succeeded("Purchase service request approved successfully.");
     }
 }

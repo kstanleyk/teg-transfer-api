@@ -50,6 +50,6 @@ public class RequestDepositFundsCommandHandler(
             return Result<TransactionDto>.Failed("An unexpected error occurred while processing your deposit. Please try again.");
 
         var transactionDto = mapper.Map<TransactionDto>(result.Entity);
-        return Result<TransactionDto>.Succeeded(transactionDto);
+        return Result<TransactionDto>.Succeeded(transactionDto, "Deposit funds request completed successfully, pending admin validation");
     }
 }
