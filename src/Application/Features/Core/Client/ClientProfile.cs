@@ -10,6 +10,7 @@ public class ClientProfile : Profile
     {
         // RegisterClientDto to RegisterClientCommand
         CreateMap<RegisterClientDto, RegisterClientCommand>();
+        CreateMap<Domain.Entity.Core.Client, ClientDto>();
 
         // Client to ClientRegisteredDto
         CreateMap<Domain.Entity.Core.Client, ClientRegisteredDto>()

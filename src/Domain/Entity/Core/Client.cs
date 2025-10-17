@@ -7,10 +7,10 @@ namespace TegWallet.Domain.Entity.Core;
 
 public class Client : Entity<Guid>
 {
-    public string Email { get; private set; } = null!;
-    public string PhoneNumber { get; private set; } = null!;
-    public string FirstName { get; private init; } = null!;
-    public string LastName { get; private init; } = null!;
+    public string Email { get; private set; }
+    public string PhoneNumber { get; private set; }
+    public string FirstName { get; private init; }
+    public string LastName { get; private init; }
     public DateTime CreatedAt { get; private init; }
     public ClientStatus Status { get; private set; }
 
@@ -19,6 +19,10 @@ public class Client : Entity<Guid>
     // Private constructor for EF Core and internal operations
     protected Client()
     {
+        Email = string.Empty;
+        PhoneNumber = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
     }
 
     public static Client Create(string email, string phoneNumber, string firstName, string lastName,

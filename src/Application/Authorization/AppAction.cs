@@ -14,5 +14,9 @@
         public const string Deposit = nameof(Deposit);
         public const string Withdraw = nameof(Withdraw);
         public const string Approve = nameof(Approve);
+        public const string Reject = nameof(Reject);
+        public const string ReservePurchase = nameof(ReservePurchase);
+        public const string ApprovePurchase = nameof(ApprovePurchase);
+        public const string CancelPurchase = nameof(CancelPurchase);
     }
 }

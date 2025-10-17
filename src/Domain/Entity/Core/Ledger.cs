@@ -15,7 +15,7 @@ public class Ledger : Entity<Guid>
     public string Reference { get; private set; } = string.Empty;
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public string CompletionType { get; private set; } 
+    public string CompletionType { get; private set; } = string.Empty;
     public DateTime? CompletedAt { get; private set; }
     public string CompletedBy { get; private set; } = string.Empty;
     public Guid? ReservationId { get; private set; } 

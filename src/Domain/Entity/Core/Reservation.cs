@@ -24,7 +24,15 @@ public class Reservation : Entity<Guid>
     public string? ProcessedBy { get; private set; }
 
     // Private constructor for EF Core
-    protected Reservation() { }
+    protected Reservation()
+    {
+        PurchaseAmount  = new Money(0, Currency.XOF);
+        ServiceFeeAmount = new Money(0, Currency.XOF);
+        TotalAmount = new Money(0, Currency.XOF);
+        Description = string.Empty;
+        SupplierDetails = string.Empty;
+        PaymentMethod = string.Empty;
+    }
 
     public static Reservation Create(Guid clientId, Guid walletId, Guid purchaseLedgerId, Guid serviceFeeLedgerId,
         Money purchaseAmount, Money serviceFeeAmount, string description, string supplierDetails, string paymentMethod)
