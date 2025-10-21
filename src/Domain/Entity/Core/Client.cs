@@ -1,14 +1,12 @@
-﻿using TegWallet.Domain.Abstractions;
+﻿using Microsoft.AspNetCore.Identity;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class Client : Entity<Guid>
+public class Client : IdentityUser<Guid>
 {
-    public string Email { get; private set; }
-    public string PhoneNumber { get; private set; }
     public string FirstName { get; private init; }
     public string LastName { get; private init; }
     public DateTime CreatedAt { get; private init; }
@@ -19,8 +17,6 @@ public class Client : Entity<Guid>
     // Private constructor for EF Core and internal operations
     protected Client()
     {
-        Email = string.Empty;
-        PhoneNumber = string.Empty;
         FirstName = string.Empty;
         LastName = string.Empty;
     }
@@ -46,13 +42,17 @@ public class Client : Entity<Guid>
 
         var client = new Client
         {
-            Id = clientId,
+            Id = clientId,                       // IdentityUser<Guid>.Id
+            UserName = email.Trim().ToLower(),   // IdentityUser.UserName
+            NormalizedUserName = email.Trim().ToUpperInvariant(),
             Email = email.Trim().ToLower(),
+            NormalizedEmail = email.Trim().ToUpperInvariant(),
             PhoneNumber = phoneNumber.Trim(),
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
             CreatedAt = createdAt ?? DateTime.UtcNow,
-            Status = ClientStatus.Active
+            Status = ClientStatus.Active,
+            EmailConfirmed = false
         };
 
         // Create wallet associated with the client
@@ -66,16 +66,13 @@ public class Client : Entity<Guid>
         DomainGuards.AgainstNullOrWhiteSpace(email);
         DomainGuards.AgainstNullOrWhiteSpace(phoneNumber);
 
-        if (!IsValidEmail(email))
-            throw new DomainException("Invalid email format");
-
-        if (!IsValidPhoneNumber(phoneNumber))
-            throw new DomainException("Invalid phone number format");
-
-        //var oldEmail = Email;
-        //var oldPhone = PhoneNumber;
+        if (!IsValidEmail(email)) throw new DomainException("Invalid email format");
+        if (!IsValidPhoneNumber(phoneNumber)) throw new DomainException("Invalid phone number format");
 
         Email = email.Trim().ToLower();
+        NormalizedEmail = email.Trim().ToUpperInvariant();
+        UserName = Email;
+        NormalizedUserName = Email.ToUpperInvariant();
         PhoneNumber = phoneNumber.Trim();
     }
 

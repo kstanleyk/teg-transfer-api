@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
@@ -13,8 +14,8 @@ public record RejectDepositFundsCommand(
     string Reason,
     string RejectedBy = "System") : IRequest<Result>;
 
-public class RejectDepositFundsCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
-    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<RejectDepositFundsCommand, Result>
+public class RejectDepositFundsCommandHandler(IWalletRepository walletRepository, UserManager<Domain.Entity.Core.Client> userManager)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, userManager), IRequestHandler<RejectDepositFundsCommand, Result>
 {
     public async Task<Result> Handle(RejectDepositFundsCommand fundsCommand, CancellationToken cancellationToken)
     {
@@ -45,6 +46,6 @@ public class RejectDepositFundsCommandHandler(IWalletRepository walletRepository
     protected override void DisposeCore()
     {
         WalletRepository.Dispose();
-        ClientRepository.Dispose();
+        UserManager.Dispose();
     }
 }

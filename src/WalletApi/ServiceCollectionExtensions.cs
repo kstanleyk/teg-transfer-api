@@ -1,14 +1,13 @@
 using System.Globalization;
-using System.Reflection;
+using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using TegWallet.Application.Authorization;
 using TegWallet.Application.Interfaces.Localization;
 using TegWallet.WalletApi.Localization;
-using TegWallet.WalletApi.Permissions;
 using TegWallet.WalletApi.Services;
 
 namespace TegWallet.WalletApi;
@@ -17,34 +16,29 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var authorizationServer = configuration["AppSettings:AuthorizationServer"];
+        // JWT settings
+        var jwtKey = configuration["Settings:Key"]!;
+        var jwtIssuer = configuration["Settings:Issuer"]!;
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        services.AddAuthentication(options =>
             {
-                options.Authority = authorizationServer;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtIssuer,
                     ValidateAudience = false,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ValidateIssuerSigningKey = true
                 };
-                options.RequireHttpsMetadata = false;
             });
 
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>()
-            .AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
-        services.AddAuthorization(options =>
-        {
-            foreach (var prop in typeof(AppPermissions).GetNestedTypes().SelectMany(c =>
-                         c.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)))
-            {
-                var propertyValue = prop.GetValue(null);
-                if (propertyValue is not null)
-                {
-                    options.AddPolicy(propertyValue.ToString()!, policy => policy.RequireClaim(AppClaim.Permission, propertyValue.ToString()!));
-                }
-            }
-        });
+        services.AddAuthorization();
 
         return services;
     }
@@ -80,12 +74,12 @@ public static class ServiceCollectionExtensions
 
         services.AddControllersWithViews(config =>
         {
-            //var policy = new AuthorizationPolicyBuilder()
-            //    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-            //    .RequireAuthenticatedUser()
-            //    .Build();
+            var policy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .Build();
 
-            //config.Filters.Add(new AuthorizeFilter(policy));
+            config.Filters.Add(new AuthorizeFilter(policy));
         })
         .AddJsonOptions(options =>
         {

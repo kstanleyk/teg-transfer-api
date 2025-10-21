@@ -18,7 +18,7 @@ public class Ledger : Entity<Guid>
     public string CompletionType { get; private set; } = string.Empty;
     public DateTime? CompletedAt { get; private set; }
     public string CompletedBy { get; private set; } = string.Empty;
-    public Guid? ReservationId { get; private set; } 
+    public Guid? ReservationId { get; private set; }
 
     // Protected constructor for EF Core
     protected Ledger()

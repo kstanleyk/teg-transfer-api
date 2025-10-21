@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
@@ -18,7 +19,7 @@ public record GetClientPurchaseReservationsQuery(
 
 public class GetClientPurchaseReservationsQueryHandler(
         IReservationRepository reservationRepository,
-        IClientRepository clientRepository,
+        UserManager<Domain.Entity.Core.Client> clientRepository,
         IMapper mapper)
         : IRequestHandler<GetClientPurchaseReservationsQuery, PagedResponse<PurchaseReservationDto>>
 {
@@ -27,7 +28,7 @@ public class GetClientPurchaseReservationsQueryHandler(
         CancellationToken cancellationToken)
     {
         // Validate client exists
-        var client = await clientRepository.GetAsync(query.ClientId);
+        var client = await clientRepository.FindByIdAsync(query.ClientId.ToString());
         if (client == null)
             throw new InvalidOperationException($"Client not found: {query.ClientId}");
 

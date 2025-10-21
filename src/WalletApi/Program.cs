@@ -13,7 +13,7 @@ const string allowedCorsOrigins = nameof(allowedCorsOrigins);
 services.AddApiServices(configuration, host, allowedCorsOrigins);
 services.AddApplicationDependencies();
 services.AddInfrastructureDependencies(configuration);
-//services.AddJwtAuthentication(configuration);
+services.AddJwtAuthentication(configuration);
 services.AddVersioning();
 services.AddLocalizationServices();
 
@@ -32,8 +32,8 @@ app.UseLocalizationServices();
 app.UseCors(allowedCorsOrigins);
 
 app.UseHttpsRedirection();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

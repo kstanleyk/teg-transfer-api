@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Validators;
 using TegWallet.Application.Helpers;
@@ -13,8 +14,8 @@ public record CancelPurchaseCommand(
     string Reason,
     string CancelledBy = "ADMIN") : IRequest<Result>;
 
-public class CancelPurchaseCommandHandler(IWalletRepository walletRepository, IClientRepository clientRepository)
-    : BaseWalletCommandHandler<TransactionDto>(walletRepository, clientRepository), IRequestHandler<CancelPurchaseCommand, Result>
+public class CancelPurchaseCommandHandler(IWalletRepository walletRepository, UserManager<Domain.Entity.Core.Client> userManager)
+    : BaseWalletCommandHandler<TransactionDto>(walletRepository, userManager), IRequestHandler<CancelPurchaseCommand, Result>
 {
     public async Task<Result> Handle(CancelPurchaseCommand command, CancellationToken cancellationToken)
     {
@@ -48,6 +49,6 @@ public class CancelPurchaseCommandHandler(IWalletRepository walletRepository, IC
     protected override void DisposeCore()
     {
         WalletRepository.Dispose();
-        ClientRepository.Dispose();
+        UserManager.Dispose();
     }
 }

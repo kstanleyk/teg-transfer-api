@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using TegWallet.Application.Features.Core.Client.Commands;
@@ -15,7 +16,8 @@ public class ClientsController(IMediator mediator, IMapper mapper,IStringLocaliz
     public IMediator Mediator { get; } = mediator;
 
     [MapToApiVersion("1.0")]
-    [HttpPost]
+    [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterClientV1([FromBody] RegisterClientDto dto)
     {
         var command = mapper.Map<RegisterClientCommand>(dto);
