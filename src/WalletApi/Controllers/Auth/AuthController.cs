@@ -39,7 +39,7 @@ public class AuthController(UserManager<Client> userManager, IConfiguration conf
 
     private (string token, int expiresInSeconds) GenerateJwtToken(Client user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
@@ -54,8 +54,8 @@ public class AuthController(UserManager<Client> userManager, IConfiguration conf
         var expiresInSeconds = (int)TimeSpan.FromHours(1).TotalSeconds;
 
         var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"], // optional
+            issuer: config["JwtSettings:Issuer"],
+            audience: config["JwtSettings:Audience"], // optional
             claims: claims,
             expires: expires,
             signingCredentials: creds);

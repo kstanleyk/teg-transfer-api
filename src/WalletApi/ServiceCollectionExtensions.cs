@@ -17,8 +17,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         // JWT settings
-        var jwtKey = configuration["Settings:Key"]!;
-        var jwtIssuer = configuration["Settings:Issuer"]!;
+        var jwtKey = configuration["JwtSettings:Key"]!;
+        var jwtIssuer = configuration["JwtSettings:Issuer"]!;
 
         services.AddAuthentication(options =>
             {
