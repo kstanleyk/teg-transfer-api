@@ -10,7 +10,11 @@ public class ClientProfile : Profile
     {
         // RegisterClientDto to RegisterClientCommand
         CreateMap<RegisterClientDto, RegisterClientCommand>();
-        CreateMap<Domain.Entity.Core.Client, ClientDto>();
+        CreateMap<Domain.Entity.Core.Client, ClientDto>()
+            .ForMember(dest => dest.FullName,
+                opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()));
 
         // Client to ClientRegisteredDto
         CreateMap<Domain.Entity.Core.Client, ClientRegisteredDto>()

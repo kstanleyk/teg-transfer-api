@@ -17,7 +17,8 @@ namespace TegWallet.WalletApi.Controllers.Auth;
 public class AuthController(UserManager<Client> userManager, IConfiguration config) : ControllerBase
 {
     [MapToApiVersion("1.0")]
-    public async Task<IActionResult> Login(LoginDto dto)
+    [HttpPost()]
+    public async Task<IActionResult> Login([FromBody]LoginDto dto)
     {
         var user = await userManager.FindByEmailAsync(dto.Email);
         if (user == null)

@@ -15,15 +15,15 @@ public record GetClientPurchaseReservationsQuery(
     int PageSize = 20,
     string? SortBy = "CreatedAt",
     bool SortDescending = true)
-    : IRequest<PagedResponse<PurchaseReservationDto>>;
+    : IRequest<Result<PagedResponse<PurchaseReservationDto>>>;
 
 public class GetClientPurchaseReservationsQueryHandler(
         IReservationRepository reservationRepository,
         UserManager<Domain.Entity.Core.Client> clientRepository,
         IMapper mapper)
-        : IRequestHandler<GetClientPurchaseReservationsQuery, PagedResponse<PurchaseReservationDto>>
+        : IRequestHandler<GetClientPurchaseReservationsQuery, Result<PagedResponse<PurchaseReservationDto>>>
 {
-    public async Task<PagedResponse<PurchaseReservationDto>> Handle(
+    public async Task<Result<PagedResponse<PurchaseReservationDto>>> Handle(
         GetClientPurchaseReservationsQuery query,
         CancellationToken cancellationToken)
     {
@@ -55,6 +55,6 @@ public class GetClientPurchaseReservationsQueryHandler(
             HasNext = pagedResult.HasNext
         };
 
-        return response;
+        return Result<PagedResponse<PurchaseReservationDto>>.Succeeded(response);
     }
 }

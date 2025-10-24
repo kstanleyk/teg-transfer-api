@@ -32,6 +32,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/deposit/approve")]
     [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
+
     public async Task<IActionResult> ApproveDepositV1(Guid clientId, [FromBody] ApproveDepositDto request)
     {
         var command = new ApproveDepositFundsCommand(

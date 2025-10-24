@@ -1,22 +1,23 @@
 ﻿using AutoMapper;
 using MediatR;
 using TegWallet.Application.Features.Core.Wallet.Dto;
+using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.Wallet.Query;
 
 // Query to get purchase reservation by ID with details
 public record GetPurchaseReservationByIdQuery(Guid ReservationId)
-    : IRequest<PurchaseReservationDetailDto>;
+    : IRequest<Result<PurchaseReservationDetailDto>>;
 
 public class GetPurchaseReservationByIdQueryHandler(
     IWalletRepository walletRepository,
     IMapper mapper)
-    : IRequestHandler<GetPurchaseReservationByIdQuery, PurchaseReservationDetailDto>
+    : IRequestHandler<GetPurchaseReservationByIdQuery, Result<PurchaseReservationDetailDto>>
 {
     private readonly IMapper _mapper = mapper;
 
-    public async Task<PurchaseReservationDetailDto> Handle(
+    public async Task<Result<PurchaseReservationDetailDto>> Handle(
         GetPurchaseReservationByIdQuery query,
         CancellationToken cancellationToken)
     {
@@ -34,8 +35,8 @@ public class GetPurchaseReservationByIdQueryHandler(
         var detailDto = _mapper.Map<PurchaseReservationDetailDto>(reservation);
         detailDto.PurchaseLedger = _mapper.Map<TransactionDto>(purchaseLedger);
         detailDto.ServiceFeeLedger = _mapper.Map<TransactionDto>(serviceFeeLedger);
-        detailDto.ClientName = "";//$"{wallet.Client?.FirstName} {wallet.Client?.LastName}";
+        detailDto.ClientName = "";//$"{wallet.Client?.FullName} {wallet.Client?.LastName}";
 
-        return detailDto;
+        return Result<PurchaseReservationDetailDto>.Succeeded(detailDto);
     }
 }

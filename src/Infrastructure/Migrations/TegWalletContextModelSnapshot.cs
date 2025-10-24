@@ -379,7 +379,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -462,7 +462,7 @@ namespace TegWallet.Infrastructure.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_client_status");
 
-                    b.HasIndex("FirstName", "LastName")
+                    b.HasIndex("FullName", "LastName")
                         .HasDatabaseName("ix_client_name");
 
                     b.ToTable("client", "identity");

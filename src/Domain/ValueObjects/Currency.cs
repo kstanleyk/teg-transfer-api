@@ -32,4 +32,6 @@ public record Currency
             _ => throw new ArgumentException($"Unsupported currency code: {code}")
         };
     }
+
+    public static IReadOnlyList<Currency> All => [USD, NGN, XOF, CNY];
 }

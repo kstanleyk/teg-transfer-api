@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace TegWallet.Application.Features.Core.Wallet.Dto;
+﻿namespace TegWallet.Application.Features.Core.Wallet.Dto;
 
 public class WalletDto
 {

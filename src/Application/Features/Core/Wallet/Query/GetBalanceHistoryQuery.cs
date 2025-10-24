@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using TegWallet.Application.Features.Core.Wallet.Dto;
 using TegWallet.Application.Features.Core.Wallet.Model;
+using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Enum;
 
@@ -8,15 +9,15 @@ namespace TegWallet.Application.Features.Core.Wallet.Query;
 
 // Query to get balance history for a period
 public record GetBalanceHistoryQuery(Guid ClientId, DateTime FromDate, DateTime ToDate, BalanceHistoryPeriod Period = BalanceHistoryPeriod.Daily)
-    : IRequest<BalanceHistoryDto>;
+    : IRequest<Result<BalanceHistoryDto>>;
 
 public class GetBalanceHistoryQueryHandler(
         IWalletRepository walletRepository)
-        : IRequestHandler<GetBalanceHistoryQuery, BalanceHistoryDto>
+        : IRequestHandler<GetBalanceHistoryQuery, Result<BalanceHistoryDto>>
 {
     private readonly IWalletRepository _walletRepository = walletRepository;
 
-    public async Task<BalanceHistoryDto> Handle(GetBalanceHistoryQuery query, CancellationToken cancellationToken)
+    public async Task<Result<BalanceHistoryDto>> Handle(GetBalanceHistoryQuery query, CancellationToken cancellationToken)
     {
         // Validate date range
         if (query.FromDate > query.ToDate)
@@ -32,7 +33,7 @@ public class GetBalanceHistoryQueryHandler(
         var historyData = await _walletRepository.GetBalanceHistoryDataAsync(wallet.Id, query.FromDate, query.ToDate);
         var balanceHistory = await BuildBalanceHistoryDto(wallet, historyData, query.FromDate, query.ToDate, query.Period);
 
-        return balanceHistory;
+        return Result<BalanceHistoryDto>.Succeeded(balanceHistory);
     }
 
     private async Task<BalanceHistoryDto> BuildBalanceHistoryDto(Domain.Entity.Core.Wallet wallet, BalanceHistoryData historyData,

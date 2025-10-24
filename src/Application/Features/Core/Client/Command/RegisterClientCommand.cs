@@ -42,7 +42,7 @@ public class RegisterClientCommandHandler(
             return Result<ClientRegisteredDto>.Failed("Client with this email already exists");
 
         // Validate currency code
-        var currency = Currency.FromCode(command.CurrencyCode);
+        var currency = Domain.ValueObjects.Currency.FromCode(command.CurrencyCode);
 
         // Create client (automatically creates wallet)
         var client = Domain.Entity.Core.Client.Create(command.Email.Trim().ToLower(), command.PhoneNumber.Trim(),

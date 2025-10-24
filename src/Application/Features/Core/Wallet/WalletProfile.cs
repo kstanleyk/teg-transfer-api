@@ -65,7 +65,7 @@ public class WalletProfile : Profile
             .ConvertUsing(src => src.Amount);
 
         // Currency value object to string (for cases where we just need the code)
-        CreateMap<Currency, string>()
+        CreateMap<Domain.ValueObjects.Currency, string>()
             .ConvertUsing(src => src.Code);
 
         CreateMap<Domain.Entity.Core.Wallet, WalletBalanceDto>()

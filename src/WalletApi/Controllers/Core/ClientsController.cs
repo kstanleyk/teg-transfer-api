@@ -10,8 +10,7 @@ using TegWallet.Application.Features.Core.Client.Dto;
 namespace TegWallet.WalletApi.Controllers.Core;
 
 [ApiVersion("1.0")]
-//[ApiVersion("2.0")]
-public class ClientsController(IMediator mediator, IMapper mapper,IStringLocalizer<SharedResources> _localizer) : ApiControllerBase<ClientsController>
+public class ClientsController(IMediator mediator, IMapper mapper,IStringLocalizer<SharedResources> localizer) : ApiControllerBase<ClientsController>
 {
     public IMediator Mediator { get; } = mediator;
 
@@ -33,7 +32,7 @@ public class ClientsController(IMediator mediator, IMapper mapper,IStringLocaliz
         {
             Culture = System.Globalization.CultureInfo.CurrentCulture.Name,
             UICulture = System.Globalization.CultureInfo.CurrentUICulture.Name,
-            ResourceName = _localizer["OrderCreatedSuccess"]
+            ResourceName = localizer["OrderCreatedSuccess"]
         });
     }
 }
