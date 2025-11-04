@@ -1,9 +1,9 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TegWallet.Application.Features.Core.Wallet.Command;
-using TegWallet.Application.Features.Core.Wallet.Dto;
-using TegWallet.Application.Features.Core.Wallet.Query;
+using TegWallet.Application.Features.Core.Wallets.Command;
+using TegWallet.Application.Features.Core.Wallets.Dto;
+using TegWallet.Application.Features.Core.Wallets.Query;
 using TegWallet.Application.Helpers;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.WalletApi.Attributes;

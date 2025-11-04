@@ -14,4 +14,6 @@ public interface IReservationRepository : IRepository<Reservation, Guid>
         int pageSize = 20,
         string? sortBy = null,
         bool sortDescending = true);
+
+    Task<IReadOnlyList<Reservation>> GetPendingReservationsAsync();
 }

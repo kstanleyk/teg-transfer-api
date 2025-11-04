@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using TegWallet.Application.Features.Core.Currency.Query;
+using TegWallet.Application.Features.Core.Currencies.Query;
 
 namespace TegWallet.WalletApi.Controllers.Core;
 

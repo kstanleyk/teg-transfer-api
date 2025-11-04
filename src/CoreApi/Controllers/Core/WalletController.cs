@@ -2,9 +2,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TegWallet.Application.Authorization;
-using TegWallet.Application.Features.Core.Wallet.Command;
-using TegWallet.Application.Features.Core.Wallet.Dto;
-using TegWallet.Application.Features.Core.Wallet.Query;
+using TegWallet.Application.Features.Core.Ledgers.Query;
+using TegWallet.Application.Features.Core.Wallets.Command;
+using TegWallet.Application.Features.Core.Wallets.Dto;
+using TegWallet.Application.Features.Core.Wallets.Query;
 using TegWallet.Application.Helpers;
 using TegWallet.CoreApi.Attributes;
 using TegWallet.Domain.Entity.Core;
@@ -19,7 +20,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/deposit")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Deposit)]
     public async Task<IActionResult> DepositFundsV1(Guid clientId, [FromBody] DepositRequestDto request)
     {
         var command = new RequestDepositFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Reference,
@@ -31,8 +31,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/deposit/approve")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
-
     public async Task<IActionResult> ApproveDepositV1(Guid clientId, [FromBody] ApproveDepositDto request)
     {
         var command = new ApproveDepositFundsCommand(
@@ -47,7 +45,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/deposit/reject")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Reject)]
     public async Task<IActionResult> RejectDepositV1(Guid clientId, [FromBody] RejectDepositDto request)
     {
         var command = new RejectDepositFundsCommand(
@@ -63,7 +60,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/withdraw")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Withdraw)]
     public async Task<IActionResult> WithdrawFundsV1(Guid clientId, [FromBody] WithdrawalRequestDto request)
     {
         var command = new RequestWithdrawFundsCommand(clientId, request.Amount, request.CurrencyCode, request.Description);
@@ -74,7 +70,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/withdraw/approve")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Approve)]
     public async Task<IActionResult> ApproveWithdrawalV1(Guid clientId, [FromBody] ApproveWithdrawalDto request)
     {
         var command = new ApproveWithdrawFundsCommand(
@@ -89,7 +84,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/withdraw/reject")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.Reject)]
     public async Task<IActionResult> RejectWithdrawalV1(Guid clientId, [FromBody] RejectWithdrawalDto request)
     {
         var command = new RejectWithdrawFundsCommand(
@@ -105,7 +99,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/purchase/reserve")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.ReservePurchase)]
     public async Task<IActionResult> ReservePurchaseV1(Guid clientId, [FromBody] ReservePurchaseRequestDto request)
     {
         var command = new ReservePurchaseCommand(
@@ -145,7 +138,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/purchase/approve")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.ApprovePurchase)]
     public async Task<IActionResult> ApprovePurchaseV1(Guid clientId, [FromBody] ApprovePurchaseRequestDto request)
     {
         var command = new ApprovePurchaseCommand(
@@ -158,7 +150,6 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/purchase/cancel")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.CancelPurchase)]
     public async Task<IActionResult> CancelPurchaseV1(Guid clientId, [FromBody] CancelPurchaseRequestDto request)
     {
         var command = new CancelPurchaseCommand(
@@ -172,10 +163,27 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpGet("{clientId:guid}/purchase/reservations/{reservationId:guid}")]
-    [MustHavePermission(AppFeature.Wallet, AppAction.CancelPurchase)]
     public async Task<IActionResult> GetPurchaseReservationV1(Guid clientId, Guid reservationId)
     {
         var query = new GetPurchaseReservationQuery(clientId, reservationId);
+        var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/transactions/recent")]
+    public async Task<IActionResult> GetRecentTransactionsV1(Guid clientId, [FromQuery] int limit = 5)
+    {
+        var query = new GetRecentLedgersQuery(clientId, limit);
+        var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/transactions/pending")]
+    public async Task<IActionResult> GetPendingTransactionsV1(Guid clientId)
+    {
+        var query = new GetPendingClientLedgersQuery(clientId);
         var result = await MediatorSender.Send(query);
         return Ok(result);
     }
@@ -185,6 +193,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Result<WalletDto>), StatusCodes.Status400BadRequest)]
+    [MustHavePermission(AppFeature.Wallet, AppAction.Read)]
     public async Task<IActionResult> GetWalletV1(Guid clientId)
     {
         var query = new GetWalletByClientIdQuery(clientId);
@@ -236,8 +245,8 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpGet("{clientId:guid}/purchase-reservations")]
-    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<PagedResponse<ReservationDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<PagedResponse<ReservationDto>>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetClientPurchaseReservationsV1(
         Guid clientId,
         [FromQuery] string? status = null,
@@ -275,8 +284,8 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpGet("purchase-reservations/{reservationId:guid}")]
-    [ProducesResponseType(typeof(Result<PurchaseReservationDetailDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result<PurchaseReservationDetailDto>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<ReservationDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ReservationDetailDto>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPurchaseReservationByIdV1(Guid reservationId)
     {
         var query = new GetPurchaseReservationByIdQuery(reservationId);
@@ -286,7 +295,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpGet("purchase-reservations")]
-    [ProducesResponseType(typeof(Result<PagedResponse<PurchaseReservationDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<PagedResponse<ReservationDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> SearchPurchaseReservationsV1(
         [FromQuery] Guid? clientId = null,
         [FromQuery] string? status = null,

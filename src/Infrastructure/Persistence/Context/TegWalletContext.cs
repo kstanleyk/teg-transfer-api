@@ -20,9 +20,10 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
 
     //Core
     public virtual DbSet<Wallet> WalletSet { get; set; }
-    //public virtual DbSet<Client> ClientSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
     public DbSet<Reservation> PurchaseReservationSet => Set<Reservation>();
+    public DbSet<ExchangeRate> ExchangeRateSet { get; set; }
+    public DbSet<ExchangeRateHistory> ExchangeRateHistorySet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

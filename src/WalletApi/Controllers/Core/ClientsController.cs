@@ -4,8 +4,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using TegWallet.Application.Features.Core.Client.Commands;
-using TegWallet.Application.Features.Core.Client.Dto;
+using TegWallet.Application.Features.Core.Clients.Command;
+using TegWallet.Application.Features.Core.Clients.Dto;
 
 namespace TegWallet.WalletApi.Controllers.Core;
 

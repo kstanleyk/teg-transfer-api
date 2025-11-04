@@ -179,4 +179,14 @@ public class Ledger : Entity<Guid>
             _ => $"Ledger of {amount.Amount} {amount.Currency.Code}"
         };
     }
+
+    public static Ledger Hydrate(Guid walletId, TransactionType type, Money money, TransactionStatus status, string failureReason, string completionType, string completedBy, DateTime? completedAt, string reference, string description, DateTime timestamp, Guid? reservationId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void HydrateFields(string failureReason, string completionType, string completedBy, DateTime? completedAt)
+    {
+        throw new NotImplementedException();
+    }
 }
