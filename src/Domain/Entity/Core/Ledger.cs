@@ -15,10 +15,10 @@ public class Ledger : Entity<Guid>
     public string Reference { get; private set; } = string.Empty;
     public string FailureReason { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public string CompletionType { get; private set; } 
+    public string CompletionType { get; private set; } = string.Empty;
     public DateTime? CompletedAt { get; private set; }
     public string CompletedBy { get; private set; } = string.Empty;
-    public Guid? ReservationId { get; private set; } 
+    public Guid? ReservationId { get; private set; }
 
     // Protected constructor for EF Core
     protected Ledger()
@@ -178,5 +178,15 @@ public class Ledger : Entity<Guid>
             TransactionType.ServiceFee => $"Service fee of {amount.Amount} {amount.Currency.Code}",
             _ => $"Ledger of {amount.Amount} {amount.Currency.Code}"
         };
+    }
+
+    public static Ledger Hydrate(Guid walletId, TransactionType type, Money money, TransactionStatus status, string failureReason, string completionType, string completedBy, DateTime? completedAt, string reference, string description, DateTime timestamp, Guid? reservationId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void HydrateFields(string failureReason, string completionType, string completedBy, DateTime? completedAt)
+    {
+        throw new NotImplementedException();
     }
 }

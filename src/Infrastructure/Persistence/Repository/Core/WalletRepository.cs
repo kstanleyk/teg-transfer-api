@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TegWallet.Application.Features.Core.Wallet.Command;
-using TegWallet.Application.Features.Core.Wallet.Dto;
-using TegWallet.Application.Features.Core.Wallet.Model;
+using TegWallet.Application.Features.Core.Wallets.Command;
+using TegWallet.Application.Features.Core.Wallets.Dto;
+using TegWallet.Application.Features.Core.Wallets.Model;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;
@@ -34,9 +34,14 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         return wallet;
     }
 
+    public async Task<Wallet[]> GetWalletsAsync() => await DbSet.AsNoTracking().ToArrayAsync();
+
+    public async Task<Wallet[]> GetWalletsForClientsAsync(Guid[] walletIds) => 
+        await DbSet.AsNoTracking().Where(x=>walletIds.Contains(x.Id)).ToArrayAsync();
+
     public async Task<Wallet?> GetByClientIdWithPendingLedgersAsync(Guid clientId) =>
         await DbSet.AsNoTracking().Include(w => w.Ledgers
-                .Where(l => l.Type == TransactionType.Deposit &&
+                .Where(l => (l.Type == TransactionType.Deposit || l.Type == TransactionType.Withdrawal) &&
                             l.Status == TransactionStatus.Pending))
             .FirstOrDefaultAsync(x => x.ClientId == clientId);
 
@@ -500,15 +505,15 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
         }
     }
 
-    private static List<DailyBalance> CalculateDailyBalances(List<Ledger> transactions, decimal startingBalance,
+    private static List<DailyBalance> CalculateDailyBalances(List<Ledger> ledgers, decimal startingBalance,
         DateTime fromDate, DateTime toDate)
     {
         var dailyBalances = new List<DailyBalance>();
         var currentBalance = startingBalance;
         var currentDate = fromDate.Date;
 
-        // Group transactions by date
-        var transactionsByDate = transactions
+        // Group ledgers by date
+        var transactionsByDate = ledgers
             .Where(t => t.Timestamp.Date >= fromDate.Date && t.Timestamp.Date <= toDate.Date)
             .GroupBy(t => t.Timestamp.Date)
             .OrderBy(g => g.Key)
@@ -534,7 +539,7 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
             }
             else
             {
-                // No transactions on this day, balance remains the same
+                // No ledgers on this day, balance remains the same
                 dailyBalances.Add(new DailyBalance
                 {
                     Date = currentDate,

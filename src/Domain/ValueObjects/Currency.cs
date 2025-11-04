@@ -7,7 +7,7 @@ public record Currency
     public int DecimalPlaces { get; init; }
 
     // EF Core requires a parameterless constructor
-    private Currency() { }
+    protected Currency() { }
 
     public Currency(string code, string symbol, int decimalPlaces)
     {
@@ -32,4 +32,6 @@ public record Currency
             _ => throw new ArgumentException($"Unsupported currency code: {code}")
         };
     }
+
+    public static IReadOnlyList<Currency> All => [USD, NGN, XOF, CNY];
 }

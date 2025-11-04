@@ -6,7 +6,7 @@ public record Money
     public Currency Currency { get; init; } = null!;
 
     // EF Core requires a parameterless constructor
-    private Money()
+    protected Money()
     {
         Amount = 0;
         // Currency will be set by EF Core

@@ -27,6 +27,11 @@ public class ReservationRepository(IDatabaseFactory databaseFactory)
         return reservations.AsReadOnly();
     }
 
+    public async Task<IReadOnlyList<Reservation>> GetPendingReservationsAsync() =>
+        await DbSet.Where(x => x.Status == ReservationStatus.Pending)
+            .AsNoTracking()
+            .ToListAsync();
+
     public async Task<PagedResult<Reservation>> GetPagedReservationsByClientIdAsync(
         Guid clientId,
         ReservationStatus? status = null,
