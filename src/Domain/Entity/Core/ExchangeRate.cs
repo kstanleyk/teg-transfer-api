@@ -6,12 +6,12 @@ namespace TegWallet.Domain.Entity.Core;
 
 public class ExchangeRate : Entity<Guid>
 {
-    public Currency BaseCurrency { get; private init; }  // XOF
-    public Currency TargetCurrency { get; private init; } // CNY
+    public Currency BaseCurrency { get; private init; }
+    public Currency TargetCurrency { get; private init; }
 
     // Values in a common reference currency (like USD)
-    public decimal BaseCurrencyValue { get; private set; }  // Value of 1 XOF in reference currency
-    public decimal TargetCurrencyValue { get; private set; } // Value of 1 CNY in reference currency
+    public decimal BaseCurrencyValue { get; private set; }  // Value of 1 unit of base currency in reference currency
+    public decimal TargetCurrencyValue { get; private set; } // Value of 1 unit of target currency in reference currency
     public decimal Margin { get; private set; } // Bank's margin/commission
 
     // Calculated properties
@@ -35,9 +35,13 @@ public class ExchangeRate : Entity<Guid>
         CreatedBy = string.Empty;
     }
 
+    // Factory methods for different rate types
+
     public static ExchangeRate CreateGeneralRate(
-        decimal baseCurrencyValue,  // 1 XOF in USD
-        decimal targetCurrencyValue, // 1 CNY in USD  
+        Currency baseCurrency,
+        Currency targetCurrency,
+        decimal baseCurrencyValue,
+        decimal targetCurrencyValue,
         decimal margin,
         DateTime effectiveFrom,
         string createdBy = "SYSTEM",
@@ -51,8 +55,8 @@ public class ExchangeRate : Entity<Guid>
         return new ExchangeRate
         {
             Id = Guid.NewGuid(),
-            BaseCurrency = Currency.XOF,
-            TargetCurrency = Currency.CNY,
+            BaseCurrency = baseCurrency,
+            TargetCurrency = targetCurrency,
             BaseCurrencyValue = baseCurrencyValue,
             TargetCurrencyValue = targetCurrencyValue,
             Margin = margin,
@@ -67,6 +71,8 @@ public class ExchangeRate : Entity<Guid>
     }
 
     public static ExchangeRate CreateGroupRate(
+        Currency baseCurrency,
+        Currency targetCurrency,
         decimal baseCurrencyValue,
         decimal targetCurrencyValue,
         decimal margin,
@@ -84,8 +90,8 @@ public class ExchangeRate : Entity<Guid>
         return new ExchangeRate
         {
             Id = Guid.NewGuid(),
-            BaseCurrency = Currency.XOF,
-            TargetCurrency = Currency.CNY,
+            BaseCurrency = baseCurrency,
+            TargetCurrency = targetCurrency,
             BaseCurrencyValue = baseCurrencyValue,
             TargetCurrencyValue = targetCurrencyValue,
             Margin = margin,
@@ -100,7 +106,9 @@ public class ExchangeRate : Entity<Guid>
         };
     }
 
-    public static ExchangeRate CreateClientRate(
+    public static ExchangeRate CreateIndividualRate(
+        Currency baseCurrency,
+        Currency targetCurrency,
         decimal baseCurrencyValue,
         decimal targetCurrencyValue,
         decimal margin,
@@ -118,8 +126,8 @@ public class ExchangeRate : Entity<Guid>
         return new ExchangeRate
         {
             Id = Guid.NewGuid(),
-            BaseCurrency = Currency.XOF,
-            TargetCurrency = Currency.CNY,
+            BaseCurrency = baseCurrency,
+            TargetCurrency = targetCurrency,
             BaseCurrencyValue = baseCurrencyValue,
             TargetCurrencyValue = targetCurrencyValue,
             Margin = margin,
@@ -134,37 +142,26 @@ public class ExchangeRate : Entity<Guid>
         };
     }
 
-    public void UpdateCurrencyValues(decimal newBaseCurrencyValue, decimal newTargetCurrencyValue, decimal newMargin, string updatedBy = "SYSTEM")
+    public void UpdateCurrencyValues(decimal newBaseCurrencyValue, decimal newTargetCurrencyValue, decimal newMargin)
     {
         ValidateCurrencyValues(newBaseCurrencyValue, newTargetCurrencyValue);
         ValidateMargin(newMargin);
-
-        // Create history record before updating
-        ExchangeRateHistory.CreateFromExchangeRate(this, "Currency values updated", updatedBy);
 
         BaseCurrencyValue = newBaseCurrencyValue;
         TargetCurrencyValue = newTargetCurrencyValue;
         Margin = newMargin;
     }
 
-    public void Deactivate(string deactivatedBy = "SYSTEM")
+    public void Deactivate()
     {
-        if (!IsActive) return;
-
-        // Create history record
-        ExchangeRateHistory.CreateFromExchangeRate(this, "Rate deactivated", deactivatedBy);
-
         IsActive = false;
         EffectiveTo = DateTime.UtcNow;
     }
 
-    public void ExtendValidity(DateTime newEffectiveTo, string updatedBy = "SYSTEM")
+    public void ExtendValidity(DateTime newEffectiveTo)
     {
         if (newEffectiveTo <= EffectiveFrom)
             throw new DomainException("New effective date must be after start date");
-
-        // Create history record
-        ExchangeRateHistory.CreateFromExchangeRate(this, $"Validity extended to {newEffectiveTo:yyyy-MM-dd}", updatedBy);
 
         EffectiveTo = newEffectiveTo;
     }
@@ -176,29 +173,28 @@ public class ExchangeRate : Entity<Guid>
                (EffectiveTo == null || date <= EffectiveTo.Value);
     }
 
-    public decimal ConvertToCNY(decimal xofAmount)
+    public decimal ConvertToTarget(decimal baseAmount)
     {
-        return xofAmount * EffectiveRate;
+        return baseAmount * EffectiveRate;
     }
 
-    public decimal ConvertToXOF(decimal cnyAmount)
+    public decimal ConvertToBase(decimal targetAmount)
     {
-        return cnyAmount / EffectiveRate;
+        return targetAmount / EffectiveRate;
     }
 
     // Private calculation methods
     private decimal CalculateMarketRate()
     {
-        // Market rate: How much CNY for 1 XOF
-        // If 1 XOF = BaseCurrencyValue USD and 1 CNY = TargetCurrencyValue USD
-        // Then 1 XOF = (BaseCurrencyValue / TargetCurrencyValue) CNY
+        // Market rate: How much target currency for 1 base currency
+        // If 1 BaseCurrency = BaseCurrencyValue USD and 1 TargetCurrency = TargetCurrencyValue USD
+        // Then 1 BaseCurrency = (BaseCurrencyValue / TargetCurrencyValue) TargetCurrency
         return BaseCurrencyValue / TargetCurrencyValue;
     }
 
     private decimal CalculateEffectiveRate()
     {
         // Effective rate = Market rate with bank's margin added
-        // Bank adds margin to make profit
         return MarketRate * (1 + Margin);
     }
 
@@ -210,21 +206,17 @@ public class ExchangeRate : Entity<Guid>
 
         if (targetCurrencyValue <= 0)
             throw new DomainException("Target currency value must be positive");
-
-        // Additional validation to prevent unrealistic rates
-        if (baseCurrencyValue > targetCurrencyValue * 1000) // Unrealistic scenario
-            throw new DomainException("Base currency value appears unrealistic compared to target currency");
     }
 
     private static void ValidateMargin(decimal margin)
     {
-        if (margin < 0 || margin > 1) // 0% to 100%
+        if (margin < 0 || margin > 1)
             throw new DomainException("Margin must be between 0 and 1 (0% to 100%)");
     }
 
     private static void ValidateEffectiveDate(DateTime effectiveFrom, DateTime? effectiveTo)
     {
-        if (effectiveFrom < DateTime.UtcNow.AddMinutes(-5)) // Allow 5 minutes tolerance
+        if (effectiveFrom < DateTime.UtcNow.AddMinutes(-5))
             throw new DomainException("Effective date cannot be in the past");
 
         if (effectiveTo.HasValue && effectiveTo.Value <= effectiveFrom)
@@ -234,7 +226,7 @@ public class ExchangeRate : Entity<Guid>
 
 public enum RateType
 {
-    General = 1,    // Applies to everyone
-    Group = 2,      // Applies to client groups
-    Individual = 3  // Applies to specific clients
+    General = 1,    // Applies to all clients
+    Group = 2,      // Applies to a client group
+    Individual = 3  // Applies to a specific client
 }

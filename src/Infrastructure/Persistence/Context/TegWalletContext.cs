@@ -45,11 +45,24 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
             b.Property(c => c.CreatedAt).IsRequired();
             b.Property(c => c.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
 
+            b.Property(c => c.ClientGroup)
+                .HasMaxLength(100)
+                .IsRequired(false); // Nullable since clients might not be in a group
+
             // Indexes
             b.HasIndex(c => c.Email).IsUnique().HasDatabaseName("ix_client_email");
             b.HasIndex(c => c.PhoneNumber).HasDatabaseName("ix_client_phone_number");
             b.HasIndex(c => new { c.FirstName, c.LastName }).HasDatabaseName("ix_client_name");
             b.HasIndex(c => c.Status).HasDatabaseName("ix_client_status");
+
+            // Index for ClientGroup for efficient group-based queries
+            b.HasIndex(c => c.ClientGroup)
+                .HasDatabaseName("IX_Clients_ClientGroup")
+                .HasFilter("[ClientGroup] IS NOT NULL"); // Filtered index since not all clients have groups
+
+            // Composite index for common queries
+            b.HasIndex(c => new { c.Status, c.ClientGroup })
+                .HasDatabaseName("IX_Clients_Status_Group");
 
             // Relationships
             b.HasOne(c => c.Wallet)
