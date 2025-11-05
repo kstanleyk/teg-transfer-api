@@ -35,14 +35,6 @@ public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<ExchangeRate>> GetRatesByGroupAsync(string clientGroup)
-    {
-        return await DbSet
-            .Where(x => x.ClientGroup == clientGroup && x.IsActive)
-            .OrderByDescending(x => x.EffectiveFrom)
-            .ToListAsync();
-    }
-
     public async Task<IReadOnlyList<ExchangeRate>> GetHistoricalRatesAsync(Currency baseCurrency, Currency targetCurrency, DateTime from, DateTime to)
     {
         return await DbSet

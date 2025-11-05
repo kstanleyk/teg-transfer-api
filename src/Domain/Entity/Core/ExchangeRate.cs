@@ -4,39 +4,50 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class ExchangeRate : Entity<Guid>
 {
     public Currency BaseCurrency { get; private init; }
     public Currency TargetCurrency { get; private init; }
 
     // Values in a common reference currency (like USD)
-    public decimal BaseCurrencyValue { get; private set; }  // Value of 1 unit of base currency in reference currency
-    public decimal TargetCurrencyValue { get; private set; } // Value of 1 unit of target currency in reference currency
-    public decimal Margin { get; private set; } // Bank's margin/commission
+    public decimal BaseCurrencyValue { get; private set; }
+    public decimal TargetCurrencyValue { get; private set; }
+    public decimal Margin { get; private set; }
 
-    // Calculated properties
-    public decimal MarketRate => CalculateMarketRate();
-    public decimal EffectiveRate => CalculateEffectiveRate();
+    // Calculated properties (not stored in DB)
+    [NotMapped]
+    public decimal MarketRate => BaseCurrencyValue / TargetCurrencyValue;
+
+    [NotMapped]
+    public decimal EffectiveRate => MarketRate * (1 + Margin);
 
     public DateTime EffectiveFrom { get; private set; }
     public DateTime? EffectiveTo { get; private set; }
     public bool IsActive { get; private set; }
     public RateType Type { get; private init; }
-    public string? ClientGroup { get; private set; }
-    public Guid? ClientId { get; private set; }
+
+    // Client targeting - now using GUID references
+    public Guid? ClientId { get; private init; }
+    public Guid? ClientGroupId { get; private init; }
+
+    // Navigation properties
+    public Client? Client { get; private set; }
+    public ClientGroup? ClientGroup { get; private set; }
+
     public DateTime CreatedAt { get; private init; }
     public string Source { get; private set; }
     public string CreatedBy { get; private set; }
 
     // Private constructor for EF Core
-    protected ExchangeRate()
+    private ExchangeRate()
     {
         Source = string.Empty;
         CreatedBy = string.Empty;
     }
 
-    // Factory methods for different rate types
-
+    // Factory methods
     public static ExchangeRate CreateGeneralRate(
         Currency baseCurrency,
         Currency targetCurrency,
@@ -76,13 +87,13 @@ public class ExchangeRate : Entity<Guid>
         decimal baseCurrencyValue,
         decimal targetCurrencyValue,
         decimal margin,
-        string clientGroup,
+        Guid clientGroupId,
         DateTime effectiveFrom,
         string createdBy = "SYSTEM",
         string source = "Market",
         DateTime? effectiveTo = null)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(clientGroup, nameof(clientGroup));
+        DomainGuards.AgainstDefault(clientGroupId, nameof(clientGroupId));
         ValidateCurrencyValues(baseCurrencyValue, targetCurrencyValue);
         ValidateMargin(margin);
         ValidateEffectiveDate(effectiveFrom, effectiveTo);
@@ -99,7 +110,7 @@ public class ExchangeRate : Entity<Guid>
             EffectiveTo = effectiveTo,
             IsActive = true,
             Type = RateType.Group,
-            ClientGroup = clientGroup.Trim(),
+            ClientGroupId = clientGroupId,
             Source = source.Trim(),
             CreatedBy = createdBy.Trim(),
             CreatedAt = DateTime.UtcNow
@@ -154,6 +165,7 @@ public class ExchangeRate : Entity<Guid>
 
     public void Deactivate()
     {
+        if (!IsActive) return;
         IsActive = false;
         EffectiveTo = DateTime.UtcNow;
     }
@@ -173,45 +185,19 @@ public class ExchangeRate : Entity<Guid>
                (EffectiveTo == null || date <= EffectiveTo.Value);
     }
 
-    public decimal ConvertToTarget(decimal baseAmount)
-    {
-        return baseAmount * EffectiveRate;
-    }
-
-    public decimal ConvertToBase(decimal targetAmount)
-    {
-        return targetAmount / EffectiveRate;
-    }
-
-    // Private calculation methods
-    private decimal CalculateMarketRate()
-    {
-        // Market rate: How much target currency for 1 base currency
-        // If 1 BaseCurrency = BaseCurrencyValue USD and 1 TargetCurrency = TargetCurrencyValue USD
-        // Then 1 BaseCurrency = (BaseCurrencyValue / TargetCurrencyValue) TargetCurrency
-        return BaseCurrencyValue / TargetCurrencyValue;
-    }
-
-    private decimal CalculateEffectiveRate()
-    {
-        // Effective rate = Market rate with bank's margin added
-        return MarketRate * (1 + Margin);
-    }
+    public decimal ConvertToTarget(decimal baseAmount) => baseAmount * EffectiveRate;
+    public decimal ConvertToBase(decimal targetAmount) => targetAmount / EffectiveRate;
 
     // Validation methods
     private static void ValidateCurrencyValues(decimal baseCurrencyValue, decimal targetCurrencyValue)
     {
-        if (baseCurrencyValue <= 0)
-            throw new DomainException("Base currency value must be positive");
-
-        if (targetCurrencyValue <= 0)
-            throw new DomainException("Target currency value must be positive");
+        if (baseCurrencyValue <= 0) throw new DomainException("Base currency value must be positive");
+        if (targetCurrencyValue <= 0) throw new DomainException("Target currency value must be positive");
     }
 
     private static void ValidateMargin(decimal margin)
     {
-        if (margin < 0 || margin > 1)
-            throw new DomainException("Margin must be between 0 and 1 (0% to 100%)");
+        if (margin < 0 || margin > 1) throw new DomainException("Margin must be between 0 and 1");
     }
 
     private static void ValidateEffectiveDate(DateTime effectiveFrom, DateTime? effectiveTo)

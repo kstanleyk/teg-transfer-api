@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TegWallet.Domain.Abstractions;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.ValueObjects;
 using TegWallet.Infrastructure.Persistence.Configurations;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
@@ -21,54 +22,97 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     //Core
     public virtual DbSet<Wallet> WalletSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
-    public DbSet<Reservation> PurchaseReservationSet => Set<Reservation>();
+    public DbSet<Reservation> PurchaseReservationSet { get; set; }
     public DbSet<ExchangeRate> ExchangeRateSet { get; set; }
     public DbSet<ExchangeRateHistory> ExchangeRateHistorySet { get; set; }
+    public DbSet<ClientGroup> ClientGroupSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Rename Identity tables and assign SchemaNames.Auth
-        modelBuilder.Entity<Client>(b =>
+        modelBuilder.Entity<Client>(builder =>
         {
-            b.ToTable("client", SchemaNames.Identity);
+            builder.ToTable("client", SchemaNames.Identity);
 
-            // Primary Key
-            b.HasKey(c => c.Id);
-
-            // Properties
-            b.Property(c => c.Email).IsRequired().HasMaxLength(255);
-            b.Property(c => c.PhoneNumber).IsRequired().HasMaxLength(20);
-            b.Property(c => c.FirstName).IsRequired().HasMaxLength(100);
-            b.Property(c => c.LastName).IsRequired().HasMaxLength(100);
-            b.Property(c => c.CreatedAt).IsRequired();
-            b.Property(c => c.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
-
-            b.Property(c => c.ClientGroup)
+            // Configure custom properties (Identity properties are handled automatically)
+            builder.Property(c => c.FirstName)
                 .HasMaxLength(100)
-                .IsRequired(false); // Nullable since clients might not be in a group
+                .IsRequired();
 
-            // Indexes
-            b.HasIndex(c => c.Email).IsUnique().HasDatabaseName("ix_client_email");
-            b.HasIndex(c => c.PhoneNumber).HasDatabaseName("ix_client_phone_number");
-            b.HasIndex(c => new { c.FirstName, c.LastName }).HasDatabaseName("ix_client_name");
-            b.HasIndex(c => c.Status).HasDatabaseName("ix_client_status");
+            builder.Property(c => c.LastName)
+                .HasMaxLength(100)
+                .IsRequired();
 
-            // Index for ClientGroup for efficient group-based queries
-            b.HasIndex(c => c.ClientGroup)
-                .HasDatabaseName("IX_Clients_ClientGroup")
-                .HasFilter("[ClientGroup] IS NOT NULL"); // Filtered index since not all clients have groups
+            builder.Property(c => c.CreatedAt)
+                .IsRequired();
+
+            builder.Property(c => c.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
+            // ClientGroup relationship
+            builder.HasOne(c => c.ClientGroup)
+                .WithMany(g => g.Clients)
+                .HasForeignKey(c => c.ClientGroupId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for ClientGroup
+            builder.HasIndex(c => c.ClientGroupId)
+                .HasDatabaseName("IX_AspNetUsers_ClientGroupId")
+                .HasFilter("[ClientGroupId] IS NOT NULL");
+
+            // Configure owned Wallet
+            builder.OwnsOne(c => c.Wallet, walletBuilder =>
+            {
+                walletBuilder.WithOwner().HasForeignKey("ClientId");
+
+                walletBuilder.Property(w => w.Id)
+                    .ValueGeneratedNever()
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.ClientId)
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.Balance)
+                    .HasConversion(
+                        money => money.Amount,
+                        amount => new Money(amount, Currency.XOF)) // Default currency
+                    .HasPrecision(18, 2)
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.AvailableBalance)
+                    .HasConversion(
+                        money => money.Amount,
+                        amount => new Money(amount, Currency.XOF))
+                    .HasPrecision(18, 2)
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.BaseCurrency)
+                    .HasConversion(
+                        currency => currency.Code,
+                        code => Currency.FromCode(code))
+                    .HasMaxLength(3)
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.CreatedAt)
+                    .IsRequired();
+
+                walletBuilder.Property(w => w.UpdatedAt)
+                    .IsRequired();
+
+                // Index for wallet
+                walletBuilder.HasIndex(w => w.ClientId)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Wallets_ClientId");
+            });
 
             // Composite index for common queries
-            b.HasIndex(c => new { c.Status, c.ClientGroup })
-                .HasDatabaseName("IX_Clients_Status_Group");
-
-            // Relationships
-            b.HasOne(c => c.Wallet)
-                .WithOne()
-                .HasForeignKey<Wallet>(w => w.ClientId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasIndex(c => new { c.Status, c.ClientGroupId })
+                .HasDatabaseName("IX_AspNetUsers_Status_Group");
         });
 
         modelBuilder.Entity<IdentityRole<Guid>>(b =>

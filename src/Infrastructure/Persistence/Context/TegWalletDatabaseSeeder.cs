@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TegWallet.Application.Authorization;
 using TegWallet.Domain.Entity.Auth;
+using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
 
-public class TegWalletDatabaseSeeder(TegWalletContext context)
+public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Client> userManager)
 {
     public async Task SeedDatabaseAsync()
     {
@@ -13,6 +16,8 @@ public class TegWalletDatabaseSeeder(TegWalletContext context)
         await SeedPermissionsAsync();
         await SeedRolesAsync();
         await SeedUsersAsync();
+
+        await SeedExchangeRatesAndGroupsAsync();
     }
 
     private async Task CheckAndApplyPendingMigrationAsync()
@@ -220,5 +225,78 @@ public class TegWalletDatabaseSeeder(TegWalletContext context)
         }
 
         await context.SaveChangesAsync();
+    }
+
+    private async Task SeedExchangeRatesAndGroupsAsync()
+    {
+        // 1. Seed Client Groups
+        if (!await context.ClientGroupSet.AnyAsync())
+        {
+            var clientGroups = new[]
+            {
+            ClientGroup.Create("VIP", "VIP clients with premium exchange rates", "SYSTEM"),
+            ClientGroup.Create("Corporate", "Corporate clients with business rates", "SYSTEM"),
+            ClientGroup.Create("Retail", "Retail clients with standard rates", "SYSTEM")
+        };
+
+            await context.ClientGroupSet.AddRangeAsync(clientGroups);
+            await context.SaveChangesAsync();
+            Console.WriteLine("Seeded 3 client groups: VIP, Corporate, Retail");
+        }
+
+        var clientGroupsList = await context.ClientGroupSet.ToListAsync();
+
+        // 2. Seed Exchange Rates
+        if (!await context.ExchangeRateSet.AnyAsync())
+        {
+            var now = DateTime.UtcNow;
+            var effectiveFrom = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
+
+            var exchangeRates = new List<ExchangeRate>();
+
+            // General Rates
+            exchangeRates.Add(ExchangeRate.CreateGeneralRate(
+                Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"));
+
+            exchangeRates.Add(ExchangeRate.CreateGeneralRate(
+                Currency.NGN, Currency.CNY, 0.0025m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"));
+
+            // Group Rates
+            if (clientGroupsList.Count >= 3)
+            {
+                exchangeRates.Add(ExchangeRate.CreateGroupRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.015m,
+                    clientGroupsList[0].Id, effectiveFrom));
+
+                exchangeRates.Add(ExchangeRate.CreateGroupRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.01m,
+                    clientGroupsList[1].Id, effectiveFrom));
+
+                exchangeRates.Add(ExchangeRate.CreateGroupRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.025m,
+                    clientGroupsList[2].Id, effectiveFrom));
+            }
+
+            // Individual Client Rates
+            var clients = await userManager.Users.Take(3).ToListAsync();
+            if (clients.Count >= 3)
+            {
+                exchangeRates.Add(ExchangeRate.CreateIndividualRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.005m,
+                    clients[0].Id, effectiveFrom));
+
+                exchangeRates.Add(ExchangeRate.CreateIndividualRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.008m,
+                    clients[1].Id, effectiveFrom));
+
+                exchangeRates.Add(ExchangeRate.CreateIndividualRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.012m,
+                    clients[2].Id, effectiveFrom));
+            }
+
+            await context.ExchangeRateSet.AddRangeAsync(exchangeRates);
+            await context.SaveChangesAsync();
+            Console.WriteLine($"Seeded {exchangeRates.Count} exchange rates");
+        }
     }
 }
