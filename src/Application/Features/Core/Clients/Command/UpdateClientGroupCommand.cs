@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Helpers;
+using TegWallet.Application.Interfaces.Core;
+using TegWallet.Application.Interfaces.Localization;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.Exceptions;
 
@@ -12,10 +14,11 @@ public record UpdateClientGroupCommand(
     string Reason = "Group updated") : IRequest<Result>;
 
 public class UpdateClientGroupCommandHandler(
-    UserManager<Client> userManager)
+    UserManager<Client> userManager,
+    IClientGroupRepository clientGroupRepository,
+    IAppLocalizer localizer)
     : IRequestHandler<UpdateClientGroupCommand, Result>
 {
-
     public async Task<Result> Handle(UpdateClientGroupCommand command, CancellationToken cancellationToken)
     {
         try
@@ -24,8 +27,21 @@ public class UpdateClientGroupCommandHandler(
             if (client == null)
                 return Result.Failed("Client not found");
 
-            // Apply domain logic
-            client.UpdateGroup(command.ClientGroup, command.Reason);
+            ClientGroup? clientGroup = null;
+
+            // If ClientGroup is provided, fetch the ClientGroup entity
+            if (!string.IsNullOrWhiteSpace(command.ClientGroup))
+            {
+                if (!Guid.TryParse(command.ClientGroup, out var clientGroupId))
+                    return Result.Failed("Invalid client group ID format");
+
+                clientGroup = await clientGroupRepository.GetAsync(clientGroupId);
+                if (clientGroup == null)
+                    return Result.Failed("Client group not found");
+            }
+
+            // Apply domain logic - UpdateGroup handles both assignment and removal
+            client.UpdateGroup(clientGroup, command.Reason);
 
             // Update using UserManager
             var result = await userManager.UpdateAsync(client);
@@ -35,11 +51,7 @@ public class UpdateClientGroupCommandHandler(
                 return Result.Failed($"Failed to update client group: {errors}");
             }
 
-            //var message = string.IsNullOrEmpty(command.ClientGroup)
-            //    ? _localizer["ClientRemovedFromGroupSuccess"]
-            //    : _localizer["ClientAssignedToGroupSuccess", command.ClientGroup];
-
-            return Result.Succeeded();
+            return Result.Succeeded(localizer["ClientGroupUpdatedSuccess"]);
         }
         catch (DomainException ex)
         {
@@ -47,3 +59,4 @@ public class UpdateClientGroupCommandHandler(
         }
     }
 }
+
