@@ -234,10 +234,10 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
         {
             var clientGroups = new[]
             {
-                ClientGroup.Create("VIP", "VIP clients with premium exchange rates", "SYSTEM"),
-                ClientGroup.Create("Corporate", "Corporate clients with business rates", "SYSTEM"),
-                ClientGroup.Create("Retail", "Retail clients with standard rates", "SYSTEM")
-            };
+            ClientGroup.Create("VIP", "VIP clients with premium exchange rates", "SYSTEM"),
+            ClientGroup.Create("Corporate", "Corporate clients with business rates", "SYSTEM"),
+            ClientGroup.Create("Retail", "Retail clients with standard rates", "SYSTEM")
+        };
 
             await context.ClientGroupSet.AddRangeAsync(clientGroups);
             await context.SaveChangesAsync();
@@ -253,49 +253,91 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
             var effectiveFrom = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
 
             var exchangeRates = new List<ExchangeRate>
-            {
-                // General Rates
-                ExchangeRate.CreateGeneralRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
-                ExchangeRate.CreateGeneralRate(
-                    Currency.NGN, Currency.CNY, 0.0025m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank")
-            };
+        {
+            // General Rates - values represent 1 USD = X currency units
+            // XOF: 1 USD = 575.50 XOF, CNY: 1 USD = 7.23 CNY
+            ExchangeRate.CreateGeneralRate(
+                Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
+            
+            // NGN: 1 USD = 1200.00 NGN, CNY: 1 USD = 7.23 CNY  
+            ExchangeRate.CreateGeneralRate(
+                Currency.NGN, Currency.CNY, 1200.00m, 7.23m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
+            
+            // USD: 1 USD = 1.00 USD, XOF: 1 USD = 575.50 XOF
+            ExchangeRate.CreateGeneralRate(
+                Currency.USD, Currency.XOF, 1.00m, 575.50m, 0.015m, effectiveFrom, "SYSTEM", "CentralBank"),
+            
+            // USD: 1 USD = 1.00 USD, NGN: 1 USD = 1200.00 NGN
+            ExchangeRate.CreateGeneralRate(
+                Currency.USD, Currency.NGN, 1.00m, 1200.00m, 0.015m, effectiveFrom, "SYSTEM", "CentralBank"),
+            
+            // USD: 1 USD = 1.00 USD, CNY: 1 USD = 7.23 CNY
+            ExchangeRate.CreateGeneralRate(
+                Currency.USD, Currency.CNY, 1.00m, 7.23m, 0.015m, effectiveFrom, "SYSTEM", "CentralBank")
+        };
 
-            // Group Rates
+            // Group Rates - VIP gets better margins
             if (clientGroupsList.Count >= 3)
             {
+                // VIP clients get lower margin for XOF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.015m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.015m, // 1.5% margin
                     clientGroupsList[0].Id, effectiveFrom));
 
+                // Corporate clients get standard margin for XOF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.01m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.02m, // 2% margin
                     clientGroupsList[1].Id, effectiveFrom));
 
+                // Retail clients get higher margin for XOF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.025m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.025m, // 2.5% margin
                     clientGroupsList[2].Id, effectiveFrom));
+
+                // VIP clients get better USD→XOF rate
+                exchangeRates.Add(ExchangeRate.CreateGroupRate(
+                    Currency.USD, Currency.XOF, 1.00m, 580.00m, 0.01m, // Better rate for VIPs
+                    clientGroupsList[0].Id, effectiveFrom));
             }
 
-            // Individual Client Rates
+            // Individual Client Rates - premium clients get even better rates
             var clients = await userManager.Users.Take(3).ToListAsync();
             if (clients.Count >= 3)
             {
+                // Premium client 1 gets very low margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.005m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.005m, // 0.5% margin
                     clients[0].Id, effectiveFrom));
 
+                // Premium client 2 gets low margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.008m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.008m, // 0.8% margin
                     clients[1].Id, effectiveFrom));
 
+                // Premium client 3 gets competitive margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.012m,
+                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.012m, // 1.2% margin
                     clients[2].Id, effectiveFrom));
+
+                // Individual USD→XOF rate for premium client 1
+                exchangeRates.Add(ExchangeRate.CreateIndividualRate(
+                    Currency.USD, Currency.XOF, 1.00m, 585.00m, 0.005m, // Best rate
+                    clients[0].Id, effectiveFrom));
             }
 
             await context.ExchangeRateSet.AddRangeAsync(exchangeRates);
             await context.SaveChangesAsync();
+
+            // Log the seeded rates with their calculated values
+            foreach (var rate in exchangeRates)
+            {
+                Console.WriteLine($"Seeded {rate.BaseCurrency.Code}→{rate.TargetCurrency.Code}: " +
+                                $"Market Rate = {rate.MarketRate:N4}, " +
+                                $"Effective Rate = {rate.EffectiveRate:N4}, " +
+                                $"Margin = {rate.Margin:P2}, " +
+                                $"Type = {rate.Type}");
+            }
+
             Console.WriteLine($"Seeded {exchangeRates.Count} exchange rates");
         }
     }

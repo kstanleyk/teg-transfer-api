@@ -21,6 +21,17 @@ public record CreateGeneralExchangeRateCommand(
     string Source = "Market",
     DateTime? EffectiveTo = null) : IRequest<Result<Guid>>;
 
+public record CreateGeneralExchangeRateParameters(
+    Currency BaseCurrency,
+    Currency TargetCurrency,
+    decimal BaseCurrencyValue,
+    decimal TargetCurrencyValue,
+    decimal Margin,
+    DateTime EffectiveFrom,
+    string CreatedBy = "SYSTEM",
+    string Source = "Market",
+    DateTime? EffectiveTo = null);
+
 public class CreateGeneralExchangeRateCommandHandler(
     IExchangeRateRepository exchangeRateRepository,
     IAppLocalizer localizer) : IRequestHandler<CreateGeneralExchangeRateCommand, Result<Guid>>
@@ -74,14 +85,3 @@ public class CreateGeneralExchangeRateCommandHandler(
         }
     }
 }
-
-public record CreateGeneralExchangeRateParameters(
-    Currency BaseCurrency,
-    Currency TargetCurrency,
-    decimal BaseCurrencyValue,
-    decimal TargetCurrencyValue,
-    decimal Margin,
-    DateTime EffectiveFrom,
-    string CreatedBy = "SYSTEM",
-    string Source = "Market",
-    DateTime? EffectiveTo = null);

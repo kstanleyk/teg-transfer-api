@@ -11,14 +11,16 @@ public class ExchangeRate : Entity<Guid>
     public Currency BaseCurrency { get; private init; }
     public Currency TargetCurrency { get; private init; }
 
-    // Values in a common reference currency (like USD)
+    // Values representing how many units of each currency equal 1 USD
+    // Example: BaseCurrencyValue = 575.50 means 1 USD = 575.50 XOF
+    // Example: TargetCurrencyValue = 7.23 means 1 USD = 7.23 CNY
     public decimal BaseCurrencyValue { get; private set; }
     public decimal TargetCurrencyValue { get; private set; }
     public decimal Margin { get; private set; }
 
     // Calculated properties (not stored in DB)
     [NotMapped]
-    public decimal MarketRate => BaseCurrencyValue / TargetCurrencyValue;
+    public decimal MarketRate => TargetCurrencyValue / BaseCurrencyValue;
 
     [NotMapped]
     public decimal EffectiveRate => MarketRate * (1 + Margin);
@@ -51,8 +53,8 @@ public class ExchangeRate : Entity<Guid>
     public static ExchangeRate CreateGeneralRate(
         Currency baseCurrency,
         Currency targetCurrency,
-        decimal baseCurrencyValue,
-        decimal targetCurrencyValue,
+        decimal baseCurrencyValue,  // 1 USD = baseCurrencyValue units of base currency
+        decimal targetCurrencyValue, // 1 USD = targetCurrencyValue units of target currency
         decimal margin,
         DateTime effectiveFrom,
         string createdBy = "SYSTEM",
@@ -84,8 +86,8 @@ public class ExchangeRate : Entity<Guid>
     public static ExchangeRate CreateGroupRate(
         Currency baseCurrency,
         Currency targetCurrency,
-        decimal baseCurrencyValue,
-        decimal targetCurrencyValue,
+        decimal baseCurrencyValue,  // 1 USD = baseCurrencyValue units of base currency
+        decimal targetCurrencyValue, // 1 USD = targetCurrencyValue units of target currency
         decimal margin,
         Guid clientGroupId,
         DateTime effectiveFrom,
@@ -120,8 +122,8 @@ public class ExchangeRate : Entity<Guid>
     public static ExchangeRate CreateIndividualRate(
         Currency baseCurrency,
         Currency targetCurrency,
-        decimal baseCurrencyValue,
-        decimal targetCurrencyValue,
+        decimal baseCurrencyValue,  // 1 USD = baseCurrencyValue units of base currency
+        decimal targetCurrencyValue, // 1 USD = targetCurrencyValue units of target currency
         decimal margin,
         Guid clientId,
         DateTime effectiveFrom,
@@ -185,28 +187,71 @@ public class ExchangeRate : Entity<Guid>
                (EffectiveTo == null || date <= EffectiveTo.Value);
     }
 
+    /// <summary>
+    /// Converts an amount from base currency to target currency
+    /// Example: Convert 1000 XOF to CNY using XOF→CNY rate
+    /// </summary>
     public decimal ConvertToTarget(decimal baseAmount) => baseAmount * EffectiveRate;
+
+    /// <summary>
+    /// Converts an amount from target currency to base currency
+    /// Example: Convert 100 CNY to XOF using XOF→CNY rate
+    /// </summary>
     public decimal ConvertToBase(decimal targetAmount) => targetAmount / EffectiveRate;
+
+    /// <summary>
+    /// Gets the market rate description for display purposes
+    /// </summary>
+    public string GetRateDescription()
+    {
+        return $"1 {BaseCurrency.Code} = {EffectiveRate:N4} {TargetCurrency.Code} (Market: {MarketRate:N4}, Margin: {Margin:P2})";
+    }
+
+    /// <summary>
+    /// Validates if this exchange rate can be used for a given amount and currency
+    /// </summary>
+    public bool CanConvert(decimal amount, Currency fromCurrency, Currency toCurrency)
+    {
+        if (!IsActive) return false;
+        if (!IsEffectiveAt(DateTime.UtcNow)) return false;
+
+        return (fromCurrency == BaseCurrency && toCurrency == TargetCurrency) ||
+               (fromCurrency == TargetCurrency && toCurrency == BaseCurrency);
+    }
 
     // Validation methods
     private static void ValidateCurrencyValues(decimal baseCurrencyValue, decimal targetCurrencyValue)
     {
-        if (baseCurrencyValue <= 0) throw new DomainException("Base currency value must be positive");
-        if (targetCurrencyValue <= 0) throw new DomainException("Target currency value must be positive");
+        if (baseCurrencyValue <= 0)
+            throw new DomainException("Base currency value must be positive (1 USD = X base currency units)");
+
+        if (targetCurrencyValue <= 0)
+            throw new DomainException("Target currency value must be positive (1 USD = X target currency units)");
+
+        // Additional validation to prevent unrealistic rates
+        if (baseCurrencyValue > 1000000)
+            throw new DomainException("Base currency value appears to be unrealistic");
+
+        if (targetCurrencyValue > 1000000)
+            throw new DomainException("Target currency value appears to be unrealistic");
     }
 
     private static void ValidateMargin(decimal margin)
     {
-        if (margin < 0 || margin > 1) throw new DomainException("Margin must be between 0 and 1");
+        if (margin < 0 || margin > 1)
+            throw new DomainException("Margin must be between 0 and 1 (0% to 100%)");
     }
 
     private static void ValidateEffectiveDate(DateTime effectiveFrom, DateTime? effectiveTo)
     {
         if (effectiveFrom < DateTime.UtcNow.AddMinutes(-5))
-            throw new DomainException("Effective date cannot be in the past");
+            throw new DomainException("Effective date cannot be more than 5 minutes in the past");
 
         if (effectiveTo.HasValue && effectiveTo.Value <= effectiveFrom)
             throw new DomainException("End date must be after start date");
+
+        if (effectiveTo.HasValue && effectiveTo.Value > DateTime.UtcNow.AddYears(10))
+            throw new DomainException("End date cannot be more than 10 years in the future");
     }
 }
 

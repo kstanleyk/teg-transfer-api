@@ -3,9 +3,9 @@ using TegWallet.Application.Features.Core.ExchangeRate.Command;
 
 namespace TegWallet.Application.Features.Core.ExchangeRate.Validator;
 
-public class CreateGeneralExchangeRateCommandValidator : AbstractValidator<CreateGeneralExchangeRateCommand>
+public class CreateIndividualExchangeRateCommandValidator : AbstractValidator<CreateIndividualExchangeRateCommand>
 {
-    public CreateGeneralExchangeRateCommandValidator()
+    public CreateIndividualExchangeRateCommandValidator()
     {
         RuleFor(x => x.BaseCurrency).ValidateCurrency();
 
@@ -17,6 +17,12 @@ public class CreateGeneralExchangeRateCommandValidator : AbstractValidator<Creat
         RuleFor(x => x.BaseCurrencyValue).ValidateCurrencyValue();
         RuleFor(x => x.TargetCurrencyValue).ValidateCurrencyValue();
         RuleFor(x => x.Margin).ValidateMargin();
+
+        RuleFor(x => x.ClientId)
+            .NotEmpty()
+            .WithMessage("Client ID is required")
+            .NotEqual(Guid.Empty)
+            .WithMessage("Client ID must be a valid GUID");
 
         RuleFor(x => x.EffectiveFrom)
             .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
