@@ -19,7 +19,7 @@ public static class CurrencyValidationRules
         return ruleBuilder
             .GreaterThan(0)
             .WithMessage("Currency value must be positive")
-            .ScalePrecision(4, 18)
+            .PrecisionScale(18, 4, true)
             .WithMessage("Currency value must have at most 4 decimal places and 18 total digits");
     }
 
@@ -28,7 +28,7 @@ public static class CurrencyValidationRules
         return ruleBuilder
             .InclusiveBetween(0, 1)
             .WithMessage("Margin must be between 0 and 1")
-            .ScalePrecision(4, 6)
+            .PrecisionScale(6, 4, true)
             .WithMessage("Margin must have at most 4 decimal places");
     }
 
