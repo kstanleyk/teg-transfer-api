@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TegWallet.Application.Authorization;
+using TegWallet.Application.Features.Core.ExchangeRate.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRate.Queries;
 using TegWallet.Application.Features.Core.Ledgers.Query;
 using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;
@@ -9,6 +11,7 @@ using TegWallet.Application.Features.Core.Wallets.Query;
 using TegWallet.Application.Helpers;
 using TegWallet.CoreApi.Attributes;
 using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.CoreApi.Controllers.Core;
 
@@ -208,6 +211,78 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     {
         var query = new GetWalletBalanceQuery(clientId);
         return Ok(await Mediator.Send(query));
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/exchange-rates/{baseCurrencyCode}/{targetCurrencyCode}")]
+    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetClientExchangeRateV1(
+            Guid clientId,
+            string baseCurrencyCode,
+            string targetCurrencyCode,
+            DateTime? asOfDate = null)
+    {
+        try
+        {
+            // Convert string currency codes to Currency objects
+            var baseCurrency = Currency.FromCode(baseCurrencyCode);
+            var targetCurrency = Currency.FromCode(targetCurrencyCode);
+
+            var query = new GetClientExchangeRateQuery(clientId, baseCurrency, targetCurrency, asOfDate);
+            var result = await Mediator.Send(query);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            // Handle invalid currency codes
+            return BadRequest(Result<ExchangeRateDto?>.Failed($"Invalid currency code: {ex.Message}"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                Result<ExchangeRateDto?>.Failed($"Internal server error: {ex.Message}"));
+        }
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/exchange-rates/{baseCurrencyCode}")]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ExchangeRateDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ExchangeRateDto>>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ExchangeRateDto>>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetClientAvailableRatesV1(
+        Guid clientId,
+        string baseCurrencyCode,
+        DateTime? asOfDate = null)
+    {
+        try
+        {
+            // Convert string currency code to Currency object
+            var baseCurrency = Currency.FromCode(baseCurrencyCode);
+
+            var query = new GetClientAvailableRatesQuery(clientId, baseCurrency, asOfDate);
+            var result = await Mediator.Send(query);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            // Handle invalid currency code
+            return BadRequest(Result<IReadOnlyList<ExchangeRateDto>>.Failed($"Invalid currency code: {ex.Message}"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                Result<IReadOnlyList<ExchangeRateDto>>.Failed($"Internal server error: {ex.Message}"));
+        }
     }
 
     [MapToApiVersion("1.0")]

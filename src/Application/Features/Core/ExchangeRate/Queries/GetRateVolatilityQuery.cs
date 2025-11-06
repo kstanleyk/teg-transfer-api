@@ -1,9 +1,4 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TegWallet.Application.Features.Core.ExchangeRate.Dtos;
 using TegWallet.Domain.ValueObjects;
 

@@ -1,10 +1,5 @@
 ﻿using AutoMapper;
-using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;
-using TegWallet.Application.Features.Core.Wallets.Model;
-using TegWallet.Domain.Entity.Core;
-using TegWallet.Domain.Entity.Enum;
-using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Features.Core.Ledgers;
 
