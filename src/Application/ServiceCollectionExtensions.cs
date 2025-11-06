@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using TegWallet.Application.Features.Core.ClientGroups;
 using TegWallet.Application.Features.Core.Clients;
-using TegWallet.Application.Features.Core.ExchangeRate;
+using TegWallet.Application.Features.Core.ExchangeRates;
 using TegWallet.Application.Features.Core.Ledgers;
 using TegWallet.Application.Features.Core.Purchases;
 using TegWallet.Application.Features.Core.Wallets;
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
             cfg.AddProfile(new PurchaseProfile());
             cfg.AddProfile(new LedgerProfile());
             cfg.AddProfile(new ExchangeRateProfile());
+            cfg.AddProfile(new ClientGroupProfile());
         }).CreateMapper());
 
         //services.AddValidatorsFromAssembly(assembly);

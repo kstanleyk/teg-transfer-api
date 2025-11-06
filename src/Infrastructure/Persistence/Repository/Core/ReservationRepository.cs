@@ -32,6 +32,7 @@ public class ReservationRepository(IDatabaseFactory databaseFactory)
             .AsNoTracking()
             .ToListAsync();
 
+
     public async Task<PagedResult<Reservation>> GetPagedReservationsByClientIdAsync(
         Guid clientId,
         ReservationStatus? status = null,
