@@ -1,4 +1,6 @@
-﻿using TegWallet.Domain.Entity.Core;
+﻿using TegWallet.Application.Features.Core.ExchangeRate.Command;
+using TegWallet.Application.Helpers;
+using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Interfaces.Core;
@@ -30,4 +32,6 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
 
     Task<IReadOnlyList<ExchangeRate>> GetExchangeRateHistoryAsync(Currency baseCurrency,
         Currency targetCurrency, DateTime fromDate, DateTime toDate, RateType? type, Guid? clientOrGroupId);
+
+    Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(CreateGeneralExchangeRateParameters parameters);
 }

@@ -48,6 +48,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
+        services.AddScoped<IClientGroupRepository, ClientGroupRepository>();
+        services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
+        services.AddScoped<IExchangeRateHistoryRepository, ExchangeRateHistoryRepository>();
 
         return services;
     }
