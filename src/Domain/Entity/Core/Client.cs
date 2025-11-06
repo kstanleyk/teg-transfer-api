@@ -92,7 +92,7 @@ public class Client : IdentityUser<Guid>
             throw new DomainException("Cannot assign group to suspended client");
 
         ClientGroupId = clientGroup.Id;
-        ClientGroup = clientGroup;
+        //ClientGroup = clientGroup;
     }
 
     public void RemoveFromGroup(string reason = "Removed from group")

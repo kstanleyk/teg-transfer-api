@@ -15,9 +15,8 @@ public record AssignClientToGroupCommand(
 
 public class AssignClientToGroupCommandHandler(
     UserManager<Client> userManager,
-    IClientGroupRepository clientGroupRepository, // Assuming you have a repository for ClientGroup
-    IAppLocalizer localizer)
-    : IRequestHandler<AssignClientToGroupCommand, Result>
+    IClientGroupRepository clientGroupRepository,
+    IAppLocalizer localizer) : IRequestHandler<AssignClientToGroupCommand, Result>
 {
     public async Task<Result> Handle(AssignClientToGroupCommand command, CancellationToken cancellationToken)
     {
@@ -31,7 +30,7 @@ public class AssignClientToGroupCommandHandler(
             if (clientGroup == null)
                 return Result.Failed("Client group not found");
 
-            // Apply domain logic
+            // Apply domain logic - this now only sets the ID
             client.AssignToGroup(clientGroup, command.Reason);
 
             // Update using UserManager

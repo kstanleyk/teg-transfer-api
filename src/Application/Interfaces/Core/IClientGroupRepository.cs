@@ -27,4 +27,8 @@ public interface IClientGroupRepository : IRepository<ClientGroup, Guid>
 
     Task<RepositoryActionResult<ClientGroup>> DeactivateClientGroupAsync(
         DeactivateClientGroupParameters parameters);
+
+    Task<IReadOnlyList<ClientGroup>> GetAllWithoutPaginationAsync(
+        bool? isActive = null,
+        string? searchTerm = null);
 }

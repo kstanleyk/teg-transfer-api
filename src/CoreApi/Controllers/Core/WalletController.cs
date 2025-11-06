@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TegWallet.Application.Authorization;
+using TegWallet.Application.Features.Core.ClientGroups.Dtos;
+using TegWallet.Application.Features.Core.Clients.Command;
 using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
 using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Features.Core.Ledgers.Query;
@@ -16,7 +18,6 @@ using TegWallet.Domain.ValueObjects;
 namespace TegWallet.CoreApi.Controllers.Core;
 
 [ApiVersion("1.0")]
-//[ApiVersion("2.0")]
 public class WalletController(IMediator mediator) : ApiControllerBase<WalletController>
 {
     public IMediator Mediator { get; } = mediator;
@@ -188,6 +189,45 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
     {
         var query = new GetPendingClientLedgersQuery(clientId);
         var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpPost("{clientId:guid}/client-group/assign")]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignClientToGroupV1(Guid clientId, [FromBody] AssignClientToGroupRequestDto request)
+    {
+        var command = new AssignClientToGroupCommand(
+            clientId,
+            request.ClientGroupId,
+            request.Reason);
+
+        var result = await Mediator.Send(command);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpDelete("{clientId:guid}/client-group/remove")]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveClientFromGroupV1(Guid clientId, [FromBody] RemoveClientFromGroupRequestDto request)
+    {
+        var command = new RemoveClientFromGroupCommand(
+            clientId,
+            request.Reason);
+
+        var result = await Mediator.Send(command);
+
+        if (!result.Success)
+            return BadRequest(result);
+
         return Ok(result);
     }
 
