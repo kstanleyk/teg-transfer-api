@@ -1,13 +1,68 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TegWallet.Application.Features.Core.ExchangeRate.Command;
+using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
-public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
+public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRateHistoryRepository, IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
+    public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(CreateGeneralExchangeRateParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Use the domain factory method to create the exchange rate
+            var exchangeRate = ExchangeRate.CreateGeneralRate(
+                parameters.BaseCurrency,
+                parameters.TargetCurrency,
+                parameters.BaseCurrencyValue,
+                parameters.TargetCurrencyValue,
+                parameters.Margin,
+                parameters.EffectiveFrom,
+                parameters.CreatedBy,
+                parameters.Source,
+                parameters.EffectiveTo);
+
+            // Add the exchange rate to the context
+            DbSet.Add(exchangeRate);
+
+            // Create history record for the creation
+            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
     public async Task<IReadOnlyList<ExchangeRate>> GetActiveRatesAsync(Currency baseCurrency, Currency targetCurrency,
         DateTime effectiveDate)
     {

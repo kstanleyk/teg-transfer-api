@@ -12,7 +12,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TegWalletContext))]
-    [Migration("20251020154754_Initial")]
+    [Migration("20251106103941_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -363,6 +363,10 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
+                    b.Property<Guid?>("ClientGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_group_id");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -373,9 +377,8 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmed")
@@ -417,9 +420,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnName("password_hash");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("text")
                         .HasColumnName("phone_number");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -448,9 +449,8 @@ namespace TegWallet.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_client");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_client_email");
+                    b.HasIndex("ClientGroupId")
+                        .HasDatabaseName("ix_client_client_group_id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -459,16 +459,239 @@ namespace TegWallet.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("PhoneNumber")
-                        .HasDatabaseName("ix_client_phone_number");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("ix_client_status");
-
-                    b.HasIndex("FirstName", "LastName")
-                        .HasDatabaseName("ix_client_name");
-
                     b.ToTable("client", "identity");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ClientGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_client_group");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_ClientGroups_IsActive");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ClientGroups_Name");
+
+                    b.ToTable("client_group", "core");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BaseCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("base_currency");
+
+                    b.Property<decimal>("BaseCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("base_currency_value");
+
+                    b.Property<Guid?>("ClientGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_group_id");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_to");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("Margin")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("margin");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source");
+
+                    b.Property<string>("TargetCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("target_currency");
+
+                    b.Property<decimal>("TargetCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("target_currency_value");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exchange_rate");
+
+                    b.HasIndex("ClientGroupId")
+                        .HasDatabaseName("ix_exchange_rate_client_group_id");
+
+                    b.HasIndex("ClientId")
+                        .HasDatabaseName("ix_exchange_rate_client_id");
+
+                    b.ToTable("exchange_rate", "core");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRateHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ChangeReason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("change_reason");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("change_type");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("changed_at");
+
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("changed_by");
+
+                    b.Property<Guid>("ExchangeRateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exchange_rate_id");
+
+                    b.Property<decimal>("NewBaseCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("new_base_currency_value");
+
+                    b.Property<decimal>("NewEffectiveRate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("new_effective_rate");
+
+                    b.Property<decimal>("NewMargin")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("new_margin");
+
+                    b.Property<decimal>("NewMarketRate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("new_market_rate");
+
+                    b.Property<decimal>("NewTargetCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("new_target_currency_value");
+
+                    b.Property<decimal>("PreviousBaseCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("previous_base_currency_value");
+
+                    b.Property<decimal>("PreviousEffectiveRate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("previous_effective_rate");
+
+                    b.Property<decimal>("PreviousMargin")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("previous_margin");
+
+                    b.Property<decimal>("PreviousMarketRate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("previous_market_rate");
+
+                    b.Property<decimal>("PreviousTargetCurrencyValue")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)")
+                        .HasColumnName("previous_target_currency_value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exchange_rate_history");
+
+                    b.HasIndex("ExchangeRateId")
+                        .HasDatabaseName("ix_exchange_rate_history_exchange_rate_id");
+
+                    b.ToTable("exchange_rate_history", "core");
                 });
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
@@ -792,6 +1015,46 @@ namespace TegWallet.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.Client", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Core.ClientGroup", "ClientGroup")
+                        .WithMany("Clients")
+                        .HasForeignKey("ClientGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_client_client_group_set_client_group_id");
+
+                    b.Navigation("ClientGroup");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRate", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Core.ClientGroup", "ClientGroup")
+                        .WithMany("ExchangeRates")
+                        .HasForeignKey("ClientGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_exchange_rate_client_group_client_group_id");
+
+                    b.HasOne("TegWallet.Domain.Entity.Core.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_exchange_rate_client_client_id");
+
+                    b.Navigation("Client");
+
+                    b.Navigation("ClientGroup");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRateHistory", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Core.ExchangeRate", null)
+                        .WithMany()
+                        .HasForeignKey("ExchangeRateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_exchange_rate_history_exchange_rate_exchange_rate_id");
+                });
+
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
                 {
                     b.HasOne("TegWallet.Domain.Entity.Core.Reservation", null)
@@ -950,13 +1213,13 @@ namespace TegWallet.Infrastructure.Migrations
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,4)")
-                                .HasColumnName("available_balance_amount");
+                                .HasColumnName("AvailableBalanceAmount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("available_balance_currency");
+                                .HasColumnName("AvailableBalanceCurrency");
 
                             b1.HasKey("WalletId");
 
@@ -975,13 +1238,13 @@ namespace TegWallet.Infrastructure.Migrations
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,4)")
-                                .HasColumnName("balance_amount");
+                                .HasColumnName("BalanceAmount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("balance_currency");
+                                .HasColumnName("BalanceCurrency");
 
                             b1.HasKey("WalletId");
 
@@ -1020,6 +1283,13 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     b.Navigation("Wallet")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ClientGroup", b =>
+                {
+                    b.Navigation("Clients");
+
+                    b.Navigation("ExchangeRates");
                 });
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>

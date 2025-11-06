@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using TegWallet.Domain.Abstractions;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
-using TegWallet.Domain.ValueObjects;
 using TegWallet.Infrastructure.Persistence.Configurations;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
@@ -60,59 +59,20 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Index for ClientGroup
-            builder.HasIndex(c => c.ClientGroupId)
-                .HasDatabaseName("IX_AspNetUsers_ClientGroupId")
-                .HasFilter("[ClientGroupId] IS NOT NULL");
+            // Wallet relationship (one-to-one)
+            builder.HasOne(c => c.Wallet)
+                .WithOne()
+                .HasForeignKey<Wallet>(w => w.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure owned Wallet
-            builder.OwnsOne(c => c.Wallet, walletBuilder =>
-            {
-                walletBuilder.WithOwner().HasForeignKey("ClientId");
+            //// Index for ClientGroup
+            //builder.HasIndex(c => c.ClientGroupId)
+            //    .HasDatabaseName("IX_AspNetUsers_ClientGroupId")
+            //    .HasFilter("[ClientGroupId] IS NOT NULL");
 
-                walletBuilder.Property(w => w.Id)
-                    .ValueGeneratedNever()
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.ClientId)
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.Balance)
-                    .HasConversion(
-                        money => money.Amount,
-                        amount => new Money(amount, Currency.XOF)) // Default currency
-                    .HasPrecision(18, 2)
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.AvailableBalance)
-                    .HasConversion(
-                        money => money.Amount,
-                        amount => new Money(amount, Currency.XOF))
-                    .HasPrecision(18, 2)
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.BaseCurrency)
-                    .HasConversion(
-                        currency => currency.Code,
-                        code => Currency.FromCode(code))
-                    .HasMaxLength(3)
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.CreatedAt)
-                    .IsRequired();
-
-                walletBuilder.Property(w => w.UpdatedAt)
-                    .IsRequired();
-
-                // Index for wallet
-                walletBuilder.HasIndex(w => w.ClientId)
-                    .IsUnique()
-                    .HasDatabaseName("IX_Wallets_ClientId");
-            });
-
-            // Composite index for common queries
-            builder.HasIndex(c => new { c.Status, c.ClientGroupId })
-                .HasDatabaseName("IX_AspNetUsers_Status_Group");
+            //// Composite index for common queries
+            //builder.HasIndex(c => new { c.Status, c.ClientGroupId })
+            //    .HasDatabaseName("IX_AspNetUsers_Status_Group");
         });
 
         modelBuilder.Entity<IdentityRole<Guid>>(b =>

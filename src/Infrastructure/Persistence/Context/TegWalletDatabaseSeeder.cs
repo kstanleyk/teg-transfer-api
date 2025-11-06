@@ -234,10 +234,10 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
         {
             var clientGroups = new[]
             {
-            ClientGroup.Create("VIP", "VIP clients with premium exchange rates", "SYSTEM"),
-            ClientGroup.Create("Corporate", "Corporate clients with business rates", "SYSTEM"),
-            ClientGroup.Create("Retail", "Retail clients with standard rates", "SYSTEM")
-        };
+                ClientGroup.Create("VIP", "VIP clients with premium exchange rates", "SYSTEM"),
+                ClientGroup.Create("Corporate", "Corporate clients with business rates", "SYSTEM"),
+                ClientGroup.Create("Retail", "Retail clients with standard rates", "SYSTEM")
+            };
 
             await context.ClientGroupSet.AddRangeAsync(clientGroups);
             await context.SaveChangesAsync();
@@ -252,14 +252,14 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
             var now = DateTime.UtcNow;
             var effectiveFrom = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
 
-            var exchangeRates = new List<ExchangeRate>();
-
-            // General Rates
-            exchangeRates.Add(ExchangeRate.CreateGeneralRate(
-                Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"));
-
-            exchangeRates.Add(ExchangeRate.CreateGeneralRate(
-                Currency.NGN, Currency.CNY, 0.0025m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"));
+            var exchangeRates = new List<ExchangeRate>
+            {
+                // General Rates
+                ExchangeRate.CreateGeneralRate(
+                    Currency.XOF, Currency.CNY, 0.00167m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
+                ExchangeRate.CreateGeneralRate(
+                    Currency.NGN, Currency.CNY, 0.0025m, 0.154m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank")
+            };
 
             // Group Rates
             if (clientGroupsList.Count >= 3)

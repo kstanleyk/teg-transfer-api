@@ -48,9 +48,5 @@ public class ClientGroupConfiguration : IEntityTypeConfiguration<ClientGroup>
         builder.HasIndex(x => x.IsActive)
             .HasDatabaseName("IX_ClientGroups_IsActive");
 
-        // Check constraints
-        builder.HasCheckConstraint("CK_ClientGroups_Name_Length", "LEN([Name]) >= 2 AND LEN([Name]) <= 50");
-
-        // Navigation properties will be configured in other configurations
     }
 }
