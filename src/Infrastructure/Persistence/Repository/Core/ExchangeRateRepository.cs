@@ -10,7 +10,8 @@ namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRateHistoryRepository, IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
-    public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(CreateGeneralExchangeRateParameters parameters)
+    public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(
+        CreateGeneralExchangeRateParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
@@ -39,6 +40,297 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             {
                 await tx.CommitAsync();
                 return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<ExchangeRate>> CreateGroupExchangeRateAsync(
+    CreateGroupExchangeRateParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Use the domain factory method to create the exchange rate
+            var exchangeRate = ExchangeRate.CreateGroupRate(
+                parameters.BaseCurrency,
+                parameters.TargetCurrency,
+                parameters.BaseCurrencyValue,
+                parameters.TargetCurrencyValue,
+                parameters.Margin,
+                parameters.ClientGroupId,
+                parameters.EffectiveFrom,
+                parameters.CreatedBy,
+                parameters.Source,
+                parameters.EffectiveTo);
+
+            // Add the exchange rate to the context
+            DbSet.Add(exchangeRate);
+
+            // Create history record for the creation
+            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<ExchangeRate>> DeactivateExchangeRateAsync(
+    DeactivateExchangeRateParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            var exchangeRate = await DbSet
+                .Include(er => er.Client)
+                .Include(er => er.ClientGroup)
+                .FirstOrDefaultAsync(er => er.Id == parameters.ExchangeRateId);
+
+            if (exchangeRate == null)
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NotFound);
+
+            if (!exchangeRate.IsActive)
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.NothingModified);
+
+            // Deactivate the exchange rate
+            exchangeRate.Deactivate();
+
+            // Create history record for deactivation
+            var history = ExchangeRateHistory.CreateFromExchangeRate(
+                exchangeRate,
+                parameters.Reason,
+                parameters.DeactivatedBy,
+                "DEACTIVATED");
+
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Updated);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<ExchangeRate>> ExtendExchangeRateValidityAsync(
+    ExtendExchangeRateValidityParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            var exchangeRate = await DbSet
+                .Include(er => er.Client)
+                .Include(er => er.ClientGroup)
+                .FirstOrDefaultAsync(er => er.Id == parameters.ExchangeRateId);
+
+            if (exchangeRate == null)
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NotFound);
+
+            if (!exchangeRate.IsActive)
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Error);
+
+            // Extend the validity
+            exchangeRate.ExtendValidity(parameters.NewEffectiveTo);
+
+            // Create history record for extension
+            var history = ExchangeRateHistory.CreateFromExchangeRate(
+                exchangeRate,
+                parameters.Reason,
+                parameters.UpdatedBy,
+                "EXTENDED");
+
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Updated);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<ExchangeRate>> CreateIndividualExchangeRateAsync(
+    CreateIndividualExchangeRateParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            // Use the domain factory method to create the exchange rate
+            var exchangeRate = ExchangeRate.CreateIndividualRate(
+                parameters.BaseCurrency,
+                parameters.TargetCurrency,
+                parameters.BaseCurrencyValue,
+                parameters.TargetCurrencyValue,
+                parameters.Margin,
+                parameters.ClientId,
+                parameters.EffectiveFrom,
+                parameters.CreatedBy,
+                parameters.Source,
+                parameters.EffectiveTo);
+
+            // Add the exchange rate to the context
+            DbSet.Add(exchangeRate);
+
+            // Create history record for the creation
+            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+            }
+            else
+            {
+                await tx.RollbackAsync();
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+        }
+    }
+
+    public async Task<RepositoryActionResult<ExchangeRate>> UpdateExchangeRateAsync(
+    UpdateExchangeRateParameters parameters)
+    {
+        await using var tx = await Context.Database.BeginTransactionAsync();
+        try
+        {
+            var exchangeRate = await DbSet
+                .Include(er => er.Client)
+                .Include(er => er.ClientGroup)
+                .FirstOrDefaultAsync(er => er.Id == parameters.ExchangeRateId);
+
+            if (exchangeRate == null)
+                return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NotFound);
+
+            // Store previous values for history
+            var previousBaseValue = exchangeRate.BaseCurrencyValue;
+            var previousTargetValue = exchangeRate.TargetCurrencyValue;
+            var previousMargin = exchangeRate.Margin;
+
+            // Update the exchange rate values
+            exchangeRate.UpdateCurrencyValues(
+                parameters.NewBaseCurrencyValue,
+                parameters.NewTargetCurrencyValue,
+                parameters.NewMargin);
+
+            // Create history record for the update
+            var history = ExchangeRateHistory.CreateForUpdate(
+                exchangeRate,
+                previousBaseValue,
+                previousTargetValue,
+                previousMargin,
+                parameters.UpdatedBy,
+                parameters.Reason);
+
+            await echExchangeRateHistoryRepository.AddAsync(history);
+
+            var result = await SaveChangesAsync();
+            if (result > 0)
+            {
+                await tx.CommitAsync();
+                return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Updated);
             }
             else
             {

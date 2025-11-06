@@ -34,4 +34,19 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
         Currency targetCurrency, DateTime fromDate, DateTime toDate, RateType? type, Guid? clientOrGroupId);
 
     Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(CreateGeneralExchangeRateParameters parameters);
+
+    Task<RepositoryActionResult<ExchangeRate>> CreateGroupExchangeRateAsync(
+        CreateGroupExchangeRateParameters parameters);
+
+    Task<RepositoryActionResult<ExchangeRate>> CreateIndividualExchangeRateAsync(
+        CreateIndividualExchangeRateParameters parameters);
+
+    Task<RepositoryActionResult<ExchangeRate>> DeactivateExchangeRateAsync(
+        DeactivateExchangeRateParameters parameters);
+
+    Task<RepositoryActionResult<ExchangeRate>> ExtendExchangeRateValidityAsync(
+        ExtendExchangeRateValidityParameters parameters);
+
+    Task<RepositoryActionResult<ExchangeRate>> UpdateExchangeRateAsync(
+        UpdateExchangeRateParameters parameters);
 }
