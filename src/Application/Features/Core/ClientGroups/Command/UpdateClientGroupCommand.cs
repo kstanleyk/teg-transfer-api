@@ -1,0 +1,76 @@
+﻿using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TegWallet.Application.Features.Core.ClientGroups.Validator;
+using TegWallet.Application.Helpers;
+using TegWallet.Application.Helpers.Exceptions;
+using TegWallet.Application.Interfaces.Core;
+using TegWallet.Application.Interfaces.Localization;
+using TegWallet.Domain.Exceptions;
+
+namespace TegWallet.Application.Features.Core.ClientGroups.Command;
+
+public record UpdateClientGroupCommand(
+    Guid ClientGroupId,
+    string Name,
+    string Description,
+    string UpdatedBy) : IRequest<Result>;
+
+public class UpdateClientGroupCommandHandler(
+    IClientGroupRepository clientGroupRepository,
+    IAppLocalizer localizer)
+    : IRequestHandler<UpdateClientGroupCommand, Result>
+{
+    private readonly IClientGroupRepository _clientGroupRepository = clientGroupRepository;
+    private readonly IAppLocalizer _localizer = localizer;
+
+    public async Task<Result> Handle(UpdateClientGroupCommand command, CancellationToken cancellationToken)
+    {
+        var validator = new UpdateClientGroupCommandValidator();
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            var validationErrors = validationResult.Errors
+                .Select(e => e.ErrorMessage)
+                .Distinct()
+                .ToList();
+
+            throw new ValidationException(validationErrors);
+        }
+
+        try
+        {
+            var parameters = new UpdateClientGroupParameters(
+                command.ClientGroupId,
+                command.Name,
+                command.Description,
+                command.UpdatedBy);
+
+            var result = await _clientGroupRepository.UpdateClientGroupAsync(parameters);
+
+            if (result.Status != RepositoryActionStatus.Updated)
+                return Result.Failed("An unexpected error occurred while updating the client group. Please try again.");
+
+            var message = _localizer["ClientGroupUpdatedSuccess"];
+            return Result.Succeeded(message);
+        }
+        catch (DomainException ex)
+        {
+            return Result.Failed(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failed($"Failed to update client group: {ex.Message}");
+        }
+    }
+}
+
+public record UpdateClientGroupParameters(
+    Guid ClientGroupId,
+    string Name,
+    string Description,
+    string UpdatedBy);

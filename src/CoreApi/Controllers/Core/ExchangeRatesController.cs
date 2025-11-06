@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TegWallet.Application.Features.Core.ExchangeRate.Command;
-using TegWallet.Application.Features.Core.ExchangeRate.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Command;
+using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
 using TegWallet.Application.Helpers;
 using TegWallet.Domain.ValueObjects;
 

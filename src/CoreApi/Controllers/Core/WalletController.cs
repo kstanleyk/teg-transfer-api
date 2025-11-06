@@ -2,8 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TegWallet.Application.Authorization;
-using TegWallet.Application.Features.Core.ExchangeRate.Dtos;
-using TegWallet.Application.Features.Core.ExchangeRate.Queries;
+using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Features.Core.Ledgers.Query;
 using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;

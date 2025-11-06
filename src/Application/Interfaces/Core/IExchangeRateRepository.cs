@@ -1,4 +1,4 @@
-﻿using TegWallet.Application.Features.Core.ExchangeRate.Command;
+﻿using TegWallet.Application.Features.Core.ExchangeRates.Command;
 using TegWallet.Application.Helpers;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;

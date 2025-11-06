@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TegWallet.Application.Features.Core.ExchangeRate.Command;
+using TegWallet.Application.Features.Core.ExchangeRates.Command;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;

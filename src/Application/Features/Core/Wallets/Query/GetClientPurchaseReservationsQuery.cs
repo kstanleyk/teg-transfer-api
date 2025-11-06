@@ -18,43 +18,48 @@ public record GetClientPurchaseReservationsQuery(
     : IRequest<Result<PagedResponse<ReservationDto>>>;
 
 public class GetClientPurchaseReservationsQueryHandler(
-        IReservationRepository reservationRepository,
-        UserManager<Domain.Entity.Core.Client> clientRepository,
-        IMapper mapper)
-        : IRequestHandler<GetClientPurchaseReservationsQuery, Result<PagedResponse<ReservationDto>>>
+    IReservationRepository reservationRepository,
+    UserManager<Client> clientRepository,
+    IMapper mapper)
+    : IRequestHandler<GetClientPurchaseReservationsQuery, Result<PagedResponse<ReservationDto>>>
 {
     public async Task<Result<PagedResponse<ReservationDto>>> Handle(
         GetClientPurchaseReservationsQuery query,
         CancellationToken cancellationToken)
     {
-        // Validate client exists
-        var client = await clientRepository.FindByIdAsync(query.ClientId.ToString());
-        if (client == null)
-            throw new InvalidOperationException($"Client not found: {query.ClientId}");
-
-        // Get paged reservations
-        var pagedResult = await reservationRepository.GetPagedReservationsByClientIdAsync(
-            query.ClientId,
-            query.Status,
-            query.Page,
-            query.PageSize,
-            query.SortBy,
-            query.SortDescending);
-
-        // Map to DTOs
-        var reservationDtos = mapper.Map<List<ReservationDto>>(pagedResult.Items);
-
-        var response = new PagedResponse<ReservationDto>
+        try
         {
-            Items = reservationDtos,
-            Page = pagedResult.Page,
-            PageSize = pagedResult.PageSize,
-            TotalCount = pagedResult.TotalCount,
-            TotalPages = pagedResult.TotalPages,
-            HasPrevious = pagedResult.HasPrevious,
-            HasNext = pagedResult.HasNext
-        };
+            // Validate client exists
+            var client = await clientRepository.FindByIdAsync(query.ClientId.ToString());
+            if (client == null)
+                return Result<PagedResponse<ReservationDto>>.Failed($"Client not found: {query.ClientId}");
 
-        return Result<PagedResponse<ReservationDto>>.Succeeded(response);
+            // Get paged reservations
+            var pagedResult = await reservationRepository.GetPagedReservationsByClientIdAsync(
+                query.ClientId,
+                query.Status,
+                query.Page,
+                query.PageSize,
+                query.SortBy,
+                query.SortDescending);
+
+            // Map to DTOs
+            var reservationDtos = mapper.Map<List<ReservationDto>>(pagedResult.Items);
+
+            var response = new PagedResponse<ReservationDto>
+            {
+                Items = reservationDtos,
+                Page = pagedResult.Page,
+                PageSize = pagedResult.PageSize,
+                TotalCount = pagedResult.TotalCount
+                // TotalPages, HasPrevious, HasNext are computed properties
+            };
+
+            return Result<PagedResponse<ReservationDto>>.Succeeded(response);
+        }
+        catch (Exception ex)
+        {
+            return Result<PagedResponse<ReservationDto>>.Failed($"An error occurred while retrieving purchase reservations: {ex.Message}");
+        }
     }
 }
