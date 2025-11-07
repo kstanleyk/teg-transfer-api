@@ -12,6 +12,8 @@ using TegWallet.CoreApi.BackgroundServices;
 using TegWallet.CoreApi.Localization;
 using TegWallet.CoreApi.Permissions;
 using TegWallet.CoreApi.Services;
+using TegWallet.Domain.Entity.Core;
+using TegWallet.Infrastructure.Photos;
 
 namespace TegWallet.CoreApi;
 
@@ -65,6 +67,9 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection("WebProtocolSettings"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.Configure<RateLockingSettings>(configuration
+            .GetSection("RateLockingSettings"));
 
         var allowedOrigins = configuration
             .GetSection("Cors:AllowedOrigins")
