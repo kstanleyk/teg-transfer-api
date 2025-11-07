@@ -9,7 +9,6 @@ using TegWallet.Domain.ValueObjects;
 namespace TegWallet.CoreApi.Controllers.Core;
 
 [ApiVersion("1.0")]
-[Route("api/exchange-rates")]
 public class ExchangeRatesController(IMediator mediator) : ApiControllerBase<ExchangeRatesController>
 {
     public IMediator Mediator { get; } = mediator;

@@ -21,7 +21,6 @@ public class RepositoryActionResult
 }
 
 public class RepositoryActionResult<T>(T? entity, RepositoryActionStatus status) : RepositoryActionResult
-    where T : class
 {
     public T? Entity { get; } = entity;
     public RepositoryActionStatus Status { get; } = status;

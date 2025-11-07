@@ -1,4 +1,6 @@
-﻿namespace TegWallet.Domain.ValueObjects;
+﻿using TegWallet.Domain.Exceptions;
+
+namespace TegWallet.Domain.ValueObjects;
 
 public record Currency
 {
@@ -31,6 +33,20 @@ public record Currency
             "CNY" => CNY,
             _ => throw new ArgumentException($"Unsupported currency code: {code}")
         };
+    }
+
+    public static bool TryFromCode(string code, out Currency currency)
+    {
+        try
+        {
+            currency = FromCode(code);
+            return true;
+        }
+        catch (DomainException)
+        {
+            currency = null;
+            return false;
+        }
     }
 
     public static IReadOnlyList<Currency> All => [USD, NGN, XOF, CNY];

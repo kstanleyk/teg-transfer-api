@@ -10,6 +10,88 @@ namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRateHistoryRepository, IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
+    public async Task<ExchangeRate?> GetApplicableRateAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        DateTime asOfDate)
+    {
+        try
+        {
+            // Get all active rates for the currency pair that are effective at the given date
+            var rates = await DbSet
+                .Include(er => er.ClientGroup)
+                .Include(er => er.Client)
+                .Where(er => er.BaseCurrency == baseCurrency &&
+                            er.TargetCurrency == targetCurrency &&
+                            er.IsActive &&
+                            er.EffectiveFrom <= asOfDate &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+                .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
+                .ThenByDescending(er => er.EffectiveFrom) // Most recent first
+                .ToListAsync();
+
+            if (!rates.Any())
+            {
+                //_logger.LogWarning("No exchange rates found for {BaseCurrency} to {TargetCurrency} as of {AsOfDate}",
+                    //baseCurrency.Code, targetCurrency.Code, asOfDate);
+                return null;
+            }
+
+            // Priority order: Individual > Group > General
+            ExchangeRate? applicableRate = null;
+
+            // 1. Check for individual rate for the specific client
+            if (clientId.HasValue)
+            {
+                applicableRate = rates.FirstOrDefault(er =>
+                    er.Type == RateType.Individual && er.ClientId == clientId.Value);
+
+                if (applicableRate != null)
+                {
+                    //_logger.LogDebug("Found individual rate for client {ClientId}: {Rate}",
+                    //    clientId, applicableRate.EffectiveRate);
+                    return applicableRate;
+                }
+            }
+
+            // 2. Check for group rate for the client's group
+            if (clientGroupId.HasValue)
+            {
+                applicableRate = rates.FirstOrDefault(er =>
+                    er.Type == RateType.Group && er.ClientGroupId == clientGroupId.Value);
+
+                if (applicableRate != null)
+                {
+                    //_logger.LogDebug("Found group rate for group {GroupId}: {Rate}",
+                    //    clientGroupId, applicableRate.EffectiveRate);
+                    return applicableRate;
+                }
+            }
+
+            // 3. Use general rate (applies to all clients)
+            applicableRate = rates.FirstOrDefault(er => er.Type == RateType.General);
+
+            if (applicableRate != null)
+            {
+                //_logger.LogDebug("Found general rate: {Rate}", applicableRate.EffectiveRate);
+                return applicableRate;
+            }
+
+            //_logger.LogWarning("No applicable exchange rate found for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
+                //clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            //_logger.LogError(ex, "Error getting applicable exchange rate for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
+            //    clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
+            throw;
+        }
+    }
+
     public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(
         CreateGeneralExchangeRateParameters parameters)
     {

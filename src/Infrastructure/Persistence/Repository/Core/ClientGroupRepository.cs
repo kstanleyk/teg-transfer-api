@@ -241,6 +241,32 @@ public class ClientGroupRepository(IDatabaseFactory databaseFactory)
         };
     }
 
+    public async Task<IReadOnlyList<ClientGroup>> GetAllWithoutPaginationAsync(
+        bool? isActive = null,
+        string? searchTerm = null)
+    {
+        var query = DbSet.AsQueryable();
+
+        // Apply filters
+        if (isActive.HasValue)
+        {
+            query = query.Where(cg => cg.IsActive == isActive.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(cg =>
+                cg.Name.ToLower().Contains(searchTerm) ||
+                cg.Description.ToLower().Contains(searchTerm));
+        }
+
+        // Return all results without pagination
+        return await query
+            .OrderBy(cg => cg.Name)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<ClientGroup>> GetByStatusAsync(bool isActive)
     {
         return await DbSet

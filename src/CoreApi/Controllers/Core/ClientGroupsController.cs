@@ -9,7 +9,6 @@ using TegWallet.Application.Helpers;
 namespace TegWallet.CoreApi.Controllers.Core;
 
 [ApiVersion("1.0")]
-[Route("api/client-groups")]
 public class ClientGroupsController(IMediator mediator) : ApiControllerBase<ClientGroupsController>
 {
     public IMediator Mediator { get; } = mediator;
@@ -39,6 +38,18 @@ public class ClientGroupsController(IMediator mediator) : ApiControllerBase<Clie
         [FromQuery] int pageSize = 20)
     {
         var query = new GetAllClientGroupsQuery(isActive, searchTerm, pageNumber, pageSize);
+        var result = await Mediator.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ClientGroupDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllClientGroupsWithoutPaginationV1(
+        [FromQuery] bool? isActive = null,
+        [FromQuery] string? searchTerm = null)
+    {
+        var query = new GetAllClientGroupsWithoutPaginationQuery(isActive, searchTerm);
         var result = await Mediator.Send(query);
         return Ok(result);
     }

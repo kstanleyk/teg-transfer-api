@@ -49,4 +49,11 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
 
     Task<RepositoryActionResult<ExchangeRate>> UpdateExchangeRateAsync(
         UpdateExchangeRateParameters parameters);
+
+    Task<ExchangeRate?> GetApplicableRateAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        DateTime asOfDate);
 }

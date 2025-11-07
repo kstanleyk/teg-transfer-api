@@ -1,16 +1,19 @@
-using System.Globalization;
-using System.Reflection;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
+using System.Reflection;
 using TegWallet.Application.Authorization;
 using TegWallet.Application.Interfaces.Localization;
+using TegWallet.CoreApi.BackgroundServices;
 using TegWallet.CoreApi.Localization;
 using TegWallet.CoreApi.Permissions;
 using TegWallet.CoreApi.Services;
+using TegWallet.Domain.Entity.Core;
+using TegWallet.Infrastructure.Photos;
 
 namespace TegWallet.CoreApi;
 
@@ -65,6 +68,9 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.Configure<RateLockingSettings>(configuration
+            .GetSection("RateLockingSettings"));
+
         var allowedOrigins = configuration
             .GetSection("Cors:AllowedOrigins")
             .Get<string[]>() ?? [];
@@ -96,6 +102,8 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<CurrentUserService>();
         services.AddScoped<TokenInfoService>();
+
+        services.AddHostedService<RateLockCleanupService>();
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
