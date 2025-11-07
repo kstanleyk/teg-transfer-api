@@ -51,6 +51,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClientGroupRepository, ClientGroupRepository>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         services.AddScoped<IExchangeRateHistoryRepository, ExchangeRateHistoryRepository>();
+        services.AddScoped<IRateLockRepository, RateLockRepository>();
 
         return services;
     }
