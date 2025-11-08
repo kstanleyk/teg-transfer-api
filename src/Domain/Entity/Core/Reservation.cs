@@ -26,9 +26,9 @@ public class Reservation : Entity<Guid>
     // Private constructor for EF Core
     protected Reservation()
     {
-        PurchaseAmount  = new Money(0, Currency.Xof);
-        ServiceFeeAmount = new Money(0, Currency.Xof);
-        TotalAmount = new Money(0, Currency.Xof);
+        PurchaseAmount  = new Money(0, Currency.XOF);
+        ServiceFeeAmount = new Money(0, Currency.XOF);
+        TotalAmount = new Money(0, Currency.XOF);
         Description = string.Empty;
         SupplierDetails = string.Empty;
         PaymentMethod = string.Empty;

@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             cfg.AddProfile(new LedgerProfile());
             cfg.AddProfile(new ExchangeRateProfile());
             cfg.AddProfile(new ClientGroupProfile());
+            cfg.AddProfile(new ClientWithExchangeRateProfile());
         }).CreateMapper());
 
         //services.AddValidatorsFromAssembly(assembly);

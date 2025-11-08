@@ -18,24 +18,24 @@ public record Currency
         DecimalPlaces = decimalPlaces;
     }
 
-    public static readonly Currency Usd = new("USD", "$", 2);
-    public static readonly Currency Ngn = new("NGN", "₦", 2);
-    public static readonly Currency Xof = new("XOF", "CFA", 2);
-    public static readonly Currency Cny = new("CNY", "¥", 2);
+    public static readonly Currency USD = new("USD", "$", 2);
+    public static readonly Currency NGN = new("NGN", "₦", 2);
+    public static readonly Currency XOF = new("XOF", "CFA", 2);
+    public static readonly Currency CNY = new("CNY", "¥", 2);
 
     public static Currency FromCode(string code)
     {
         return code.ToUpper() switch
         {
-            "USD" => Usd,
-            "NGN" => Ngn,
-            "XOF" => Xof,
-            "CNY" => Cny,
+            "USD" => USD,
+            "NGN" => NGN,
+            "XOF" => XOF,
+            "CNY" => CNY,
             _ => throw new ArgumentException($"Unsupported currency code: {code}")
         };
     }
 
-    public static bool TryFromCode(string code, out Currency currency)
+    public static bool TryFromCode(string code, out Currency? currency)
     {
         try
         {
@@ -49,5 +49,5 @@ public record Currency
         }
     }
 
-    public static IReadOnlyList<Currency> All => [Usd, Ngn, Xof, Cny];
+    public static IReadOnlyList<Currency> All => [USD, NGN, XOF, CNY];
 }

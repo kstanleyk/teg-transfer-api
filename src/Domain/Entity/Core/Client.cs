@@ -47,7 +47,7 @@ public class Client : IdentityUser<Guid>
             throw new DomainException("Invalid phone number format");
 
         var clientId = Guid.NewGuid();
-        var currency = defaultCurrency ?? Currency.Xof;
+        var currency = defaultCurrency ?? Currency.XOF;
 
         var client = new Client
         {

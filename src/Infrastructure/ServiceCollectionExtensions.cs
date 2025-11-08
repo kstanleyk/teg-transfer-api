@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
 
         //Core
-        //services.AddScoped<IClientRepository, UserManager>();
+        services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();

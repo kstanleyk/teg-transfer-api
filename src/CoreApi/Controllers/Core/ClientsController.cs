@@ -1,11 +1,11 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using TegWallet.Application.Authorization;
 using TegWallet.Application.Features.Core.Clients.Command;
 using TegWallet.Application.Features.Core.Clients.Dto;
 using TegWallet.Application.Features.Core.Clients.Query;
-using TegWallet.CoreApi.Attributes;
+using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 
 namespace TegWallet.CoreApi.Controllers.Core;
 
@@ -19,6 +19,30 @@ public class ClientsController(IMapper mapper) : ApiControllerBase<ClientsContro
         var query = new GetClientsQuery();
         var result = await MediatorSender.Send(query);
         return Ok(result);
+    }
+
+    [HttpGet("with-exchange-rates")]
+    [ProducesResponseType(typeof(IReadOnlyList<ClientWithExchangeRateDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetClientsWithExchangeRates(
+        [FromQuery] string baseCurrency,
+        [FromQuery] string targetCurrency)
+    {
+        var query = new GetClientsWithExchangeRatesQuery(
+            BaseCurrency: baseCurrency,
+            TargetCurrency: targetCurrency);
+
+        var result = await MediatorSender.Send(query);
+
+        if (result.Success)
+            return Ok(result);
+
+        return BadRequest(new ProblemDetails
+        {
+            Title = "Error retrieving clients with exchange rates",
+            Detail = result.Message
+        });
     }
 
     [MapToApiVersion("1.0")]
