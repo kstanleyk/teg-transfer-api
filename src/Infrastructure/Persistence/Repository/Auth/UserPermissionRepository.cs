@@ -24,8 +24,8 @@ public class UserPermissionRepository(TegWalletContext context) :Disposable, IUs
         return permissions.ToHashSet();
     }
 
-    //protected override void DisposeCore()
-    //{
-    //    base.DisposeCore();
-    //}
+    protected override void DisposeCore()
+    {
+        context.Dispose();
+    }
 }

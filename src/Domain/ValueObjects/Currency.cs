@@ -35,7 +35,7 @@ public record Currency
         };
     }
 
-    public static bool TryFromCode(string code, out Currency currency)
+    public static bool TryFromCode(string code, out Currency? currency)
     {
         try
         {

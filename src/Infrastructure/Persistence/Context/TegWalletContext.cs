@@ -26,6 +26,7 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     public DbSet<ExchangeRateHistory> ExchangeRateHistorySet { get; set; }
     public DbSet<ClientGroup> ClientGroupSet { get; set; }
     public DbSet<RateLock> RateLockSet { get; set; }
+    public DbSet<Client> ClientSet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
 using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
@@ -12,26 +10,24 @@ public record GetClientExchangeRateQuery(
     Guid ClientId,
     Currency BaseCurrency,
     Currency TargetCurrency,
-    DateTime? AsOfDate = null) : IRequest<Result<ExchangeRateDto?>>;
+    DateTime? AsOfDate = null) : IRequest<Result<ClientWithExchangeRateDto?>>;
 
 public class GetClientExchangeRateQueryHandler(
     IExchangeRateRepository exchangeRateRepository,
-    UserManager<Domain.Entity.Core.Client> userManager,
-    IMapper mapper)
-    : IRequestHandler<GetClientExchangeRateQuery, Result<ExchangeRateDto?>>
+    IClientRepository clientRepository)
+    : ClientWithExchangeRateHandlerBase, IRequestHandler<GetClientExchangeRateQuery, Result<ClientWithExchangeRateDto?>>
 {
     private readonly IExchangeRateRepository _exchangeRateRepository = exchangeRateRepository;
-    private readonly UserManager<Domain.Entity.Core.Client> _userManager = userManager;
-    private readonly IMapper _mapper = mapper;
+    private readonly IClientRepository _clientRepository = clientRepository;
 
-    public async Task<Result<ExchangeRateDto?>> Handle(GetClientExchangeRateQuery query,
+    public async Task<Result<ClientWithExchangeRateDto?>> Handle(GetClientExchangeRateQuery query,
         CancellationToken cancellationToken)
     {
         try
         {
-            var client = await _userManager.FindByIdAsync(query.ClientId.ToString());
+            var client = await _clientRepository.GetClientForExchangeRateQueryAsync(query.ClientId);
             if (client == null)
-                return Result<ExchangeRateDto?>.Failed("Client not found");
+                return Result<ClientWithExchangeRateDto?>.Failed("Client not found");
 
             var asOfDate = query.AsOfDate ?? DateTime.UtcNow;
 
@@ -44,15 +40,15 @@ public class GetClientExchangeRateQueryHandler(
                 asOfDate);
 
             if (rate == null)
-                return Result<ExchangeRateDto?>.Succeeded(null);
+                return Result<ClientWithExchangeRateDto?>.Succeeded(null);
 
-            var rateDto = _mapper.Map<ExchangeRateDto>(rate);
-            return Result<ExchangeRateDto?>.Succeeded(rateDto);
+            var rateDto = MapDto(client, rate);
+            return Result<ClientWithExchangeRateDto?>.Succeeded(rateDto);
         }
         catch (Exception ex)
         {
             // Log exception here if needed
-            return Result<ExchangeRateDto?>.Failed($"An error occurred while retrieving exchange rate: {ex.Message}");
+            return Result<ClientWithExchangeRateDto?>.Failed($"An error occurred while retrieving exchange rate: {ex.Message}");
         }
     }
 }

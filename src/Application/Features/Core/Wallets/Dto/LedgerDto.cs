@@ -13,6 +13,9 @@ public class LedgerDto
     public string Description { get; set; } = string.Empty;
     public string FailureReason { get; set; } = string.Empty;
     public string TraceNumber { get; set; } = string.Empty;
+    public string CurrencyCode { get; internal set; }
+    public DateTime? CompletedAt { get; internal set; }
+    public string CompletedBy { get; internal set; }
 
     // Parameterless constructor for AutoMapper
     public LedgerDto() { }

@@ -10,6 +10,51 @@ namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRateHistoryRepository, IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
+    public async Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
+        IEnumerable<Client> clients,
+        Currency baseCurrency,
+        Currency targetCurrency)
+    {
+        var clientList = clients.ToList();
+        if (!clientList.Any())
+            return new Dictionary<Guid, ExchangeRate?>();
+
+        var clientIds = clientList.Select(c => c.Id).ToList();
+        var clientGroupIds = clientList.Where(c => c.ClientGroupId.HasValue)
+            .Select(c => c.ClientGroupId!.Value)
+            .Distinct()
+            .ToList();
+
+        var now = DateTime.UtcNow;
+
+        // Get all possible exchange rates in one query
+        var exchangeRates = await DbSet
+            .Where(er => er.BaseCurrency == baseCurrency &&
+                         er.TargetCurrency == targetCurrency &&
+                         er.IsActive &&
+                         er.EffectiveFrom <= now &&
+                         (er.EffectiveTo == null || er.EffectiveTo >= now))
+            .ToListAsync();
+
+        var result = new Dictionary<Guid, ExchangeRate?>();
+
+        foreach (var client in clientList)
+        {
+            // Find applicable rate with priority: Individual > Group > General
+            var applicableRate = exchangeRates
+                .Where(er => er.IsEffectiveAt(now))
+                .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
+                .FirstOrDefault(er =>
+                    (er.Type == RateType.Individual && er.ClientId == client.Id) ||
+                    (er.Type == RateType.Group && er.ClientGroupId == client.ClientGroupId) ||
+                    (er.Type == RateType.General));
+
+            result[client.Id] = applicableRate;
+        }
+
+        return result;
+    }
+
     public async Task<ExchangeRate?> GetApplicableRateAsync(
         Guid? clientId,
         Guid? clientGroupId,
@@ -40,7 +85,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             }
 
             // Priority order: Individual > Group > General
-            ExchangeRate? applicableRate = null;
+            ExchangeRate? applicableRate;
 
             // 1. Check for individual rate for the specific client
             if (clientId.HasValue)
@@ -485,8 +530,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             Guid? clientGroupId,
             Currency baseCurrency,
             Currency targetCurrency,
-            DateTime asOfDate,
-            CancellationToken cancellationToken = default)
+            DateTime asOfDate)
     {
         // Try individual rate first
         var individualRate = await DbSet
@@ -499,7 +543,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                         er.EffectiveFrom <= asOfDate &&
                         (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
             .OrderByDescending(er => er.EffectiveFrom)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync();
 
         if (individualRate != null)
             return individualRate;
@@ -516,7 +560,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                             er.EffectiveFrom <= asOfDate &&
                             (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
                 .OrderByDescending(er => er.EffectiveFrom)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync();
 
             if (groupRate != null)
                 return groupRate;
@@ -532,7 +576,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                         er.EffectiveFrom <= asOfDate &&
                         (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
             .OrderByDescending(er => er.EffectiveFrom)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync();
 
         return generalRate;
     }

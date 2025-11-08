@@ -21,6 +21,8 @@ public class ExchangeRateDto
     public string? ClientGroupName { get; set; }
     public string? ClientName { get; set; }
     public string RateTypeDescription { get; set; } = string.Empty;
+    public string RateDescription { get; set; } = string.Empty;
+    public string RateInverseDescription { get; set; } = string.Empty;
 
     // Calculated properties
     public string CurrencyPair => $"{BaseCurrency.Code}/{TargetCurrency.Code}";

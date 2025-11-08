@@ -17,13 +17,11 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
 
     Task<ExchangeRate?> GetByIdAsync(Guid id);
 
-    Task<ExchangeRate?> GetEffectiveRateForClientAsync(
-        Guid clientId,
+    Task<ExchangeRate?> GetEffectiveRateForClientAsync(Guid clientId,
         Guid? clientGroupId,
         Currency baseCurrency,
         Currency targetCurrency,
-        DateTime asOfDate,
-        CancellationToken cancellationToken = default);
+        DateTime asOfDate);
 
     Task<IReadOnlyList<ExchangeRate>> GetClientAvailableRatesAsync(
         Guid clientId,
@@ -56,4 +54,9 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
         Currency baseCurrency,
         Currency targetCurrency,
         DateTime asOfDate);
+
+    Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
+        IEnumerable<Client> clients,
+        Currency baseCurrency,
+        Currency targetCurrency);
 }
