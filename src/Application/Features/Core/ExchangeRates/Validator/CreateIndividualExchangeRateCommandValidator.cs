@@ -24,9 +24,9 @@ public class CreateIndividualExchangeRateCommandValidator : AbstractValidator<Cr
             .NotEqual(Guid.Empty)
             .WithMessage("Client ID must be a valid GUID");
 
-        RuleFor(x => x.EffectiveFrom)
-            .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
-            .WithMessage("Effective date cannot be more than 5 minutes in the past");
+        //RuleFor(x => x.EffectiveFrom)
+        //    .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
+        //    .WithMessage("Effective date cannot be more than 5 minutes in the past");
 
         RuleFor(x => x.EffectiveTo)
             .Must((command, effectiveTo) => effectiveTo == null || effectiveTo > command.EffectiveFrom)

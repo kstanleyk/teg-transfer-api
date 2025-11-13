@@ -19,14 +19,11 @@ public class CreateGroupExchangeRateCommandValidator : AbstractValidator<CreateG
         RuleFor(x => x.Margin).ValidateMargin();
 
         RuleFor(x => x.ClientGroupId)
-            .NotEmpty()
-            .WithMessage("Client group ID is required")
-            .NotEqual(Guid.Empty)
-            .WithMessage("Client group ID must be a valid GUID");
+            .ValidateNotEmptyGuid("Client group Id");
 
-        RuleFor(x => x.EffectiveFrom)
-            .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
-            .WithMessage("Effective date cannot be more than 5 minutes in the past");
+        //RuleFor(x => x.EffectiveFrom)
+        //    .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
+        //    .WithMessage("Effective date cannot be more than 5 minutes in the past");
 
         RuleFor(x => x.EffectiveTo)
             .Must((command, effectiveTo) => effectiveTo == null || effectiveTo > command.EffectiveFrom)

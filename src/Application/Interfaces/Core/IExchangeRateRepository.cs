@@ -7,8 +7,6 @@ namespace TegWallet.Application.Interfaces.Core;
 
 public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
 {
-    Task<IReadOnlyList<ExchangeRate>> GetActiveRatesAsync(Currency baseCurrency, Currency targetCurrency,
-        DateTime effectiveDate);
 
     Task<IReadOnlyList<ExchangeRate>> GetRatesByClientAsync(Guid clientId);
 
@@ -59,4 +57,12 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
         IEnumerable<Client> clients,
         Currency baseCurrency,
         Currency targetCurrency);
+
+    Task MarkExpiredRatesAsInactiveAsync();
+
+    Task<IReadOnlyList<ExchangeRate>> GetAllActiveRatesAsync(
+        DateTime? asOfDate = null,
+        Currency? baseCurrency = null,
+        Currency? targetCurrency = null,
+        RateType? rateType = null);
 }

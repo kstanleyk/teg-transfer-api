@@ -58,12 +58,14 @@ public class CreateIndividualExchangeRateCommandHandler(
             if (client.Status != ClientStatus.Active)
                 return Result<Guid>.Failed("Cannot create rate for inactive client");
 
+            var marginPercentage = command.Margin / 100;
+
             var parameters = new CreateIndividualExchangeRateParameters(
                 command.BaseCurrency,
                 command.TargetCurrency,
                 command.BaseCurrencyValue,
                 command.TargetCurrencyValue,
-                command.Margin,
+                marginPercentage,
                 command.ClientId,
                 command.EffectiveFrom,
                 command.CreatedBy,

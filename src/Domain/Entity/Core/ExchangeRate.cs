@@ -162,6 +162,24 @@ public class ExchangeRate : Entity<Guid>
         };
     }
 
+    public void Expire(DateTime newRateEffectiveFrom, string deactivatedBy, string reason)
+    {
+        // Set the expiration to 1 second before the new rate starts
+        EffectiveTo = newRateEffectiveFrom.AddSeconds(-1);
+
+        // If the new rate starts in the future, we remain active until then
+        // If the new rate starts now or in the past, we deactivate immediately
+        if (EffectiveTo < DateTime.UtcNow)
+        {
+            IsActive = false;
+        }
+    }
+
+    public void MarkAsHistorical()
+    {
+        IsActive = false;
+    }
+
     public void UpdateCurrencyValues(decimal newBaseCurrencyValue, decimal newTargetCurrencyValue, decimal newMargin)
     {
         ValidateCurrencyValues(newBaseCurrencyValue, newTargetCurrencyValue);
@@ -410,8 +428,8 @@ public class ExchangeRate : Entity<Guid>
 
     private static void ValidateEffectiveDate(DateTime effectiveFrom, DateTime? effectiveTo)
     {
-        if (effectiveFrom < DateTime.UtcNow.AddMinutes(-5))
-            throw new DomainException("Effective date cannot be more than 5 minutes in the past");
+        //if (effectiveFrom < DateTime.UtcNow.AddMinutes(-5))
+        //    throw new DomainException("Effective date cannot be more than 5 minutes in the past");
 
         if (effectiveTo.HasValue && effectiveTo.Value <= effectiveFrom)
             throw new DomainException("End date must be after start date");

@@ -23,7 +23,6 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     public virtual DbSet<Ledger> LedgerSet { get; set; }
     public DbSet<Reservation> PurchaseReservationSet { get; set; }
     public DbSet<ExchangeRate> ExchangeRateSet { get; set; }
-    public DbSet<ExchangeRateHistory> ExchangeRateHistorySet { get; set; }
     public DbSet<ClientGroup> ClientGroupSet { get; set; }
     public DbSet<RateLock> RateLockSet { get; set; }
     public DbSet<Client> ClientSet { get; set; }
@@ -67,14 +66,11 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
                 .HasForeignKey<Wallet>(w => w.ClientId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //// Index for ClientGroup
-            //builder.HasIndex(c => c.ClientGroupId)
-            //    .HasDatabaseName("IX_AspNetUsers_ClientGroupId")
-            //    .HasFilter("[ClientGroupId] IS NOT NULL");
-
-            //// Composite index for common queries
-            //builder.HasIndex(c => new { c.Status, c.ClientGroupId })
-            //    .HasDatabaseName("IX_AspNetUsers_Status_Group");
+            // Relationship with ApplicationUser
+            builder.HasOne(s => s.User)
+                .WithOne(u => u.Client)
+                .HasForeignKey<ApplicationUser>(u => u.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<IdentityRole<Guid>>(b =>

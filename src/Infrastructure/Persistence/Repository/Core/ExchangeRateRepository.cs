@@ -7,47 +7,119 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
-public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRateHistoryRepository, IDatabaseFactory databaseFactory)
+public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
+    //public async Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
+    //    IEnumerable<Client> clients,
+    //    Currency baseCurrency,
+    //    Currency targetCurrency)
+    //{
+    //    var clientList = clients.ToList();
+    //    if (!clientList.Any())
+    //        return new Dictionary<Guid, ExchangeRate?>();
+
+    //    var clientIds = clientList.Select(c => c.Id).ToList();
+    //    var clientGroupIds = clientList.Where(c => c.ClientGroupId.HasValue)
+    //        .Select(c => c.ClientGroupId!.Value)
+    //        .Distinct()
+    //        .ToList();
+
+    //    var now = DateTime.UtcNow;
+
+    //    // Get all possible exchange rates in one query
+    //    var exchangeRates = await DbSet
+    //        .Where(er => er.BaseCurrency == baseCurrency &&
+    //                     er.TargetCurrency == targetCurrency &&
+    //                     er.IsActive &&
+    //                     er.EffectiveFrom <= now &&
+    //                     (er.EffectiveTo == null || er.EffectiveTo >= now))
+    //        .ToListAsync();
+
+    //    var result = new Dictionary<Guid, ExchangeRate?>();
+
+    //    foreach (var client in clientList)
+    //    {
+    //        // Find applicable rate with priority: Individual > Group > General
+    //        var applicableRate = exchangeRates
+    //            .Where(er => er.IsEffectiveAt(now))
+    //            .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
+    //            .FirstOrDefault(er =>
+    //                (er.Type == RateType.Individual && er.ClientId == client.Id) ||
+    //                (er.Type == RateType.Group && er.ClientGroupId == client.ClientGroupId) ||
+    //                (er.Type == RateType.General));
+
+    //        result[client.Id] = applicableRate;
+    //    }
+
+    //    return result;
+    //}
+
     public async Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
-        IEnumerable<Client> clients,
-        Currency baseCurrency,
-        Currency targetCurrency)
+    IEnumerable<Client> clients,
+    Currency baseCurrency,
+    Currency targetCurrency)
     {
         var clientList = clients.ToList();
         if (!clientList.Any())
             return new Dictionary<Guid, ExchangeRate?>();
 
-        var clientIds = clientList.Select(c => c.Id).ToList();
-        var clientGroupIds = clientList.Where(c => c.ClientGroupId.HasValue)
-            .Select(c => c.ClientGroupId!.Value)
-            .Distinct()
-            .ToList();
-
         var now = DateTime.UtcNow;
 
-        // Get all possible exchange rates in one query
-        var exchangeRates = await DbSet
+        // Get ALL rates for the currency pair (including inactive for fallback)
+        var allRates = await DbSet
             .Where(er => er.BaseCurrency == baseCurrency &&
-                         er.TargetCurrency == targetCurrency &&
-                         er.IsActive &&
-                         er.EffectiveFrom <= now &&
-                         (er.EffectiveTo == null || er.EffectiveTo >= now))
+                        er.TargetCurrency == targetCurrency &&
+                        er.EffectiveFrom <= now)
             .ToListAsync();
 
         var result = new Dictionary<Guid, ExchangeRate?>();
 
         foreach (var client in clientList)
         {
-            // Find applicable rate with priority: Individual > Group > General
-            var applicableRate = exchangeRates
-                .Where(er => er.IsEffectiveAt(now))
-                .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
-                .FirstOrDefault(er =>
-                    (er.Type == RateType.Individual && er.ClientId == client.Id) ||
-                    (er.Type == RateType.Group && er.ClientGroupId == client.ClientGroupId) ||
-                    (er.Type == RateType.General));
+            ExchangeRate? applicableRate = null;
+
+            // 1. Try active individual rate
+            var individualRate = allRates
+                .Where(er => er.Type == RateType.Individual &&
+                            er.ClientId == client.Id &&
+                            er.IsActive &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= now))
+                .OrderByDescending(er => er.EffectiveFrom)
+                .FirstOrDefault();
+
+            if (individualRate != null)
+            {
+                applicableRate = individualRate;
+            }
+            else
+            {
+                // 2. Try active group rate
+                if (client.ClientGroupId.HasValue)
+                {
+                    var groupRate = allRates
+                        .Where(er => er.Type == RateType.Group &&
+                                    er.ClientGroupId == client.ClientGroupId.Value &&
+                                    er.IsActive &&
+                                    (er.EffectiveTo == null || er.EffectiveTo >= now))
+                        .OrderByDescending(er => er.EffectiveFrom)
+                        .FirstOrDefault();
+
+                    if (groupRate != null)
+                    {
+                        applicableRate = groupRate;
+                    }
+                }
+
+                // 3. Fallback to most recent general rate (even if expired)
+                if (applicableRate == null)
+                {
+                    applicableRate = allRates
+                        .Where(er => er.Type == RateType.General)
+                        .OrderByDescending(er => er.EffectiveFrom)
+                        .FirstOrDefault();
+                }
+            }
 
             result[client.Id] = applicableRate;
         }
@@ -55,87 +127,190 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
         return result;
     }
 
-    public async Task<ExchangeRate?> GetApplicableRateAsync(
-        Guid? clientId,
-        Guid? clientGroupId,
-        Currency baseCurrency,
-        Currency targetCurrency,
-        DateTime asOfDate)
+    public async Task<IReadOnlyList<ExchangeRate>> GetAllActiveRatesAsync(
+        DateTime? asOfDate = null,
+        Currency? baseCurrency = null,
+        Currency? targetCurrency = null,
+        RateType? rateType = null)
+    {
+        var effectiveDate = asOfDate ?? DateTime.UtcNow;
+
+        var query = DbSet
+            .Include(er => er.Client)
+            .Include(er => er.ClientGroup)
+            .Where(er => er.IsActive &&
+                         er.EffectiveFrom <= effectiveDate &&
+                         (er.EffectiveTo == null || er.EffectiveTo >= effectiveDate));
+
+        // Apply optional filters using Currency objects
+        if (baseCurrency != null)
+        {
+            query = query.Where(er => er.BaseCurrency == baseCurrency);
+        }
+
+        if (targetCurrency != null)
+        {
+            query = query.Where(er => er.TargetCurrency == targetCurrency);
+        }
+
+        if (rateType.HasValue)
+        {
+            query = query.Where(er => er.Type == rateType.Value);
+        }
+
+        // Try ordering by the Currency objects directly (if EF supports it)
+        return await query
+            .OrderBy(er => er.BaseCurrency)  // Use the Currency object directly
+            .ThenBy(er => er.TargetCurrency) // Use the Currency object directly  
+            .ThenByDescending(er => er.Type)
+            .ThenByDescending(er => er.EffectiveFrom)
+            .ToListAsync();
+    }
+
+    public async Task<ExchangeRate?> GetApplicableRateAsync(Guid? clientId, Guid? clientGroupId, Currency baseCurrency,
+        Currency targetCurrency, DateTime asOfDate)
     {
         try
         {
-            // Get all active rates for the currency pair that are effective at the given date
-            var rates = await DbSet
+            // Get ALL rates (active and inactive) for historical fallback
+            var allRates = await DbSet
                 .Include(er => er.ClientGroup)
                 .Include(er => er.Client)
                 .Where(er => er.BaseCurrency == baseCurrency &&
                             er.TargetCurrency == targetCurrency &&
-                            er.IsActive &&
-                            er.EffectiveFrom <= asOfDate &&
-                            (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
-                .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
-                .ThenByDescending(er => er.EffectiveFrom) // Most recent first
+                            er.EffectiveFrom <= asOfDate)
+                .OrderByDescending(er => er.Type)
+                .ThenByDescending(er => er.EffectiveFrom)
                 .ToListAsync();
 
-            if (!rates.Any())
-            {
-                //_logger.LogWarning("No exchange rates found for {BaseCurrency} to {TargetCurrency} as of {AsOfDate}",
-                    //baseCurrency.Code, targetCurrency.Code, asOfDate);
+            if (!allRates.Any())
                 return null;
-            }
 
             // Priority order: Individual > Group > General
-            ExchangeRate? applicableRate;
-
-            // 1. Check for individual rate for the specific client
+            // Check for active individual rate first
             if (clientId.HasValue)
             {
-                applicableRate = rates.FirstOrDefault(er =>
-                    er.Type == RateType.Individual && er.ClientId == clientId.Value);
+                var individualRate = allRates
+                    .Where(er => er.Type == RateType.Individual &&
+                                er.ClientId == clientId.Value &&
+                                (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+                    .OrderByDescending(er => er.EffectiveFrom)
+                    .FirstOrDefault();
 
-                if (applicableRate != null)
-                {
-                    //_logger.LogDebug("Found individual rate for client {ClientId}: {Rate}",
-                    //    clientId, applicableRate.EffectiveRate);
-                    return applicableRate;
-                }
+                if (individualRate != null && individualRate.IsActive)
+                    return individualRate;
             }
 
-            // 2. Check for group rate for the client's group
+            // Check for active group rate
             if (clientGroupId.HasValue)
             {
-                applicableRate = rates.FirstOrDefault(er =>
-                    er.Type == RateType.Group && er.ClientGroupId == clientGroupId.Value);
+                var groupRate = allRates
+                    .Where(er => er.Type == RateType.Group &&
+                                er.ClientGroupId == clientGroupId.Value &&
+                                (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+                    .OrderByDescending(er => er.EffectiveFrom)
+                    .FirstOrDefault();
 
-                if (applicableRate != null)
-                {
-                    //_logger.LogDebug("Found group rate for group {GroupId}: {Rate}",
-                    //    clientGroupId, applicableRate.EffectiveRate);
-                    return applicableRate;
-                }
+                if (groupRate != null && groupRate.IsActive)
+                    return groupRate;
             }
 
-            // 3. Use general rate (applies to all clients)
-            applicableRate = rates.FirstOrDefault(er => er.Type == RateType.General);
+            // Fallback to general rate - find the most recent one that was effective at or before asOfDate
+            // This includes expired/inactive general rates as per requirement
+            var generalRate = allRates
+                .Where(er => er.Type == RateType.General)
+                .OrderByDescending(er => er.EffectiveFrom)
+                .FirstOrDefault(er => er.EffectiveFrom <= asOfDate);
 
-            if (applicableRate != null)
-            {
-                //_logger.LogDebug("Found general rate: {Rate}", applicableRate.EffectiveRate);
-                return applicableRate;
-            }
-
-            //_logger.LogWarning("No applicable exchange rate found for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
-                //clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
-
-            return null;
+            return generalRate;
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "Error getting applicable exchange rate for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
-            //    clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
             throw;
         }
     }
+
+    //public async Task<ExchangeRate?> GetApplicableRateAsync(
+    //    Guid? clientId,
+    //    Guid? clientGroupId,
+    //    Currency baseCurrency,
+    //    Currency targetCurrency,
+    //    DateTime asOfDate)
+    //{
+    //    try
+    //    {
+    //        // Get all active rates for the currency pair that are effective at the given date
+    //        var rates = await DbSet
+    //            .Include(er => er.ClientGroup)
+    //            .Include(er => er.Client)
+    //            .Where(er => er.BaseCurrency == baseCurrency &&
+    //                        er.TargetCurrency == targetCurrency &&
+    //                        er.IsActive &&
+    //                        er.EffectiveFrom <= asOfDate &&
+    //                        (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+    //            .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
+    //            .ThenByDescending(er => er.EffectiveFrom) // Most recent first
+    //            .ToListAsync();
+
+    //        if (!rates.Any())
+    //        {
+    //            //_logger.LogWarning("No exchange rates found for {BaseCurrency} to {TargetCurrency} as of {AsOfDate}",
+    //                //baseCurrency.Code, targetCurrency.Code, asOfDate);
+    //            return null;
+    //        }
+
+    //        // Priority order: Individual > Group > General
+    //        ExchangeRate? applicableRate;
+
+    //        // 1. Check for individual rate for the specific client
+    //        if (clientId.HasValue)
+    //        {
+    //            applicableRate = rates.FirstOrDefault(er =>
+    //                er.Type == RateType.Individual && er.ClientId == clientId.Value);
+
+    //            if (applicableRate != null)
+    //            {
+    //                //_logger.LogDebug("Found individual rate for client {ClientId}: {Rate}",
+    //                //    clientId, applicableRate.EffectiveRate);
+    //                return applicableRate;
+    //            }
+    //        }
+
+    //        // 2. Check for group rate for the client's group
+    //        if (clientGroupId.HasValue)
+    //        {
+    //            applicableRate = rates.FirstOrDefault(er =>
+    //                er.Type == RateType.Group && er.ClientGroupId == clientGroupId.Value);
+
+    //            if (applicableRate != null)
+    //            {
+    //                //_logger.LogDebug("Found group rate for group {GroupId}: {Rate}",
+    //                //    clientGroupId, applicableRate.EffectiveRate);
+    //                return applicableRate;
+    //            }
+    //        }
+
+    //        // 3. Use general rate (applies to all clients)
+    //        applicableRate = rates.FirstOrDefault(er => er.Type == RateType.General);
+
+    //        if (applicableRate != null)
+    //        {
+    //            //_logger.LogDebug("Found general rate: {Rate}", applicableRate.EffectiveRate);
+    //            return applicableRate;
+    //        }
+
+    //        //_logger.LogWarning("No applicable exchange rate found for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
+    //            //clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
+
+    //        return null;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        //_logger.LogError(ex, "Error getting applicable exchange rate for client {ClientId}, group {GroupId}, {BaseCurrency} to {TargetCurrency}",
+    //        //    clientId, clientGroupId, baseCurrency.Code, targetCurrency.Code);
+    //        throw;
+    //    }
+    //}
 
     public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(
         CreateGeneralExchangeRateParameters parameters)
@@ -143,6 +318,20 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
+            // Check for overlapping general rates and expire them
+            var overlappingRates = await DbSet
+                .Where(er => er.Type == RateType.General &&
+                            er.BaseCurrency == parameters.BaseCurrency &&
+                            er.TargetCurrency == parameters.TargetCurrency &&
+                            er.IsActive &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= parameters.EffectiveFrom))
+                .ToListAsync();
+
+            foreach (var overlappingRate in overlappingRates)
+            {
+                overlappingRate.Expire(parameters.EffectiveFrom, parameters.CreatedBy, "Replaced by new general rate");
+            }
+
             // Use the domain factory method to create the exchange rate
             var exchangeRate = ExchangeRate.CreateGeneralRate(
                 parameters.BaseCurrency,
@@ -155,12 +344,11 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 parameters.Source,
                 parameters.EffectiveTo);
 
-            // Add the exchange rate to the context
             DbSet.Add(exchangeRate);
 
-            // Create history record for the creation
-            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation
+            // var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            // await _exchangeRateHistoryRepository.AddAsync(history);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -174,16 +362,6 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
             }
         }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
-        }
         catch (Exception ex)
         {
             await tx.RollbackAsync();
@@ -192,11 +370,29 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
     }
 
     public async Task<RepositoryActionResult<ExchangeRate>> CreateGroupExchangeRateAsync(
-    CreateGroupExchangeRateParameters parameters)
+        CreateGroupExchangeRateParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
+            // Check for overlapping group rates for this specific client group
+            var overlappingRates = await DbSet
+                .Where(er => er.Type == RateType.Group &&
+                            er.ClientGroupId == parameters.ClientGroupId &&
+                            er.BaseCurrency == parameters.BaseCurrency &&
+                            er.TargetCurrency == parameters.TargetCurrency &&
+                            er.IsActive &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= parameters.EffectiveFrom))
+                .ToListAsync();
+
+            foreach (var overlappingRate in overlappingRates)
+            {
+                overlappingRate.Expire(parameters.EffectiveFrom, parameters.CreatedBy, "Replaced by new group rate");
+
+                // REMOVED: History creation for expiration
+                // var expireHistory = ExchangeRateHistory.CreateFromExchangeRate(...);
+            }
+
             // Use the domain factory method to create the exchange rate
             var exchangeRate = ExchangeRate.CreateGroupRate(
                 parameters.BaseCurrency,
@@ -210,12 +406,11 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 parameters.Source,
                 parameters.EffectiveTo);
 
-            // Add the exchange rate to the context
             DbSet.Add(exchangeRate);
 
-            // Create history record for the creation
-            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation for the creation
+            // var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            // await _exchangeRateHistoryRepository.AddAsync(history);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -246,8 +441,117 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
         }
     }
 
+    //public async Task<RepositoryActionResult<ExchangeRate>> CreateGeneralExchangeRateAsync(
+    //    CreateGeneralExchangeRateParameters parameters)
+    //{
+    //    await using var tx = await Context.Database.BeginTransactionAsync();
+    //    try
+    //    {
+    //        // Use the domain factory method to create the exchange rate
+    //        var exchangeRate = ExchangeRate.CreateGeneralRate(
+    //            parameters.BaseCurrency,
+    //            parameters.TargetCurrency,
+    //            parameters.BaseCurrencyValue,
+    //            parameters.TargetCurrencyValue,
+    //            parameters.Margin,
+    //            parameters.EffectiveFrom,
+    //            parameters.CreatedBy,
+    //            parameters.Source,
+    //            parameters.EffectiveTo);
+
+    //        // Add the exchange rate to the context
+    //        DbSet.Add(exchangeRate);
+
+    //        // Create history record for the creation
+    //        var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+    //        await exchangeRateHistoryRepository.AddAsync(history);
+
+    //        var result = await SaveChangesAsync();
+    //        if (result > 0)
+    //        {
+    //            await tx.CommitAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+    //        }
+    //        else
+    //        {
+    //            await tx.RollbackAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+    //        }
+    //    }
+    //    catch (DbUpdateConcurrencyException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+    //    }
+    //    catch (DbUpdateException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //}
+
+    //public async Task<RepositoryActionResult<ExchangeRate>> CreateGroupExchangeRateAsync(
+    //CreateGroupExchangeRateParameters parameters)
+    //{
+    //    await using var tx = await Context.Database.BeginTransactionAsync();
+    //    try
+    //    {
+    //        // Use the domain factory method to create the exchange rate
+    //        var exchangeRate = ExchangeRate.CreateGroupRate(
+    //            parameters.BaseCurrency,
+    //            parameters.TargetCurrency,
+    //            parameters.BaseCurrencyValue,
+    //            parameters.TargetCurrencyValue,
+    //            parameters.Margin,
+    //            parameters.ClientGroupId,
+    //            parameters.EffectiveFrom,
+    //            parameters.CreatedBy,
+    //            parameters.Source,
+    //            parameters.EffectiveTo);
+
+    //        // Add the exchange rate to the context
+    //        DbSet.Add(exchangeRate);
+
+    //        // Create history record for the creation
+    //        var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+    //        await exchangeRateHistoryRepository.AddAsync(history);
+
+    //        var result = await SaveChangesAsync();
+    //        if (result > 0)
+    //        {
+    //            await tx.CommitAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+    //        }
+    //        else
+    //        {
+    //            await tx.RollbackAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+    //        }
+    //    }
+    //    catch (DbUpdateConcurrencyException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+    //    }
+    //    catch (DbUpdateException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //}
+
     public async Task<RepositoryActionResult<ExchangeRate>> DeactivateExchangeRateAsync(
-    DeactivateExchangeRateParameters parameters)
+        DeactivateExchangeRateParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
@@ -266,14 +570,8 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             // Deactivate the exchange rate
             exchangeRate.Deactivate();
 
-            // Create history record for deactivation
-            var history = ExchangeRateHistory.CreateFromExchangeRate(
-                exchangeRate,
-                parameters.Reason,
-                parameters.DeactivatedBy,
-                "DEACTIVATED");
-
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation for deactivation
+            // var history = ExchangeRateHistory.CreateFromExchangeRate(...);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -287,16 +585,6 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
             }
         }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
-        }
         catch (Exception ex)
         {
             await tx.RollbackAsync();
@@ -305,7 +593,7 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
     }
 
     public async Task<RepositoryActionResult<ExchangeRate>> ExtendExchangeRateValidityAsync(
-    ExtendExchangeRateValidityParameters parameters)
+        ExtendExchangeRateValidityParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
@@ -324,14 +612,8 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             // Extend the validity
             exchangeRate.ExtendValidity(parameters.NewEffectiveTo);
 
-            // Create history record for extension
-            var history = ExchangeRateHistory.CreateFromExchangeRate(
-                exchangeRate,
-                parameters.Reason,
-                parameters.UpdatedBy,
-                "EXTENDED");
-
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation for extension
+            // var history = ExchangeRateHistory.CreateFromExchangeRate(...);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -345,16 +627,6 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
             }
         }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
-        }
         catch (Exception ex)
         {
             await tx.RollbackAsync();
@@ -363,11 +635,29 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
     }
 
     public async Task<RepositoryActionResult<ExchangeRate>> CreateIndividualExchangeRateAsync(
-    CreateIndividualExchangeRateParameters parameters)
+        CreateIndividualExchangeRateParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
         {
+            // Check for overlapping individual rates for this specific client
+            var overlappingRates = await DbSet
+                .Where(er => er.Type == RateType.Individual &&
+                            er.ClientId == parameters.ClientId &&
+                            er.BaseCurrency == parameters.BaseCurrency &&
+                            er.TargetCurrency == parameters.TargetCurrency &&
+                            er.IsActive &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= parameters.EffectiveFrom))
+                .ToListAsync();
+
+            foreach (var overlappingRate in overlappingRates)
+            {
+                overlappingRate.Expire(parameters.EffectiveFrom, parameters.CreatedBy, "Replaced by new individual rate");
+
+                // REMOVED: History creation for expiration
+                // var expireHistory = ExchangeRateHistory.CreateFromExchangeRate(...);
+            }
+
             // Use the domain factory method to create the exchange rate
             var exchangeRate = ExchangeRate.CreateIndividualRate(
                 parameters.BaseCurrency,
@@ -381,12 +671,11 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 parameters.Source,
                 parameters.EffectiveTo);
 
-            // Add the exchange rate to the context
             DbSet.Add(exchangeRate);
 
-            // Create history record for the creation
-            var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation for the creation
+            // var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+            // await _exchangeRateHistoryRepository.AddAsync(history);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -417,8 +706,63 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
         }
     }
 
+    //public async Task<RepositoryActionResult<ExchangeRate>> CreateIndividualExchangeRateAsync(
+    //CreateIndividualExchangeRateParameters parameters)
+    //{
+    //    await using var tx = await Context.Database.BeginTransactionAsync();
+    //    try
+    //    {
+    //        // Use the domain factory method to create the exchange rate
+    //        var exchangeRate = ExchangeRate.CreateIndividualRate(
+    //            parameters.BaseCurrency,
+    //            parameters.TargetCurrency,
+    //            parameters.BaseCurrencyValue,
+    //            parameters.TargetCurrencyValue,
+    //            parameters.Margin,
+    //            parameters.ClientId,
+    //            parameters.EffectiveFrom,
+    //            parameters.CreatedBy,
+    //            parameters.Source,
+    //            parameters.EffectiveTo);
+
+    //        // Add the exchange rate to the context
+    //        DbSet.Add(exchangeRate);
+
+    //        // Create history record for the creation
+    //        var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
+    //        await exchangeRateHistoryRepository.AddAsync(history);
+
+    //        var result = await SaveChangesAsync();
+    //        if (result > 0)
+    //        {
+    //            await tx.CommitAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(exchangeRate, RepositoryActionStatus.Created);
+    //        }
+    //        else
+    //        {
+    //            await tx.RollbackAsync();
+    //            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
+    //        }
+    //    }
+    //    catch (DbUpdateConcurrencyException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
+    //    }
+    //    catch (DbUpdateException ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await tx.RollbackAsync();
+    //        return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
+    //    }
+    //}
+
     public async Task<RepositoryActionResult<ExchangeRate>> UpdateExchangeRateAsync(
-    UpdateExchangeRateParameters parameters)
+        UpdateExchangeRateParameters parameters)
     {
         await using var tx = await Context.Database.BeginTransactionAsync();
         try
@@ -431,27 +775,14 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             if (exchangeRate == null)
                 return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NotFound);
 
-            // Store previous values for history
-            var previousBaseValue = exchangeRate.BaseCurrencyValue;
-            var previousTargetValue = exchangeRate.TargetCurrencyValue;
-            var previousMargin = exchangeRate.Margin;
-
             // Update the exchange rate values
             exchangeRate.UpdateCurrencyValues(
                 parameters.NewBaseCurrencyValue,
                 parameters.NewTargetCurrencyValue,
                 parameters.NewMargin);
 
-            // Create history record for the update
-            var history = ExchangeRateHistory.CreateForUpdate(
-                exchangeRate,
-                previousBaseValue,
-                previousTargetValue,
-                previousMargin,
-                parameters.UpdatedBy,
-                parameters.Reason);
-
-            await echExchangeRateHistoryRepository.AddAsync(history);
+            // REMOVED: History creation for update
+            // var history = ExchangeRateHistory.CreateForUpdate(...);
 
             var result = await SaveChangesAsync();
             if (result > 0)
@@ -464,16 +795,6 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
                 await tx.RollbackAsync();
                 return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.NothingModified);
             }
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.ConcurrencyConflict, ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            await tx.RollbackAsync();
-            return new RepositoryActionResult<ExchangeRate>(null, RepositoryActionStatus.Error, ex);
         }
         catch (Exception ex)
         {
@@ -579,6 +900,23 @@ public class ExchangeRateRepository(IExchangeRateHistoryRepository echExchangeRa
             .FirstOrDefaultAsync();
 
         return generalRate;
+    }
+
+    public async Task MarkExpiredRatesAsInactiveAsync()
+    {
+        var now = DateTime.UtcNow;
+        var expiredRates = await DbSet
+            .Where(er => er.IsActive &&
+                         er.EffectiveTo.HasValue &&
+                         er.EffectiveTo < now)
+            .ToListAsync();
+
+        foreach (var rate in expiredRates)
+        {
+            rate.MarkAsHistorical();
+        }
+
+        await SaveChangesAsync();
     }
 
     public async Task<IReadOnlyList<ExchangeRate>> GetClientAvailableRatesAsync(

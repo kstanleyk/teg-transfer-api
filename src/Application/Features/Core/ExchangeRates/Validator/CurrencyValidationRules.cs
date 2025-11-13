@@ -26,8 +26,8 @@ public static class CurrencyValidationRules
     public static IRuleBuilderOptions<T, decimal> ValidateMargin<T>(this IRuleBuilder<T, decimal> ruleBuilder)
     {
         return ruleBuilder
-            .InclusiveBetween(0, 1)
-            .WithMessage("Margin must be between 0 and 1")
+            .InclusiveBetween(0, 10)
+            .WithMessage("Margin must be between 0 and 10")
             .PrecisionScale(6, 4, true)
             .WithMessage("Margin must have at most 4 decimal places");
     }

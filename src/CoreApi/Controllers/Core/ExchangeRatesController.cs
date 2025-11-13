@@ -3,7 +3,9 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TegWallet.Application.Features.Core.ExchangeRates.Command;
 using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Helpers;
+using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.CoreApi.Controllers.Core;
@@ -12,6 +14,32 @@ namespace TegWallet.CoreApi.Controllers.Core;
 public class ExchangeRatesController(IMediator mediator) : ApiControllerBase<ExchangeRatesController>
 {
     public IMediator Mediator { get; } = mediator;
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("active")]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ActiveExchangeRateDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<IReadOnlyList<ActiveExchangeRateDto>>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetActiveExchangeRatesV1(
+        [FromQuery] string? baseCurrencyCode = null,
+        [FromQuery] string? targetCurrencyCode = null,
+        [FromQuery] RateType? rateType = null,
+        [FromQuery] DateTime? asOfDate = null)
+    {
+        var query = new GetActiveExchangeRatesQuery(
+            BaseCurrencyCode: baseCurrencyCode,
+            TargetCurrencyCode: targetCurrencyCode,
+            RateType: rateType,
+            AsOfDate: asOfDate);
+
+        var result = await Mediator.Send(query);
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
 
     [MapToApiVersion("1.0")]
     [HttpPost("general")]

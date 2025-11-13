@@ -56,12 +56,14 @@ public class CreateGeneralExchangeRateCommandHandler(
 
         try
         {
+            var marginPercentage = command.Margin / 100;
+
             var parameters = new CreateGeneralExchangeRateParameters(
                 command.BaseCurrency,
                 command.TargetCurrency,
                 command.BaseCurrencyValue,
                 command.TargetCurrencyValue,
-                command.Margin,
+                marginPercentage,
                 command.EffectiveFrom,
                 command.CreatedBy,
                 command.Source,
