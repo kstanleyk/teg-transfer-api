@@ -25,7 +25,7 @@ public class Wallet : Aggregate<Guid>
     {
         // Initialize with default values that EF Core can work with
         // These will be overwritten when EF Core hydrates the entity
-        BaseCurrency = Currency.XOF;
+        BaseCurrency = Currency.XAF;
         Balance = new Money(0, BaseCurrency);
         AvailableBalance = new Money(0, BaseCurrency);
         CreatedAt = DateTime.UtcNow;

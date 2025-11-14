@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TegWallet.Domain.Entity.Core;
+﻿using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Features.Core.RateLocks.Dtos;

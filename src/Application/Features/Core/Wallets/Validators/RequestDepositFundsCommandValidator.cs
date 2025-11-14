@@ -18,7 +18,7 @@ public class RequestDepositFundsCommandValidator : AbstractValidator<RequestDepo
         RuleFor(x => x.CurrencyCode)
             .NotEmpty().WithMessage("Currency code is required")
             .Length(3).WithMessage("Currency code must be 3 characters")
-            .Must(BeAValidCurrency).WithMessage("Unsupported currency code. Supported: USD, NGN, XOF");
+            .Must(BeAValidCurrency).WithMessage("Unsupported currency code. Supported: USD, NGN, XAF");
 
         RuleFor(x => x.Reference)
             .MaximumLength(100).WithMessage("Reference cannot exceed 100 characters")
@@ -40,7 +40,7 @@ public class RequestDepositFundsCommandValidator : AbstractValidator<RequestDepo
 
     private static bool BeAValidCurrency(string? currencyCode)
     {
-        var supportedCurrencies = new[] { "USD", "NGN", "XOF" };
+        var supportedCurrencies = new[] { "USD", "NGN", "XAF" };
         return supportedCurrencies.Contains(currencyCode?.ToUpper());
     }
 
@@ -50,7 +50,7 @@ public class RequestDepositFundsCommandValidator : AbstractValidator<RequestDepo
         {
             ["USD"] = 10.00m,
             ["NGN"] = 1000.00m,
-            ["XOF"] = 5000.00m
+            ["XAF"] = 5000.00m
         };
 
         if (minAmounts.TryGetValue(command.CurrencyCode.ToUpper(), out var minAmount))
@@ -83,7 +83,7 @@ public class RequestDepositFundsCommandValidator : AbstractValidator<RequestDepo
         {
             "USD" => 5000.00m,
             "NGN" => 500000.00m,
-            "XOF" => 1000000.00m,
+            "XAF" => 1000000.00m,
             _ => 10000.00m
         };
     }

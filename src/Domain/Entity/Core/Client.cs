@@ -11,6 +11,8 @@ public class Client : Entity<Guid>
     // Custom properties
     public string FirstName { get; private init; }
     public string LastName { get; private init; }
+    public string Email { get; private init; } = string.Empty;
+    public string PhoneNumber { get; private init; } = string.Empty;
     public DateTime CreatedAt { get; private init; }
     public ClientStatus Status { get; private set; }
 
@@ -51,11 +53,13 @@ public class Client : Entity<Guid>
             throw new DomainException("Invalid phone number format");
 
         var clientId = Guid.NewGuid();
-        var currency = defaultCurrency ?? Currency.XOF;
+        var currency = defaultCurrency ?? Currency.XAF;
 
         var client = new Client
         {
             Id = clientId,
+            Email = email.Trim(),
+            PhoneNumber = phoneNumber.Trim(),
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
             CreatedAt = createdAt ?? DateTime.UtcNow,
@@ -113,7 +117,6 @@ public class Client : Entity<Guid>
         }
     }
 
-    // Existing methods
     public void UpdateContactInfo(string email, string phoneNumber)
     {
         DomainGuards.AgainstNullOrWhiteSpace(email);
@@ -154,7 +157,6 @@ public class Client : Entity<Guid>
 
     public string FullName => $"{FirstName} {LastName}";
 
-    // Validation methods
     private static bool IsValidEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email)) return false;
@@ -174,5 +176,12 @@ public class Client : Entity<Guid>
         if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
         var cleaned = new string(phoneNumber.Where(char.IsDigit).ToArray());
         return cleaned.Length >= 10;
+    }
+
+    public void LinkToUser(Guid userId)
+    {
+        DomainGuards.AgainstDefault(userId, nameof(userId));
+
+        UserId = userId;
     }
 }

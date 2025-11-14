@@ -4,7 +4,7 @@ using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.ClientGroups.Queries;
 
-// Check if ClientGroup can be deleted (no clients assigned)
+// Check if ClientGroupId can be deleted (no clients assigned)
 public record CanDeleteClientGroupQuery(Guid ClientGroupId) : IRequest<Result<bool>>;
 
 public class CanDeleteClientGroupQueryHandler(

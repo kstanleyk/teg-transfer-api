@@ -38,7 +38,7 @@ public static class CurrencyValidationRules
             .NotEmpty()
             .WithMessage("Currency code is required")
             .Must(code => !string.IsNullOrWhiteSpace(code) && IsValidCurrencyCode(code))
-            .WithMessage("Unsupported currency code. Supported codes: USD, NGN, XOF, CNY")
+            .WithMessage("Unsupported currency code. Supported codes: USD, NGN, XAF, CNY")
             .Length(3)
             .WithMessage("Currency code must be exactly 3 characters");
     }
@@ -60,7 +60,7 @@ public static class CurrencyValidationRules
         var normalizedCode = code.Trim().ToUpperInvariant();
         return normalizedCode switch
         {
-            "USD" or "NGN" or "XOF" or "CNY" => true,
+            "USD" or "NGN" or "XAF" or "CNY" => true,
             _ => false
         };
     }

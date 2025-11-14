@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
-using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Configurations.Core;
 
@@ -9,80 +9,50 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
 {
     public void Configure(EntityTypeBuilder<Client> builder)
     {
-        builder.ToTable("wallet", SchemaNames.Core);
+        builder.ToTable("client", SchemaNames.Core);
 
-        builder.HasKey(w => w.Id);
-        builder.Property(w => w.Id).ValueGeneratedOnAdd();
-
-        builder.Property(w => w.ClientId)
+        // Configure custom properties (Identity properties are handled automatically)
+        builder.Property(c => c.FirstName)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(w => w.CreatedAt)
+        builder.Property(c => c.LastName)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(w => w.UpdatedAt)
+        builder.Property(c => c.Email)
+            .HasMaxLength(100)
             .IsRequired();
 
-        // Configure BaseCurrency as simple property
-        builder.Property(w => w.BaseCurrency)
-            .HasConversion(
-                currency => currency.Code,
-                code => Currency.FromCode(code))
-            .IsRequired()
-            .HasMaxLength(3);
+        builder.Property(c => c.PhoneNumber)
+            .HasMaxLength(35)
+            .IsRequired();
 
-        // Configure Balance as owned entity with explicit column names
-        builder.OwnsOne(w => w.Balance, balanceBuilder =>
-        {
-            balanceBuilder.Property(m => m.Amount)
-                .IsRequired()
-                .HasColumnType("decimal(18,4)")
-                .HasColumnName("BalanceAmount");
+        builder.Property(c => c.CreatedAt)
+            .IsRequired();
 
-            balanceBuilder.Property(m => m.Currency)
-                .HasConversion(
-                    currency => currency.Code,
-                    code => Currency.FromCode(code))
-                .IsRequired()
-                .HasMaxLength(3)
-                .HasColumnName("BalanceCurrency");
-        });
+        builder.Property(c => c.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
 
-        // Configure AvailableBalance as owned entity with explicit column names
-        builder.OwnsOne(w => w.AvailableBalance, availableBalanceBuilder =>
-        {
-            availableBalanceBuilder.Property(m => m.Amount)
-                .IsRequired()
-                .HasColumnType("decimal(18,4)")
-                .HasColumnName("AvailableBalanceAmount");
+        // ClientGroupId relationship
+        builder.HasOne(c => c.ClientGroup)
+            .WithMany(g => g.Clients)
+            .HasForeignKey(c => c.ClientGroupId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
 
-            availableBalanceBuilder.Property(m => m.Currency)
-                .HasConversion(
-                    currency => currency.Code,
-                    code => Currency.FromCode(code))
-                .IsRequired()
-                .HasMaxLength(3)
-                .HasColumnName("AvailableBalanceCurrency");
-        });
-
-        // Configure relationships - be explicit about foreign keys
-        builder.HasMany(w => w.Ledgers)
+        // Wallet relationship (one-to-one)
+        builder.HasOne(c => c.Wallet)
             .WithOne()
-            .HasForeignKey("ClientId") // Use string for shadow property if needed
+            .HasForeignKey<Wallet>(w => w.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(w => w.Reservations)
-            .WithOne()
-            .HasForeignKey("ClientId") // Use string for shadow property if needed
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasIndex(w => w.ClientId)
-            .IsUnique();
-
-        // Relationship to Client - make this explicit
-        builder.HasOne<Client>()
-            .WithOne(c => c.Client)
-            .HasForeignKey<Client>(w => w.ClientId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Relationship with ApplicationUser
+        builder.HasOne(s => s.User)
+            .WithOne(u => u.Client)
+            .HasForeignKey<ApplicationUser>(u => u.ClientId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using TegWallet.Application.Features.Core.RateLocks.Dtos;
 using TegWallet.Application.Helpers;
@@ -23,7 +22,7 @@ public record LockRateCommand : IRequest<Result<RateLockResponse>>
 }
 
 public class LockRateCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IExchangeRateRepository exchangeRateRepository,
     IRateLockRepository rateLockRepository,
     IOptions<RateLockingSettings> rateLockingSettings,
@@ -79,7 +78,7 @@ public class LockRateCommandHandler(
                 return Result<RateLockResponse>.Failed(localizer["Lock duration exceeds maximum allowed"]);
 
             // Get client
-            var client = await userManager.FindByIdAsync(request.ClientId.ToString());
+            var client = await clientRepository.GetAsync(request.ClientId);
             if (client == null)
                 return Result<RateLockResponse>.Failed(localizer["Client not found"]);
 

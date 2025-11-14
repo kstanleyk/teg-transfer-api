@@ -124,7 +124,7 @@ public class ClientGroupRepository(IDatabaseFactory databaseFactory)
         //catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         //{
         //    await tx.RollbackAsync();
-        //    return new RepositoryActionResult<ClientGroup>(null, RepositoryActionStatus.Error,
+        //    return new RepositoryActionResult<ClientGroupId>(null, RepositoryActionStatus.Error,
         //        new Exception("A client group with this name already exists."));
         //}
         catch (DbUpdateConcurrencyException ex)
@@ -172,7 +172,7 @@ public class ClientGroupRepository(IDatabaseFactory databaseFactory)
         //catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         //{
         //    await tx.RollbackAsync();
-        //    return new RepositoryActionResult<ClientGroup>(null, RepositoryActionStatus.Error,
+        //    return new RepositoryActionResult<ClientGroupId>(null, RepositoryActionStatus.Error,
         //        new Exception("A client group with this name already exists."));
         //}
         catch (DbUpdateConcurrencyException ex)
@@ -192,12 +192,10 @@ public class ClientGroupRepository(IDatabaseFactory databaseFactory)
         }
     }
 
-    public async Task<ClientGroup?> GetByIdWithClientsAsync(Guid id)
-    {
-        return await DbSet
+    public async Task<ClientGroup?> GetByIdWithClientsAsync(Guid id) =>
+        await DbSet
             .Include(cg => cg.Clients)
             .FirstOrDefaultAsync(cg => cg.Id == id);
-    }
 
     public async Task<PagedResult<ClientGroup>> GetAllAsync(
         bool? isActive = null,
@@ -267,19 +265,15 @@ public class ClientGroupRepository(IDatabaseFactory databaseFactory)
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<ClientGroup>> GetByStatusAsync(bool isActive)
-    {
-        return await DbSet
+    public async Task<IReadOnlyList<ClientGroup>> GetByStatusAsync(bool isActive) =>
+        await DbSet
             .Where(cg => cg.IsActive == isActive)
             .OrderBy(cg => cg.Name)
             .ToListAsync();
-    }
 
-    public async Task<IReadOnlyList<ClientGroup>> GetAllActiveAsync(CancellationToken cancellationToken = default)
-    {
-        return await DbSet
+    public async Task<IReadOnlyList<ClientGroup>> GetAllActiveAsync() =>
+        await DbSet
             .Where(cg => cg.IsActive)
             .OrderBy(cg => cg.Name)
-            .ToListAsync(cancellationToken);
-    }
+            .ToListAsync();
 }

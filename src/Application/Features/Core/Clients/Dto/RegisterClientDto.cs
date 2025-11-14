@@ -7,5 +7,5 @@ public record RegisterClientDto
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
-    public string CurrencyCode { get; init; } = "XOF"; // Default currency
+    public string CurrencyCode { get; init; } = "XAF"; // Default currency
 }

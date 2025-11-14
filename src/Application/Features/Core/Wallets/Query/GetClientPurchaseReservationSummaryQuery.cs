@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
@@ -13,7 +12,7 @@ public record GetClientPurchaseReservationSummaryQuery(Guid ClientId)
 
 public class GetClientPurchaseReservationSummaryQueryHandler(
     IReservationRepository reservationRepository,
-    UserManager<Domain.Entity.Core.Client> clientRepository)
+    IClientRepository clientRepository)
     : IRequestHandler<GetClientPurchaseReservationSummaryQuery, Result<PurchaseReservationSummaryDto>>
 {
 
@@ -23,7 +22,7 @@ public class GetClientPurchaseReservationSummaryQueryHandler(
     {
         try
         {
-            var client = await clientRepository.FindByIdAsync(query.ClientId.ToString());
+            var client = await clientRepository.GetAsync(query.ClientId);
             if (client == null)
                 return Result<PurchaseReservationSummaryDto>.Failed($"Client not found: {query.ClientId}");
 
@@ -38,7 +37,7 @@ public class GetClientPurchaseReservationSummaryQueryHandler(
                 TotalPurchaseAmount = reservations.Sum(r => r.PurchaseAmount.Amount),
                 TotalServiceFeeAmount = reservations.Sum(r => r.ServiceFeeAmount.Amount),
                 TotalAmount = reservations.Sum(r => r.TotalAmount.Amount),
-                CurrencyCode = reservations.FirstOrDefault()?.PurchaseAmount.Currency.Code ?? "XOF"
+                CurrencyCode = reservations.FirstOrDefault()?.PurchaseAmount.Currency.Code ?? "XAF"
             };
 
             return Result<PurchaseReservationSummaryDto>.Succeeded(summary);

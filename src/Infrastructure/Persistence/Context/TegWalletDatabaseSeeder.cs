@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TegWallet.Application.Authorization;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
@@ -7,7 +6,7 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
 
-public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Client> userManager)
+public class TegWalletDatabaseSeeder(TegWalletContext context)
 {
     public async Task SeedDatabaseAsync()
     {
@@ -255,17 +254,17 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
             var exchangeRates = new List<ExchangeRate>
         {
             // General Rates - values represent 1 USD = X currency units
-            // XOF: 1 USD = 575.50 XOF, CNY: 1 USD = 7.23 CNY
+            // XAF: 1 USD = 575.50 XAF, CNY: 1 USD = 7.23 CNY
             ExchangeRate.CreateGeneralRate(
-                Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
+                Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
             
             // NGN: 1 USD = 1200.00 NGN, CNY: 1 USD = 7.23 CNY  
             ExchangeRate.CreateGeneralRate(
                 Currency.NGN, Currency.CNY, 1200.00m, 7.23m, 0.02m, effectiveFrom, "SYSTEM", "CentralBank"),
             
-            // USD: 1 USD = 1.00 USD, XOF: 1 USD = 575.50 XOF
+            // USD: 1 USD = 1.00 USD, XAF: 1 USD = 575.50 XAF
             ExchangeRate.CreateGeneralRate(
-                Currency.USD, Currency.XOF, 1.00m, 575.50m, 0.015m, effectiveFrom, "SYSTEM", "CentralBank"),
+                Currency.USD, Currency.XAF, 1.00m, 575.50m, 0.015m, effectiveFrom, "SYSTEM", "CentralBank"),
             
             // USD: 1 USD = 1.00 USD, NGN: 1 USD = 1200.00 NGN
             ExchangeRate.CreateGeneralRate(
@@ -279,49 +278,49 @@ public class TegWalletDatabaseSeeder(TegWalletContext context, UserManager<Clien
             // Group Rates - VIP gets better margins
             if (clientGroupsList.Count >= 3)
             {
-                // VIP clients get lower margin for XOF→CNY
+                // VIP clients get lower margin for XAF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.015m, // 1.5% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.015m, // 1.5% margin
                     clientGroupsList[0].Id, effectiveFrom));
 
-                // Corporate clients get standard margin for XOF→CNY
+                // Corporate clients get standard margin for XAF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.02m, // 2% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.02m, // 2% margin
                     clientGroupsList[1].Id, effectiveFrom));
 
-                // Retail clients get higher margin for XOF→CNY
+                // Retail clients get higher margin for XAF→CNY
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.025m, // 2.5% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.025m, // 2.5% margin
                     clientGroupsList[2].Id, effectiveFrom));
 
-                // VIP clients get better USD→XOF rate
+                // VIP clients get better USD→XAF rate
                 exchangeRates.Add(ExchangeRate.CreateGroupRate(
-                    Currency.USD, Currency.XOF, 1.00m, 580.00m, 0.01m, // Better rate for VIPs
+                    Currency.USD, Currency.XAF, 1.00m, 580.00m, 0.01m, // Better rate for VIPs
                     clientGroupsList[0].Id, effectiveFrom));
             }
 
             // Individual Client Rates - premium clients get even better rates
-            var clients = await userManager.Users.Take(3).ToListAsync();
+            var clients = await context.ClientSet.Take(3).ToListAsync();
             if (clients.Count >= 3)
             {
                 // Premium client 1 gets very low margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.005m, // 0.5% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.005m, // 0.5% margin
                     clients[0].Id, effectiveFrom));
 
                 // Premium client 2 gets low margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.008m, // 0.8% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.008m, // 0.8% margin
                     clients[1].Id, effectiveFrom));
 
                 // Premium client 3 gets competitive margin
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.XOF, Currency.CNY, 575.50m, 7.23m, 0.012m, // 1.2% margin
+                    Currency.XAF, Currency.CNY, 575.50m, 7.23m, 0.012m, // 1.2% margin
                     clients[2].Id, effectiveFrom));
 
-                // Individual USD→XOF rate for premium client 1
+                // Individual USD→XAF rate for premium client 1
                 exchangeRates.Add(ExchangeRate.CreateIndividualRate(
-                    Currency.USD, Currency.XOF, 1.00m, 585.00m, 0.005m, // Best rate
+                    Currency.USD, Currency.XAF, 1.00m, 585.00m, 0.005m, // Best rate
                     clients[0].Id, effectiveFrom));
             }
 

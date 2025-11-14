@@ -43,11 +43,13 @@ public class ActivateClientGroupCommandHandler(
 
             var result = await _clientGroupRepository.ActivateClientGroupAsync(parameters);
 
-            if (result.Status != RepositoryActionStatus.Updated)
-                return Result.Failed("An unexpected error occurred while activating the client group. Please try again.");
+            var failureMessage = _localizer["An unexpected error occurred while activating the client group. Please try again."];
 
-            var message = _localizer["ClientGroupActivatedSuccess"];
-            return Result.Succeeded(message);
+            if (result.Status != RepositoryActionStatus.Updated)
+                return Result.Failed(failureMessage);
+
+            var successMessage = _localizer["ClientGroupActivatedSuccess"];
+            return Result.Succeeded(successMessage);
         }
         catch (DomainException ex)
         {

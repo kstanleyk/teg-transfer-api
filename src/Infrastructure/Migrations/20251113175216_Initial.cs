@@ -13,13 +13,13 @@ namespace TegWallet.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "identity");
-
-            migrationBuilder.EnsureSchema(
                 name: "core");
 
             migrationBuilder.EnsureSchema(
                 name: "auth");
+
+            migrationBuilder.EnsureSchema(
+                name: "identity");
 
             migrationBuilder.CreateTable(
                 name: "client_group",
@@ -106,29 +106,18 @@ namespace TegWallet.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "client",
-                schema: "identity",
+                schema: "core",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    phone_number = table.Column<string>(type: "character varying(35)", maxLength: 35, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     client_group_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    normalized_email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    email_confirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    password_hash = table.Column<string>(type: "text", nullable: true),
-                    security_stamp = table.Column<string>(type: "text", nullable: true),
-                    concurrency_stamp = table.Column<string>(type: "text", nullable: true),
-                    phone_number = table.Column<string>(type: "text", nullable: true),
-                    phone_number_confirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    two_factor_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    lockout_end = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    lockout_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    access_failed_count = table.Column<int>(type: "integer", nullable: false)
+                    user_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -248,7 +237,7 @@ namespace TegWallet.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_exchange_rate_client_client_id",
                         column: x => x.client_id,
-                        principalSchema: "identity",
+                        principalSchema: "core",
                         principalTable: "client",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -257,6 +246,110 @@ namespace TegWallet.Infrastructure.Migrations
                         column: x => x.client_group_id,
                         principalSchema: "core",
                         principalTable: "client_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user",
+                schema: "identity",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    client_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    normalized_email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    email_confirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    password_hash = table.Column<string>(type: "text", nullable: true),
+                    security_stamp = table.Column<string>(type: "text", nullable: true),
+                    concurrency_stamp = table.Column<string>(type: "text", nullable: true),
+                    phone_number = table.Column<string>(type: "text", nullable: true),
+                    phone_number_confirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    two_factor_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    lockout_end = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    lockout_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    access_failed_count = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_client_client_id",
+                        column: x => x.client_id,
+                        principalSchema: "core",
+                        principalTable: "client",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "wallet",
+                schema: "core",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    client_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
+                    BalanceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    AvailableBalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
+                    AvailableBalanceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    base_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_wallet", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_wallet_client_client_id",
+                        column: x => x.client_id,
+                        principalSchema: "core",
+                        principalTable: "client",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "rate_lock",
+                schema: "core",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    client_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    exchange_rate_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    base_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    target_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    locked_rate = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
+                    locked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    valid_until = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    is_used = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    lock_reference = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    used_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    cancellation_reason = table.Column<string>(type: "text", nullable: true),
+                    cancelled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    cancelled_by = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_rate_lock", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_rate_lock_client_client_id",
+                        column: x => x.client_id,
+                        principalSchema: "core",
+                        principalTable: "client",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_rate_lock_exchange_rate_exchange_rate_id",
+                        column: x => x.exchange_rate_id,
+                        principalSchema: "core",
+                        principalTable: "exchange_rate",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -276,10 +369,10 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_user_claim", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_claim_client_user_id",
+                        name: "fk_user_claim_asp_net_users_user_id",
                         column: x => x.user_id,
                         principalSchema: "identity",
-                        principalTable: "client",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -298,10 +391,10 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_user_login", x => new { x.login_provider, x.provider_key });
                     table.ForeignKey(
-                        name: "fk_user_login_client_user_id",
+                        name: "fk_user_login_asp_net_users_user_id",
                         column: x => x.user_id,
                         principalSchema: "identity",
-                        principalTable: "client",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -318,10 +411,10 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_user_role", x => new { x.user_id, x.role_id });
                     table.ForeignKey(
-                        name: "fk_user_role_client_user_id",
+                        name: "fk_user_role_asp_net_users_user_id",
                         column: x => x.user_id,
                         principalSchema: "identity",
-                        principalTable: "client",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -347,71 +440,10 @@ namespace TegWallet.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_user_token", x => new { x.user_id, x.login_provider, x.name });
                     table.ForeignKey(
-                        name: "fk_user_token_client_user_id",
+                        name: "fk_user_token_asp_net_users_user_id",
                         column: x => x.user_id,
                         principalSchema: "identity",
-                        principalTable: "client",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "wallet",
-                schema: "core",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    client_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    BalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    BalanceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                    AvailableBalanceAmount = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    AvailableBalanceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    base_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_wallet", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_wallet_client_client_id",
-                        column: x => x.client_id,
-                        principalSchema: "identity",
-                        principalTable: "client",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "exchange_rate_history",
-                schema: "core",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    exchange_rate_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    previous_base_currency_value = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    new_base_currency_value = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    previous_target_currency_value = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    new_target_currency_value = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    previous_margin = table.Column<decimal>(type: "numeric(5,4)", precision: 5, scale: 4, nullable: false),
-                    new_margin = table.Column<decimal>(type: "numeric(5,4)", precision: 5, scale: 4, nullable: false),
-                    previous_market_rate = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    new_market_rate = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    previous_effective_rate = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    new_effective_rate = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    changed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    changed_by = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    change_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    change_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_exchange_rate_history", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_exchange_rate_history_exchange_rate_exchange_rate_id",
-                        column: x => x.exchange_rate_id,
-                        principalSchema: "core",
-                        principalTable: "exchange_rate",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -494,23 +526,10 @@ namespace TegWallet.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "EmailIndex",
-                schema: "identity",
-                table: "client",
-                column: "normalized_email");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_client_client_group_id",
-                schema: "identity",
+                schema: "core",
                 table: "client",
                 column: "client_group_id");
-
-            migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                schema: "identity",
-                table: "client",
-                column: "normalized_user_name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ClientGroups_IsActive",
@@ -536,12 +555,6 @@ namespace TegWallet.Infrastructure.Migrations
                 schema: "core",
                 table: "exchange_rate",
                 column: "client_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_exchange_rate_history_exchange_rate_id",
-                schema: "core",
-                table: "exchange_rate_history",
-                column: "exchange_rate_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_ledger_reference",
@@ -585,6 +598,43 @@ namespace TegWallet.Infrastructure.Migrations
                 table: "permission",
                 columns: new[] { "feature", "action" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_client_active",
+                schema: "core",
+                table: "rate_lock",
+                columns: new[] { "client_id", "is_used", "valid_until" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_client_currency_active",
+                schema: "core",
+                table: "rate_lock",
+                columns: new[] { "client_id", "base_currency", "target_currency", "is_used", "valid_until" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_client_id",
+                schema: "core",
+                table: "rate_lock",
+                column: "client_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_currency_pair",
+                schema: "core",
+                table: "rate_lock",
+                columns: new[] { "base_currency", "target_currency" })
+                .Annotation("Npgsql:IndexMethod", "btree");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_exchange_rate_id",
+                schema: "core",
+                table: "rate_lock",
+                column: "exchange_rate_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_rate_locks_valid_until",
+                schema: "core",
+                table: "rate_lock",
+                column: "valid_until");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reservation_client_id",
@@ -662,6 +712,26 @@ namespace TegWallet.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                schema: "identity",
+                table: "user",
+                column: "normalized_email");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_client_id",
+                schema: "identity",
+                table: "user",
+                column: "client_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                schema: "identity",
+                table: "user",
+                column: "normalized_user_name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_user_claim_user_id",
                 schema: "identity",
                 table: "user_claim",
@@ -697,11 +767,11 @@ namespace TegWallet.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "exchange_rate_history",
+                name: "ledger",
                 schema: "core");
 
             migrationBuilder.DropTable(
-                name: "ledger",
+                name: "rate_lock",
                 schema: "core");
 
             migrationBuilder.DropTable(
@@ -733,11 +803,11 @@ namespace TegWallet.Infrastructure.Migrations
                 schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "exchange_rate",
+                name: "reservation",
                 schema: "core");
 
             migrationBuilder.DropTable(
-                name: "reservation",
+                name: "exchange_rate",
                 schema: "core");
 
             migrationBuilder.DropTable(
@@ -757,12 +827,16 @@ namespace TegWallet.Infrastructure.Migrations
                 schema: "identity");
 
             migrationBuilder.DropTable(
+                name: "user",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
                 name: "wallet",
                 schema: "core");
 
             migrationBuilder.DropTable(
                 name: "client",
-                schema: "identity");
+                schema: "core");
 
             migrationBuilder.DropTable(
                 name: "client_group",

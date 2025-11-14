@@ -241,7 +241,7 @@ public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
     //    {
     //        // Get all active rates for the currency pair that are effective at the given date
     //        var rates = await DbSet
-    //            .Include(er => er.ClientGroup)
+    //            .Include(er => er.ClientGroupId)
     //            .Include(er => er.Client)
     //            .Where(er => er.BaseCurrency == baseCurrency &&
     //                        er.TargetCurrency == targetCurrency &&

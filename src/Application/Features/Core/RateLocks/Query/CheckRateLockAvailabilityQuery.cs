@@ -1,13 +1,6 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using TegWallet.Application.Features.Core.RateLocks.Dtos;
 using TegWallet.Application.Helpers;
-using TegWallet.Application.Interfaces.Core;
-using TegWallet.Application.Interfaces.Localization;
-using TegWallet.Domain.Entity.Core;
-using TegWallet.Domain.Exceptions;
-using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Features.Core.RateLocks.Query;
 

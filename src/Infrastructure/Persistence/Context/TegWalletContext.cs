@@ -9,7 +9,7 @@ using TegWallet.Infrastructure.Persistence.Configurations;
 namespace TegWallet.Infrastructure.Persistence.Context;
 
 public class TegWalletContext(DbContextOptions<TegWalletContext> options)
-    : IdentityDbContext<Client, IdentityRole<Guid>, Guid>(options)
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
     //Auth
     public DbSet<Permission> PermissionSet => Set<Permission>();
@@ -53,7 +53,7 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
                 .HasMaxLength(20)
                 .IsRequired();
 
-            // ClientGroup relationship
+            // ClientGroupId relationship
             builder.HasOne(c => c.ClientGroup)
                 .WithMany(g => g.Clients)
                 .HasForeignKey(c => c.ClientGroupId)

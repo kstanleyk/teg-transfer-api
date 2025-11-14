@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using TegWallet.Application.Features.Core.RateLocks.Dtos;
 using TegWallet.Application.Helpers;
@@ -21,7 +20,7 @@ public record UseLockedRateCommand : IRequest<Result<CalculatePurchaseAmountResp
 }
 
 public class UseLockedRateCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IRateLockRepository rateLockRepository,
     IAppLocalizer localizer,
     IOptions<RateLockingSettings> rateLockingSettings)
@@ -46,7 +45,7 @@ public class UseLockedRateCommandHandler(
                 return Result<CalculatePurchaseAmountResponse>.Failed(localizer["Rate lock not found or no longer valid"]);
 
             // Get client
-            var client = await userManager.FindByIdAsync(request.ClientId.ToString());
+            var client = await clientRepository.GetAsync(request.ClientId);
             if (client == null)
                 return Result<CalculatePurchaseAmountResponse>.Failed(localizer["Client not found"]);
 

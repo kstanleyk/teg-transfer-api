@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
