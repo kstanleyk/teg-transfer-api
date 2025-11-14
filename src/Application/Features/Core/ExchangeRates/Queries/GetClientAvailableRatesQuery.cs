@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
@@ -15,12 +14,12 @@ public record GetClientAvailableRatesQuery(
 
 public class GetClientAvailableRatesQueryHandler(
     IExchangeRateRepository exchangeRateRepository,
-    UserManager<Domain.Entity.Core.Client> userManager,
+    IClientRepository clientRepository,
     IMapper mapper)
-    : IRequestHandler<GetClientAvailableRatesQuery, Result<IReadOnlyList<ExchangeRateDto>>>
+    :RequestHandlerBase, IRequestHandler<GetClientAvailableRatesQuery, Result<IReadOnlyList<ExchangeRateDto>>>
 {
     private readonly IExchangeRateRepository _exchangeRateRepository = exchangeRateRepository;
-    private readonly UserManager<Domain.Entity.Core.Client> _userManager = userManager;
+    private readonly IClientRepository _clientRepository = clientRepository;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<IReadOnlyList<ExchangeRateDto>>> Handle(GetClientAvailableRatesQuery query,
@@ -28,7 +27,7 @@ public class GetClientAvailableRatesQueryHandler(
     {
         try
         {
-            var client = await _userManager.FindByIdAsync(query.ClientId.ToString());
+            var client = await _clientRepository.GetAsync(query.ClientId);
             if (client == null)
                 return Result<IReadOnlyList<ExchangeRateDto>>.Failed("Client not found");
 
@@ -50,5 +49,11 @@ public class GetClientAvailableRatesQueryHandler(
             // Log exception here if needed
             return Result<IReadOnlyList<ExchangeRateDto>>.Failed($"An error occurred while retrieving available rates: {ex.Message}");
         }
+    }
+
+    protected override void DisposeCore()
+    {
+        _exchangeRateRepository.Dispose();
+        _clientRepository.Dispose();
     }
 }

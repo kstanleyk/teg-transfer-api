@@ -8,11 +8,11 @@ public class ClientGroupProfile : Profile
 {
     public ClientGroupProfile()
     {
-        // ClientGroup to ClientGroupDto
+        // ClientGroupId to ClientGroupDto
         CreateMap<ClientGroup, ClientGroupDto>()
             .ForMember(dest => dest.ClientCount, opt => opt.MapFrom(src => src.Clients.Count));
 
-        // ClientGroup to ClientGroupWithClientsDto
+        // ClientGroupId to ClientGroupWithClientsDto
         CreateMap<ClientGroup, ClientGroupWithClientsDto>()
             .ForMember(dest => dest.Clients, opt => opt.MapFrom(src => src.Clients));
 

@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Features.Core.Wallets.Validators;
 using TegWallet.Application.Helpers;
@@ -19,9 +18,9 @@ public record RequestDepositFundsCommand(
 
 public class RequestDepositFundsCommandHandler(
     IWalletRepository walletRepository,
-    UserManager<Domain.Entity.Core.Client> userManager,
+    IClientRepository clientRepository,
     IAppLocalizer localizer,
-    IMapper mapper) : BaseWalletCommandHandler<LedgerDto>(walletRepository, userManager), IRequestHandler<RequestDepositFundsCommand, Result<LedgerDto>>
+    IMapper mapper) : BaseWalletCommandHandler<LedgerDto>(walletRepository, clientRepository), IRequestHandler<RequestDepositFundsCommand, Result<LedgerDto>>
 {
     public async Task<Result<LedgerDto>> Handle(RequestDepositFundsCommand command, CancellationToken cancellationToken)
     {
@@ -61,6 +60,6 @@ public class RequestDepositFundsCommandHandler(
     protected override void DisposeCore()
     {
         WalletRepository.Dispose();
-        UserManager.Dispose();
+        ClientRepository.Dispose();
     }
 }

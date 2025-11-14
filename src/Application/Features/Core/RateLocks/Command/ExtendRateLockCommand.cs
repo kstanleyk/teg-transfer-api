@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using TegWallet.Application.Features.Core.RateLocks.Dtos;
 using TegWallet.Application.Helpers;
@@ -19,13 +18,14 @@ public record ExtendRateLockCommand : IRequest<Result<RateLockResponse>>
 }
 
 public class ExtendRateLockCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IRateLockRepository rateLockRepository,
     IOptions<RateLockingSettings> rateLockingSettings,
     IAppLocalizer localizer)
     : IRequestHandler<ExtendRateLockCommand, Result<RateLockResponse>>
 {
-    public async Task<Result<RateLockResponse>> Handle(ExtendRateLockCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RateLockResponse>> Handle(ExtendRateLockCommand request,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -49,7 +49,7 @@ public class ExtendRateLockCommandHandler(
             }
 
             // Get client to verify existence
-            var client = await userManager.FindByIdAsync(request.ClientId.ToString());
+            var client = await clientRepository.GetAsync(request.ClientId);
             if (client == null)
                 return Result<RateLockResponse>.Failed(localizer["Client not found"]);
 

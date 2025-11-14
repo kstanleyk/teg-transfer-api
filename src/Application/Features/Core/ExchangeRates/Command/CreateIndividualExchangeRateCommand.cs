@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Features.Core.ExchangeRates.Validator;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Helpers.Exceptions;
@@ -26,11 +25,11 @@ public record CreateIndividualExchangeRateCommand(
 
 public class CreateIndividualExchangeRateCommandHandler(
     IExchangeRateRepository exchangeRateRepository,
-    UserManager<Domain.Entity.Core.Client> userManager,
-    IAppLocalizer localizer) : IRequestHandler<CreateIndividualExchangeRateCommand, Result<Guid>>
+    IClientRepository clientRepository,
+    IAppLocalizer localizer) :RequestHandlerBase, IRequestHandler<CreateIndividualExchangeRateCommand, Result<Guid>>
 {
     private readonly IExchangeRateRepository _exchangeRateRepository = exchangeRateRepository;
-    private readonly UserManager<Domain.Entity.Core.Client> _userManager = userManager;
+    private readonly IClientRepository _clientRepository = clientRepository;
     private readonly IAppLocalizer _localizer = localizer;
 
     public async Task<Result<Guid>> Handle(CreateIndividualExchangeRateCommand command, CancellationToken cancellationToken)
@@ -51,19 +50,21 @@ public class CreateIndividualExchangeRateCommandHandler(
         try
         {
             // Validate client exists and is active
-            var client = await _userManager.FindByIdAsync(command.ClientId.ToString());
+            var client = await _clientRepository.GetAsync(command.ClientId);
             if (client == null)
                 return Result<Guid>.Failed("Client not found");
 
             if (client.Status != ClientStatus.Active)
                 return Result<Guid>.Failed("Cannot create rate for inactive client");
 
+            var marginPercentage = command.Margin / 100;
+
             var parameters = new CreateIndividualExchangeRateParameters(
                 command.BaseCurrency,
                 command.TargetCurrency,
                 command.BaseCurrencyValue,
                 command.TargetCurrencyValue,
-                command.Margin,
+                marginPercentage,
                 command.ClientId,
                 command.EffectiveFrom,
                 command.CreatedBy,
@@ -86,6 +87,12 @@ public class CreateIndividualExchangeRateCommandHandler(
         {
             return Result<Guid>.Failed($"Failed to create individual exchange rate: {ex.Message}");
         }
+    }
+
+    protected override void DisposeCore()
+    {
+        _exchangeRateRepository.Dispose();
+        _clientRepository.Dispose();
     }
 }
 

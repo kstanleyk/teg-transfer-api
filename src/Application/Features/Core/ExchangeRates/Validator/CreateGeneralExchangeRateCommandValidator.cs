@@ -18,9 +18,9 @@ public class CreateGeneralExchangeRateCommandValidator : AbstractValidator<Creat
         RuleFor(x => x.TargetCurrencyValue).ValidateCurrencyValue();
         RuleFor(x => x.Margin).ValidateMargin();
 
-        RuleFor(x => x.EffectiveFrom)
-            .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
-            .WithMessage("Effective date cannot be more than 5 minutes in the past");
+        //RuleFor(x => x.EffectiveFrom)
+        //    .GreaterThanOrEqualTo(DateTime.UtcNow.AddMinutes(-5))
+        //    .WithMessage("Effective date cannot be more than 5 minutes in the past");
 
         RuleFor(x => x.EffectiveTo)
             .Must((command, effectiveTo) => effectiveTo == null || effectiveTo > command.EffectiveFrom)

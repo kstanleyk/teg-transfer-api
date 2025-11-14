@@ -56,12 +56,14 @@ public class CreateGroupExchangeRateCommandHandler(
             if (!clientGroup.IsActive)
                 return Result<Guid>.Failed("Cannot create rate for inactive client group");
 
+            var marginPercentage = command.Margin / 100;
+
             var parameters = new CreateGroupExchangeRateParameters(
                 command.BaseCurrency,
                 command.TargetCurrency,
                 command.BaseCurrencyValue,
                 command.TargetCurrencyValue,
-                command.Margin,
+                marginPercentage,
                 command.ClientGroupId,
                 command.EffectiveFrom,
                 command.CreatedBy,

@@ -15,7 +15,5 @@ public class ClientWithExchangeRateProfile : Profile
         CreateMap<Wallet, WalletDto>()
             .ForMember(dest => dest.Balance, opt => opt.MapFrom(src => src.Balance.Amount))
             .ForMember(dest => dest.AvailableBalance, opt => opt.MapFrom(src => src.AvailableBalance.Amount));
-
-        CreateMap<ExchangeRate, ExchangeRateDto>();
     }
 }

@@ -26,9 +26,17 @@ public class RepositoryActionResult<T>(T? entity, RepositoryActionStatus status)
     public RepositoryActionStatus Status { get; } = status;
     public Exception? Exception { get; }
 
+    public string? Message { get; } = string.Empty;
+
     public RepositoryActionResult(T? entity, RepositoryActionStatus status, Exception? exception) :
         this(entity, status)
     {
         Exception = exception;
+    }
+
+    public RepositoryActionResult(T? entity, RepositoryActionStatus status, string? message = "Operation failed!") :
+        this(entity, status)
+    {
+        Message = message;
     }
 }

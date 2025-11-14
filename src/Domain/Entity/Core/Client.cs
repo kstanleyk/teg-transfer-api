@@ -1,15 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using TegWallet.Domain.Abstractions;
+using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
 using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-public class Client : IdentityUser<Guid>
+public class Client : Entity<Guid>
 {
     // Custom properties
     public string FirstName { get; private init; }
     public string LastName { get; private init; }
+    public string Email { get; private init; } = string.Empty;
+    public string PhoneNumber { get; private init; } = string.Empty;
     public DateTime CreatedAt { get; private init; }
     public ClientStatus Status { get; private set; }
 
@@ -18,6 +21,9 @@ public class Client : IdentityUser<Guid>
     public ClientGroup? ClientGroup { get; private set; }
 
     public Wallet Wallet { get; private set; } = null!;
+
+    public virtual ApplicationUser? User { get; private set; }
+    public Guid? UserId { get; private set; }
 
     // Private constructor for EF Core
     protected Client()
@@ -47,21 +53,17 @@ public class Client : IdentityUser<Guid>
             throw new DomainException("Invalid phone number format");
 
         var clientId = Guid.NewGuid();
-        var currency = defaultCurrency ?? Currency.XOF;
+        var currency = defaultCurrency ?? Currency.XAF;
 
         var client = new Client
         {
             Id = clientId,
-            UserName = email.Trim().ToLower(),
-            NormalizedUserName = email.Trim().ToUpperInvariant(),
-            Email = email.Trim().ToLower(),
-            NormalizedEmail = email.Trim().ToUpperInvariant(),
+            Email = email.Trim(),
             PhoneNumber = phoneNumber.Trim(),
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
             CreatedAt = createdAt ?? DateTime.UtcNow,
-            Status = ClientStatus.Active,
-            EmailConfirmed = false
+            Status = ClientStatus.Active
         };
 
         // Assign to group if provided
@@ -115,7 +117,6 @@ public class Client : IdentityUser<Guid>
         }
     }
 
-    // Existing methods
     public void UpdateContactInfo(string email, string phoneNumber)
     {
         DomainGuards.AgainstNullOrWhiteSpace(email);
@@ -123,12 +124,6 @@ public class Client : IdentityUser<Guid>
 
         if (!IsValidEmail(email)) throw new DomainException("Invalid email format");
         if (!IsValidPhoneNumber(phoneNumber)) throw new DomainException("Invalid phone number format");
-
-        Email = email.Trim().ToLower();
-        NormalizedEmail = email.Trim().ToUpperInvariant();
-        UserName = Email;
-        NormalizedUserName = Email.ToUpperInvariant();
-        PhoneNumber = phoneNumber.Trim();
     }
 
     public void Suspend(string reason)
@@ -154,9 +149,7 @@ public class Client : IdentityUser<Guid>
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return false;
 
-        return Email != other.Email ||
-               PhoneNumber != other.PhoneNumber ||
-               FirstName != other.FirstName ||
+        return FirstName != other.FirstName ||
                LastName != other.LastName ||
                Status != other.Status ||
                ClientGroupId != other.ClientGroupId;
@@ -164,7 +157,6 @@ public class Client : IdentityUser<Guid>
 
     public string FullName => $"{FirstName} {LastName}";
 
-    // Validation methods
     private static bool IsValidEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email)) return false;
@@ -184,5 +176,12 @@ public class Client : IdentityUser<Guid>
         if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
         var cleaned = new string(phoneNumber.Where(char.IsDigit).ToArray());
         return cleaned.Length >= 10;
+    }
+
+    public void LinkToUser(Guid userId)
+    {
+        DomainGuards.AgainstDefault(userId, nameof(userId));
+
+        UserId = userId;
     }
 }

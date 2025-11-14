@@ -14,7 +14,7 @@ public interface IClientGroupRepository : IRepository<ClientGroup, Guid>
         int pageSize = 20);
 
     Task<IReadOnlyList<ClientGroup>> GetByStatusAsync(bool isActive);
-    Task<IReadOnlyList<ClientGroup>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ClientGroup>> GetAllActiveAsync();
 
     Task<RepositoryActionResult<ClientGroup>> CreateClientGroupAsync(
         CreateClientGroupParameters parameters);

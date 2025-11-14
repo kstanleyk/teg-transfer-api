@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity.Auth;
 
 namespace TegWallet.WalletApi.Controllers.Auth;
 
@@ -14,7 +14,7 @@ namespace TegWallet.WalletApi.Controllers.Auth;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/login")]
 [AllowAnonymous]
-public class AuthController(UserManager<Client> userManager, IConfiguration config) : ControllerBase
+public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration config) : ControllerBase
 {
     [MapToApiVersion("1.0")]
     [HttpPost()]
@@ -38,7 +38,7 @@ public class AuthController(UserManager<Client> userManager, IConfiguration conf
         });
     }
 
-    private (string token, int expiresInSeconds) GenerateJwtToken(Client user)
+    private (string token, int expiresInSeconds) GenerateJwtToken(ApplicationUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -1,9 +1,8 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Application.Interfaces.Localization;
-using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity;
 using TegWallet.Domain.Exceptions;
 
 namespace TegWallet.Application.Features.Core.Clients.Command;
@@ -14,7 +13,7 @@ public record AssignClientToGroupCommand(
     string Reason = "Group assignment") : IRequest<Result>;
 
 public class AssignClientToGroupCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IClientGroupRepository clientGroupRepository,
     IAppLocalizer localizer) : IRequestHandler<AssignClientToGroupCommand, Result>
 {
@@ -22,7 +21,7 @@ public class AssignClientToGroupCommandHandler(
     {
         try
         {
-            var client = await userManager.FindByIdAsync(command.ClientId.ToString());
+            var client = await clientRepository.GetAsync(command.ClientId);
             if (client == null)
                 return Result.Failed("Client not found");
 
@@ -33,12 +32,13 @@ public class AssignClientToGroupCommandHandler(
             // Apply domain logic - this now only sets the ID
             client.AssignToGroup(clientGroup, command.Reason);
 
-            // Update using UserManager
-            var result = await userManager.UpdateAsync(client);
-            if (!result.Succeeded)
+            var parameters = new AssignToGroupParameters(command.ClientGroupId, command.Reason);
+
+            // Update using ClientRepository
+            var result = await clientRepository.AssignToGroupAsync(client.Id,parameters);
+            if (result.Status != RepositoryActionStatus.Updated)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return Result.Failed($"Failed to assign client to group: {errors}");
+                return Result.Failed($"Failed to assign client to group");
             }
 
             return Result.Succeeded(localizer["ClientAssignedToGroupSuccess"]);
@@ -47,5 +47,22 @@ public class AssignClientToGroupCommandHandler(
         {
             return Result.Failed(ex.Message);
         }
+    }
+}
+
+public record AssignToGroupParameters
+{
+    public Guid ClientGroupId { get; init; } 
+    public string Reason { get; init; } = string.Empty;
+
+    public AssignToGroupParameters(Guid clientGroupId, string reason)
+    {
+        Reason = reason;
+        ClientGroupId = clientGroupId;
+    }
+
+    public void Validate()
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(Reason, nameof(Reason));
     }
 }

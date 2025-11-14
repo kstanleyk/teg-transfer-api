@@ -21,8 +21,6 @@ public class ExchangeRateDto
     public string? ClientGroupName { get; set; }
     public string? ClientName { get; set; }
     public string RateTypeDescription { get; set; } = string.Empty;
-    public string RateDescription { get; set; } = string.Empty;
-    public string RateInverseDescription { get; set; } = string.Empty;
 
     // Calculated properties
     public string CurrencyPair => $"{BaseCurrency.Code}/{TargetCurrency.Code}";
@@ -35,4 +33,9 @@ public class ExchangeRateDto
     public string DisplayEffectiveRate => EffectiveRate.ToString("N6");
     public string DisplayMarketRate => MarketRate.ToString("N6");
     public string DisplayMargin => $"{MarginPercentage:N2}%";
+
+    public string? ExchangeRateDescription { get; set; }
+    public string? ExchangeRateInverseDescription { get; set; }
+    public string? ExchangeRateShortDescription { get; set; }
+    public string? ExchangeRateInverseShortDescription { get; set; }
 }

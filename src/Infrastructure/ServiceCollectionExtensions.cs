@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TegWallet.Application.Interfaces.Auth;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Application.Interfaces.Photos;
-using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity.Auth;
 using TegWallet.Infrastructure.Persistence.Context;
 using TegWallet.Infrastructure.Persistence.Repository;
 using TegWallet.Infrastructure.Persistence.Repository.Auth;
@@ -17,7 +17,8 @@ namespace TegWallet.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services,
+        IConfiguration configuration)
     {
         // Entity Framework
         services.AddDbContext<TegWalletContext>(options =>
@@ -25,7 +26,7 @@ public static class ServiceCollectionExtensions
                 .UseSnakeCaseNamingConvention())
             .AddTransient<TegWalletDatabaseSeeder>();
 
-        services.AddIdentity<Client, IdentityRole<Guid>>(options =>
+        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
@@ -50,7 +51,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IClientGroupRepository, ClientGroupRepository>();
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
-        services.AddScoped<IExchangeRateHistoryRepository, ExchangeRateHistoryRepository>();
         services.AddScoped<IRateLockRepository, RateLockRepository>();
 
         return services;

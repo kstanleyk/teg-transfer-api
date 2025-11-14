@@ -1,26 +1,30 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TegWallet.Application.Features.Core.Clients.Dto;
 using TegWallet.Application.Helpers;
+using TegWallet.Application.Interfaces.Core;
 
 namespace TegWallet.Application.Features.Core.Clients.Query;
 
 public record GetClientsQuery : IRequest<Result<ClientDto[]>>;
 
 public class GetClientsQueryHandler(
-    UserManager<Domain.Entity.Core.Client> userManager,
+    IClientRepository clientRepository,
     IMapper mapper)
-    : IRequestHandler<GetClientsQuery, Result<ClientDto[]>>
+    :RequestHandlerBase, IRequestHandler<GetClientsQuery, Result<ClientDto[]>>
 {
-    private readonly UserManager<Domain.Entity.Core.Client> _userManager = userManager;
+    private readonly IClientRepository _clientRepository = clientRepository;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<ClientDto[]>> Handle(GetClientsQuery query, CancellationToken cancellationToken)
     {
-        var clients = await _userManager.Users.ToArrayAsync(cancellationToken: cancellationToken);
+        var clients = await _clientRepository.GetAllAsync();
 
         return Result<ClientDto[]>.Succeeded(_mapper.Map<ClientDto[]>(clients),"Clients retrieved successfully.");
+    }
+
+    protected override void DisposeCore()
+    {
+        _clientRepository.Dispose();
     }
 }

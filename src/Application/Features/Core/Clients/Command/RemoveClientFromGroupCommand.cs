@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Helpers;
+using TegWallet.Application.Interfaces.Core;
 using TegWallet.Application.Interfaces.Localization;
-using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity;
 using TegWallet.Domain.Exceptions;
 
 namespace TegWallet.Application.Features.Core.Clients.Command;
@@ -12,7 +12,7 @@ public record RemoveClientFromGroupCommand(
     string Reason = "Removed from group") : IRequest<Result>;
 
 public class RemoveClientFromGroupCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IAppLocalizer localizer)
     : IRequestHandler<RemoveClientFromGroupCommand, Result>
 {
@@ -20,19 +20,20 @@ public class RemoveClientFromGroupCommandHandler(
     {
         try
         {
-            var client = await userManager.FindByIdAsync(command.ClientId.ToString());
+            var client = await clientRepository.GetAsync(command.ClientId);
             if (client == null)
                 return Result.Failed("Client not found");
 
             // Apply domain logic
             client.RemoveFromGroup(command.Reason);
 
-            // Update using UserManager
-            var result = await userManager.UpdateAsync(client);
-            if (!result.Succeeded)
+            var parameters = new RemoveFromGroupParameters(command.Reason);
+
+            // Update using ClientRepository
+            var result = await clientRepository.RemoveFromGroupAsync(command.ClientId, parameters);
+            if (result.Status != RepositoryActionStatus.Updated)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return Result.Failed($"Failed to remove client from group: {errors}");
+                return Result.Failed($"Failed to remove client from group");
             }
 
             return Result.Succeeded(localizer["ClientRemovedFromGroupSuccess"]);
@@ -42,4 +43,13 @@ public class RemoveClientFromGroupCommandHandler(
             return Result.Failed(ex.Message);
         }
     }
+}
+
+public record RemoveFromGroupParameters
+{
+    public string Reason { get; init; } = string.Empty;
+
+    public RemoveFromGroupParameters(string reason) => Reason = reason;
+
+    public void Validate() => DomainGuards.AgainstNullOrWhiteSpace(Reason, nameof(Reason));
 }

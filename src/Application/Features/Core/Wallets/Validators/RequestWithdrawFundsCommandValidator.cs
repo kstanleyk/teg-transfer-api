@@ -18,7 +18,7 @@ public class RequestWithdrawFundsCommandValidator : AbstractValidator<RequestWit
         RuleFor(x => x.CurrencyCode)
             .NotEmpty().WithMessage("Currency code is required")
             .Length(3).WithMessage("Currency code must be 3 characters")
-            .Must(BeAValidCurrency).WithMessage("Unsupported currency code. Supported: USD, NGN, XOF");
+            .Must(BeAValidCurrency).WithMessage("Unsupported currency code. Supported: USD, NGN, XAF");
 
         RuleFor(x => x.Description)
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters")
@@ -37,7 +37,7 @@ public class RequestWithdrawFundsCommandValidator : AbstractValidator<RequestWit
 
     private static bool BeAValidCurrency(string currencyCode)
     {
-        var supportedCurrencies = new[] { "USD", "NGN", "XOF" };
+        var supportedCurrencies = new[] { "USD", "NGN", "XAF" };
         return supportedCurrencies.Contains(currencyCode?.ToUpper());
     }
 
@@ -47,7 +47,7 @@ public class RequestWithdrawFundsCommandValidator : AbstractValidator<RequestWit
         {
             ["USD"] = 5.00m,
             ["NGN"] = 500.00m,
-            ["XOF"] = 1000.00m
+            ["XAF"] = 1000.00m
         };
 
         if (minAmounts.TryGetValue(command.CurrencyCode.ToUpper(), out var minAmount))

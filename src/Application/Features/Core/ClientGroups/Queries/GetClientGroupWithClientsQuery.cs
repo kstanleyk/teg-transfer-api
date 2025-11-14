@@ -7,7 +7,7 @@ using TegWallet.Application.Interfaces.Core;
 namespace TegWallet.Application.Features.Core.ClientGroups.Queries;
 
 
-// Get ClientGroup with Clients (includes client count and details)
+// Get ClientGroupId with Clients (includes client count and details)
 public record GetClientGroupWithClientsQuery(Guid ClientGroupId) : IRequest<Result<ClientGroupWithClientsDto>>;
 
 public class GetClientGroupWithClientsQueryHandler(

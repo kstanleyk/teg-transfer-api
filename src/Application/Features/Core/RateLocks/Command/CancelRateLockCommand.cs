@@ -1,9 +1,7 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Application.Interfaces.Localization;
-using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.Exceptions;
 
 namespace TegWallet.Application.Features.Core.RateLocks.Command;
@@ -18,7 +16,7 @@ public record CancelRateLockCommand : IRequest<Result>
 }
 
 public class CancelRateLockCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IRateLockRepository rateLockRepository,
     IAppLocalizer localizer) : IRequestHandler<CancelRateLockCommand, Result>
 {
@@ -31,7 +29,7 @@ public class CancelRateLockCommandHandler(
                 return Result.Failed(localizer["Cancellation reason is required"]);
 
             // Get client to verify existence
-            var client = await userManager.FindByIdAsync(request.ClientId.ToString());
+            var client = await clientRepository.GetAsync(request.ClientId);
             if (client == null)
                 return Result.Failed(localizer["Client not found"]);
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using TegWallet.Application.Helpers;
+﻿using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
@@ -8,14 +7,14 @@ namespace TegWallet.Application.Features.Core.Wallets.Command;
 
 public abstract class BaseWalletCommandHandler<TResult>(
     IWalletRepository walletRepository,
-    UserManager<Domain.Entity.Core.Client> userManager): RequestHandlerBase
+    IClientRepository clientRepository): RequestHandlerBase
 {
     protected readonly IWalletRepository WalletRepository = walletRepository;
-    protected readonly UserManager<Domain.Entity.Core.Client> UserManager = userManager;
+    protected readonly IClientRepository ClientRepository = clientRepository;
 
     protected async Task<Result<(Domain.Entity.Core.Client client, Domain.Entity.Core.Wallet wallet)>> ValidateClientAndWalletAsync(Guid clientId)
     {
-        var client = await UserManager.FindByIdAsync(clientId.ToString());
+        var client = await ClientRepository.GetAsync(clientId);
         if (client == null)
             return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Failed("Client not found");
 
@@ -41,7 +40,7 @@ public abstract class BaseWalletCommandHandler<TResult>(
 
     protected async Task<Result<(Domain.Entity.Core.Client client, Domain.Entity.Core.Wallet wallet)>> ValidateClientAndWalletAsync(Guid clientId, Guid reservationId)
     {
-        var client = await UserManager.FindByIdAsync(clientId.ToString());
+        var client = await ClientRepository.GetAsync(clientId);
         if (client == null)
             return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Failed("Client not found");
 

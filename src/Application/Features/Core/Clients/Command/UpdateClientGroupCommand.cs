@@ -1,20 +1,19 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Application.Interfaces.Localization;
-using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity;
 using TegWallet.Domain.Exceptions;
 
 namespace TegWallet.Application.Features.Core.Clients.Command;
 
 public record UpdateClientGroupCommand(
     Guid ClientId,
-    string? ClientGroup, // Null to remove from group
+    string? ClientGroupId, // Null to remove from group
     string Reason = "Group updated") : IRequest<Result>;
 
 public class UpdateClientGroupCommandHandler(
-    UserManager<Client> userManager,
+    IClientRepository clientRepository,
     IClientGroupRepository clientGroupRepository,
     IAppLocalizer localizer)
     : IRequestHandler<UpdateClientGroupCommand, Result>
@@ -23,32 +22,16 @@ public class UpdateClientGroupCommandHandler(
     {
         try
         {
-            var client = await userManager.FindByIdAsync(command.ClientId.ToString());
+            var client = await clientRepository.GetAsync(command.ClientId);
             if (client == null)
                 return Result.Failed("Client not found");
 
-            ClientGroup? clientGroup = null;
+            var parameters = new UpdateGroupParameters(command.ClientGroupId, command.Reason);
 
-            // If ClientGroup is provided, fetch the ClientGroup entity
-            if (!string.IsNullOrWhiteSpace(command.ClientGroup))
+            var result = await clientRepository.UpdateGroupAsync(command.ClientId, parameters);
+            if (result.Status!= RepositoryActionStatus.Updated)
             {
-                if (!Guid.TryParse(command.ClientGroup, out var clientGroupId))
-                    return Result.Failed("Invalid client group ID format");
-
-                clientGroup = await clientGroupRepository.GetAsync(clientGroupId);
-                if (clientGroup == null)
-                    return Result.Failed("Client group not found");
-            }
-
-            // Apply domain logic - UpdateGroup handles both assignment and removal
-            client.UpdateGroup(clientGroup, command.Reason);
-
-            // Update using UserManager
-            var result = await userManager.UpdateAsync(client);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return Result.Failed($"Failed to update client group: {errors}");
+                return Result.Failed($"Failed to update client group");
             }
 
             return Result.Succeeded(localizer["ClientGroupUpdatedSuccess"]);
@@ -57,6 +40,23 @@ public class UpdateClientGroupCommandHandler(
         {
             return Result.Failed(ex.Message);
         }
+    }
+}
+
+public record UpdateGroupParameters
+{
+    public string? ClientGroupId { get; init; }
+    public string Reason { get; init; } = string.Empty;
+
+    public UpdateGroupParameters(string? clientGroupId, string reason)
+    {
+        Reason = reason;
+        ClientGroupId = clientGroupId;
+    }
+
+    public void Validate()
+    {
+        DomainGuards.AgainstNullOrWhiteSpace(Reason, nameof(Reason));
     }
 }
 
