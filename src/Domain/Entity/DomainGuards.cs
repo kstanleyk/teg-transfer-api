@@ -10,7 +10,10 @@ public static class DomainGuards
         [CallerArgumentExpression("value")] string? paramName = null)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException($"{paramName} cannot be null or whitespace.");
+        {
+            var message = $"{paramName} cannot be null or whitespace.";
+            throw new DomainException(message);
+        }
     }
 
     public static void AgainstDefault<T>(T value, [CallerArgumentExpression("value")] string? paramName = null)
