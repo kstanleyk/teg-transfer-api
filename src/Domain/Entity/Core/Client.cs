@@ -1,4 +1,5 @@
-﻿using TegWallet.Domain.Abstractions;
+﻿using System.Text.RegularExpressions;
+using TegWallet.Domain.Abstractions;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
@@ -157,19 +158,27 @@ public class Client : Entity<Guid>
 
     public string FullName => $"{FirstName} {LastName}";
 
-    private static bool IsValidEmail(string email)
+    public static bool IsValidEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email)) return false;
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
         try
         {
             var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email.Trim();
+            email = addr.Address;
         }
         catch
         {
             return false;
         }
+
+        const string pattern =
+            @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+
+        return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
     }
+
 
     private static bool IsValidPhoneNumber(string phoneNumber)
     {
