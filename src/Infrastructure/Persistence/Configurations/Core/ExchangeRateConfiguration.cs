@@ -80,5 +80,14 @@ public class ExchangeRateConfiguration : IEntityTypeConfiguration<ExchangeRate>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Configure Tiers collection (using the backing field)
+        builder.HasMany(x => x.Tiers)
+            .WithOne(t => t.ExchangeRate)
+            .HasForeignKey(t => t.ExchangeRateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Map the backing field for Tiers
+        builder.Metadata.FindNavigation(nameof(ExchangeRate.Tiers))!
+            .SetField("_tiers");
     }
 }

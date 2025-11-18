@@ -19,13 +19,16 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     public DbSet<UserRole> UserRoleSet => Set<UserRole>();
 
     //Core
-    public virtual DbSet<Wallet> WalletSet { get; set; }
+    public virtual DbSet<Client> ClientSet { get; set; }
+    public virtual DbSet<ClientGroup> ClientGroupSet { get; set; }
+    public virtual DbSet<ExchangeRate> ExchangeRateSet { get; set; }
+    public virtual DbSet<ExchangeRateTier> ExchangeRateTierSet { get; set; }
+    public virtual DbSet<MinimumAmountConfiguration> MinimumAmountConfigurationSet { get; set; }
+    public virtual DbSet<RateLock> RateLockSet { get; set; }
+    public virtual DbSet<Reservation> PurchaseReservationSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
-    public DbSet<Reservation> PurchaseReservationSet { get; set; }
-    public DbSet<ExchangeRate> ExchangeRateSet { get; set; }
-    public DbSet<ClientGroup> ClientGroupSet { get; set; }
-    public DbSet<RateLock> RateLockSet { get; set; }
-    public DbSet<Client> ClientSet { get; set; }
+    public virtual DbSet<Wallet> WalletSet { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

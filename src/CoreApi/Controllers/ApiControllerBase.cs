@@ -11,9 +11,7 @@ namespace TegWallet.CoreApi.Controllers
 
         public ISender MediatorSender => _sender ??= HttpContext.RequestServices.GetService<ISender>();
 
-        protected async Task<IActionResult> GetActionResult(Func<Task<IActionResult>> codeToExecute)
-        {
-            return await codeToExecute.Invoke();
-        }
+        protected async Task<IActionResult> GetActionResult(Func<Task<IActionResult>> codeToExecute) =>
+            await codeToExecute.Invoke();
     }
 }
