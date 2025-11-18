@@ -49,6 +49,18 @@ public class ExchangeRate : Entity<Guid>
     public string Source { get; private set; }
     public string CreatedBy { get; private set; }
 
+    private readonly List<ExchangeRateTier> _tiers = [];
+    public IReadOnlyList<ExchangeRateTier> Tiers => _tiers.AsReadOnly();
+
+    // Method to get applicable tier for an amount
+    public ExchangeRateTier? GetApplicableTier(decimal amount)
+    {
+        return _tiers
+            .Where(t => amount >= t.MinAmount && amount <= t.MaxAmount)
+            .OrderBy(t => t.MinAmount)
+            .FirstOrDefault();
+    }
+
     // Private constructor for EF Core
     private ExchangeRate()
     {
@@ -210,6 +222,27 @@ public class ExchangeRate : Entity<Guid>
         return IsActive &&
                date >= EffectiveFrom &&
                (EffectiveTo == null || date <= EffectiveTo.Value);
+    }
+
+    // Domain methods for managing tiers
+    public void AddTier(decimal minAmount, decimal maxAmount, decimal rate, decimal margin, string createdBy)
+    {
+        var tier = ExchangeRateTier.Create(Id, minAmount, maxAmount, rate, margin, createdBy);
+        _tiers.Add(tier);
+    }
+
+    public void RemoveTier(Guid tierId)
+    {
+        var tier = _tiers.FirstOrDefault(t => t.Id == tierId);
+        if (tier != null)
+        {
+            _tiers.Remove(tier);
+        }
+    }
+
+    public void ClearTiers()
+    {
+        _tiers.Clear();
     }
 
     #region Rate Descriptions

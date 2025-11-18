@@ -208,4 +208,61 @@ public class ExchangeRatesController(IMediator mediator) : ApiControllerBase<Exc
 
         return BadRequest(result);
     }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("applicable-with-tiers")]
+    [ProducesResponseType(typeof(Result<ExchangeRateApplicationDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ExchangeRateApplicationDto>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetApplicableExchangeRateWithTiersV1(
+        [FromQuery] Guid? clientId,
+        [FromQuery] Guid? clientGroupId,
+        [FromQuery] string baseCurrencyCode,
+        [FromQuery] string targetCurrencyCode,
+        [FromQuery] decimal transactionAmount, // Target currency amount
+        [FromQuery] DateTime? asOfDate = null)
+    {
+        var query = new GetApplicableExchangeRateWithTiersQuery(
+            clientId,
+            clientGroupId,
+            baseCurrencyCode,
+            targetCurrencyCode,
+            transactionAmount,
+            asOfDate);
+
+        var result = await Mediator.Send(query);
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+
+    [MapToApiVersion("1.0")]
+    [HttpPost("{exchangeRateId}/tiers")]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ManageExchangeRateTiersV1(
+        [FromRoute] Guid exchangeRateId,
+        [FromBody] ManageExchangeRateTiersRequestDto request)
+    {
+        var command = new ManageExchangeRateTiersCommand(
+            exchangeRateId,
+            request.Tiers);
+
+        var result = await Mediator.Send(command);
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    public record ManageExchangeRateTiersRequestDto(
+        List<ExchangeRateTierRequestDto> Tiers);
 }

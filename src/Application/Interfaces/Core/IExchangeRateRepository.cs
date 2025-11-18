@@ -1,4 +1,5 @@
 ﻿using TegWallet.Application.Features.Core.ExchangeRates.Command;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Helpers;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.ValueObjects;
@@ -65,4 +66,14 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
         Currency? baseCurrency = null,
         Currency? targetCurrency = null,
         RateType? rateType = null);
+
+    Task<ExchangeRateApplicationResult> GetApplicableRateWithTiersAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        decimal transactionAmount, // Target currency amount
+        DateTime asOfDate);
+
+    Task ManageExchangeRateTiersAsync(Guid exchangeRateId, List<ExchangeRateTierRequest> tierRequests);
 }

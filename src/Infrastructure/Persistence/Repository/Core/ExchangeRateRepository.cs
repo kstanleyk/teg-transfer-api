@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TegWallet.Application.Features.Core.ExchangeRates.Command;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;
@@ -7,53 +8,210 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Infrastructure.Persistence.Repository.Core;
 
-public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
+public class ExchangeRateRepository(IMinimumAmountConfigurationRepository minimumAmountConfigurationRepository,  IDatabaseFactory databaseFactory)
     : DataRepository<ExchangeRate, Guid>(databaseFactory), IExchangeRateRepository
 {
-    //public async Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
-    //    IEnumerable<Client> clients,
-    //    Currency baseCurrency,
-    //    Currency targetCurrency)
-    //{
-    //    var clientList = clients.ToList();
-    //    if (!clientList.Any())
-    //        return new Dictionary<Guid, ExchangeRate?>();
+    public async Task<ExchangeRateApplicationResult> GetApplicableRateWithTiersAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        decimal transactionAmount, // Target currency amount
+        DateTime asOfDate)
+    {
+        try
+        {
+            // 1. Get the applicable minimum amount configuration for this currency pair
+            var minAmountConfig = await minimumAmountConfigurationRepository.GetApplicableMinimumAmountAsync(
+                baseCurrency, targetCurrency, asOfDate);
 
-    //    var clientIds = clientList.Select(c => c.Id).ToList();
-    //    var clientGroupIds = clientList.Where(c => c.ClientGroupId.HasValue)
-    //        .Select(c => c.ClientGroupId!.Value)
-    //        .Distinct()
-    //        .ToList();
+            var minimumAmount = minAmountConfig?.MinimumAmount ?? 0m;
 
-    //    var now = DateTime.UtcNow;
+            // 2. Check if transaction qualifies for hierarchical rates
+            if (transactionAmount >= minimumAmount)
+            {
+                // Use existing hierarchical system (Individual → Group → General)
+                var hierarchicalRate = await GetApplicableRateAsync(
+                    clientId, clientGroupId, baseCurrency, targetCurrency, asOfDate);
 
-    //    // Get all possible exchange rates in one query
-    //    var exchangeRates = await DbSet
-    //        .Where(er => er.BaseCurrency == baseCurrency &&
-    //                     er.TargetCurrency == targetCurrency &&
-    //                     er.IsActive &&
-    //                     er.EffectiveFrom <= now &&
-    //                     (er.EffectiveTo == null || er.EffectiveTo >= now))
-    //        .ToListAsync();
+                return new ExchangeRateApplicationResult
+                {
+                    ExchangeRate = hierarchicalRate,
+                    AppliedTier = null,
+                    RateType = hierarchicalRate?.Type ?? RateType.General,
+                    IsTieredRate = false,
+                    MinimumAmount = minimumAmount,
+                    EffectiveRate = hierarchicalRate?.EffectiveRate ?? 0m,
+                    EffectiveMargin = hierarchicalRate?.Margin ?? 0m
+                };
+            }
+            else
+            {
+                // 3. Use tiered pricing system - ONLY for general rates
+                return await GetTieredGeneralRateAsync(
+                    baseCurrency, targetCurrency, transactionAmount, asOfDate, minimumAmount);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new RepositoryException($"Error getting applicable rate with tiers for client {clientId}", ex);
+        }
+    }
 
-    //    var result = new Dictionary<Guid, ExchangeRate?>();
+    public async Task ManageExchangeRateTiersAsync(Guid exchangeRateId, List<ExchangeRateTierRequest> tierRequests)
+    {
+        var exchangeRate = await DbSet
+            .Include(er => er.Tiers)
+            .FirstOrDefaultAsync(er => er.Id == exchangeRateId);
 
-    //    foreach (var client in clientList)
-    //    {
-    //        // Find applicable rate with priority: Individual > Group > General
-    //        var applicableRate = exchangeRates
-    //            .Where(er => er.IsEffectiveAt(now))
-    //            .OrderByDescending(er => er.Type) // Individual (3) > Group (2) > General (1)
-    //            .FirstOrDefault(er =>
-    //                (er.Type == RateType.Individual && er.ClientId == client.Id) ||
-    //                (er.Type == RateType.Group && er.ClientGroupId == client.ClientGroupId) ||
-    //                (er.Type == RateType.General));
+        if (exchangeRate == null)
+            throw new ArgumentException($"Exchange rate with ID {exchangeRateId} not found");
 
-    //        result[client.Id] = applicableRate;
-    //    }
+        // Clear existing tiers
+        exchangeRate.ClearTiers();
 
-    //    return result;
-    //}
+        // Add new tiers
+        foreach (var tierRequest in tierRequests)
+        {
+            exchangeRate.AddTier(
+                tierRequest.MinAmount,
+                tierRequest.MaxAmount,
+                tierRequest.Rate,
+                tierRequest.Margin,
+                tierRequest.CreatedBy);
+        }
+
+        await SaveChangesAsync();
+    }
+
+    private async Task<ExchangeRateApplicationResult> GetTieredGeneralRateAsync(
+        Currency baseCurrency,
+        Currency targetCurrency,
+        decimal transactionAmount,
+        DateTime asOfDate,
+        decimal minimumAmount)
+    {
+        // Get ONLY the general rate with its tiers
+        var generalRate = await GetGeneralRateWithTiersAsync(baseCurrency, targetCurrency, asOfDate);
+
+        if (generalRate != null)
+        {
+            // Check if the general rate has an applicable tier for the transaction amount
+            var applicableTier = generalRate.GetApplicableTier(transactionAmount);
+            if (applicableTier != null)
+            {
+                return new ExchangeRateApplicationResult
+                {
+                    ExchangeRate = generalRate,
+                    AppliedTier = applicableTier,
+                    RateType = RateType.General,
+                    IsTieredRate = true,
+                    MinimumAmount = minimumAmount,
+                    EffectiveRate = applicableTier.Rate,
+                    EffectiveMargin = applicableTier.Margin
+                };
+            }
+
+            // If no tier applies but we have a general rate, use the base general rate
+            return new ExchangeRateApplicationResult
+            {
+                ExchangeRate = generalRate,
+                AppliedTier = null,
+                RateType = RateType.General,
+                IsTieredRate = false,
+                MinimumAmount = minimumAmount,
+                EffectiveRate = generalRate.EffectiveRate,
+                EffectiveMargin = generalRate.Margin
+            };
+        }
+
+        // Fallback: No general rate found at all
+        return new ExchangeRateApplicationResult
+        {
+            ExchangeRate = null,
+            AppliedTier = null,
+            RateType = RateType.General,
+            IsTieredRate = false,
+            MinimumAmount = minimumAmount,
+            EffectiveRate = 0m,
+            EffectiveMargin = 0m
+        };
+    }
+
+    private async Task<ExchangeRate?> GetGeneralRateWithTiersAsync(
+        Currency baseCurrency,
+        Currency targetCurrency,
+        DateTime asOfDate)
+    {
+        return await DbSet
+            .Include(er => er.Tiers)
+            .Where(er => er.Type == RateType.General &&
+                        er.BaseCurrency == baseCurrency &&
+                        er.TargetCurrency == targetCurrency &&
+                        er.IsActive &&
+                        er.EffectiveFrom <= asOfDate &&
+                        (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+            .OrderByDescending(er => er.EffectiveFrom) // Get the most recent one
+            .FirstOrDefaultAsync();
+    }
+
+    private async Task<List<ExchangeRate>> GetAllRatesWithTiersInHierarchyAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        DateTime asOfDate)
+    {
+        var rates = new List<ExchangeRate>();
+
+        // 1. Individual rates (highest priority)
+        if (clientId.HasValue)
+        {
+            var individualRates = await DbSet
+                .Include(er => er.Tiers)
+                .Include(er => er.Client)
+                .Where(er => er.ClientId == clientId.Value &&
+                            er.BaseCurrency == baseCurrency &&
+                            er.TargetCurrency == targetCurrency &&
+                            er.IsActive &&
+                            er.EffectiveFrom <= asOfDate &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+                .ToListAsync();
+            rates.AddRange(individualRates);
+        }
+
+        // 2. Group rates (medium priority)
+        if (clientGroupId.HasValue)
+        {
+            var groupRates = await DbSet
+                .Include(er => er.Tiers)
+                .Include(er => er.ClientGroup)
+                .Where(er => er.Type == RateType.Group &&
+                            er.ClientGroupId == clientGroupId.Value &&
+                            er.BaseCurrency == baseCurrency &&
+                            er.TargetCurrency == targetCurrency &&
+                            er.IsActive &&
+                            er.EffectiveFrom <= asOfDate &&
+                            (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+                .ToListAsync();
+            rates.AddRange(groupRates);
+        }
+
+        // 3. General rates (lowest priority)
+        var generalRates = await DbSet
+            .Include(er => er.Tiers)
+            .Where(er => er.Type == RateType.General &&
+                        er.BaseCurrency == baseCurrency &&
+                        er.TargetCurrency == targetCurrency &&
+                        er.IsActive &&
+                        er.EffectiveFrom <= asOfDate &&
+                        (er.EffectiveTo == null || er.EffectiveTo >= asOfDate))
+            .ToListAsync();
+        rates.AddRange(generalRates);
+
+        // Return in hierarchy order: Individual > Group > General
+        return rates.OrderByDescending(r => r.Type).ToList();
+    }
 
     public async Task<Dictionary<Guid, ExchangeRate?>> GetApplicableExchangeRatesForClientsAsync(
     IEnumerable<Client> clients,
@@ -344,11 +502,21 @@ public class ExchangeRateRepository(IDatabaseFactory databaseFactory)
                 parameters.Source,
                 parameters.EffectiveTo);
 
-            DbSet.Add(exchangeRate);
+            // Add tiers if provided
+            if (parameters.Tiers != null && parameters.Tiers.Any())
+            {
+                foreach (var tierRequest in parameters.Tiers)
+                {
+                    exchangeRate.AddTier(
+                        tierRequest.MinAmount,
+                        tierRequest.MaxAmount,
+                        tierRequest.Rate,
+                        tierRequest.Margin,
+                        tierRequest.CreatedBy);
+                }
+            }
 
-            // REMOVED: History creation
-            // var history = ExchangeRateHistory.CreateForCreation(exchangeRate, parameters.CreatedBy);
-            // await _exchangeRateHistoryRepository.AddAsync(history);
+            DbSet.Add(exchangeRate);
 
             var result = await SaveChangesAsync();
             if (result > 0)

@@ -37,5 +37,33 @@ public class CreateGeneralExchangeRateCommandValidator : AbstractValidator<Creat
             .WithMessage("Source is required")
             .MaximumLength(50)
             .WithMessage("Source cannot exceed 50 characters");
+
+        // NEW: Tier validation
+        RuleForEach(x => x.Tiers)
+            .SetValidator(new ExchangeRateTierRequestValidator())
+            .When(x => x.Tiers != null && x.Tiers.Any());
+
+        // Validate no overlapping tiers
+        RuleFor(x => x.Tiers)
+            .Must(HaveNonOverlappingTiers)
+            .WithMessage("Tier ranges cannot overlap")
+            .When(x => x.Tiers != null && x.Tiers.Any());
+    }
+
+    private bool HaveNonOverlappingTiers(List<ExchangeRateTierRequest>? tiers)
+    {
+        if (tiers == null || tiers.Count < 2) return true;
+
+        var sortedTiers = tiers.OrderBy(t => t.MinAmount).ToList();
+
+        for (int i = 0; i < sortedTiers.Count - 1; i++)
+        {
+            if (sortedTiers[i].MaxAmount >= sortedTiers[i + 1].MinAmount)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

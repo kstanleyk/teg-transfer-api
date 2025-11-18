@@ -19,7 +19,15 @@ public record CreateGeneralExchangeRateCommand(
     DateTime EffectiveFrom,
     string CreatedBy = "SYSTEM",
     string Source = "Market",
-    DateTime? EffectiveTo = null) : IRequest<Result<Guid>>;
+    DateTime? EffectiveTo = null,
+    List<ExchangeRateTierRequest>? Tiers = null) : IRequest<Result<Guid>>; // NEW: Tiers parameter
+
+public record ExchangeRateTierRequest(
+    decimal MinAmount,
+    decimal MaxAmount,
+    decimal Rate,
+    decimal Margin,  // This is in percentage (e.g., 3.0 for 3%)
+    string CreatedBy = "SYSTEM");
 
 public record CreateGeneralExchangeRateParameters(
     Currency BaseCurrency,
@@ -30,11 +38,14 @@ public record CreateGeneralExchangeRateParameters(
     DateTime EffectiveFrom,
     string CreatedBy = "SYSTEM",
     string Source = "Market",
-    DateTime? EffectiveTo = null);
+    DateTime? EffectiveTo = null,
+    List<ExchangeRateTierRequest>? Tiers = null); // NEW: Tiers parameter
+
 
 public class CreateGeneralExchangeRateCommandHandler(
     IExchangeRateRepository exchangeRateRepository,
-    IAppLocalizer localizer) : IRequestHandler<CreateGeneralExchangeRateCommand, Result<Guid>>
+    IAppLocalizer localizer)
+    : IRequestHandler<CreateGeneralExchangeRateCommand, Result<Guid>>
 {
     private readonly IExchangeRateRepository _exchangeRateRepository = exchangeRateRepository;
     private readonly IAppLocalizer _localizer = localizer;
@@ -58,6 +69,19 @@ public class CreateGeneralExchangeRateCommandHandler(
         {
             var marginPercentage = command.Margin / 100;
 
+            // Convert tier DTOs to domain objects if provided
+            List<ExchangeRateTierRequest>? tierParameters = null;
+            if (command.Tiers != null && command.Tiers.Any())
+            {
+                tierParameters = command.Tiers.Select(t => new ExchangeRateTierRequest(
+                    t.MinAmount,
+                    t.MaxAmount,
+                    t.Rate,
+                    t.Margin / 100, // Convert margin percentage to decimal
+                    t.CreatedBy
+                )).ToList();
+            }
+
             var parameters = new CreateGeneralExchangeRateParameters(
                 command.BaseCurrency,
                 command.TargetCurrency,
@@ -67,7 +91,8 @@ public class CreateGeneralExchangeRateCommandHandler(
                 command.EffectiveFrom,
                 command.CreatedBy,
                 command.Source,
-                command.EffectiveTo);
+                command.EffectiveTo,
+                tierParameters); // Pass tiers to repository
 
             var result = await _exchangeRateRepository.CreateGeneralExchangeRateAsync(parameters);
 
