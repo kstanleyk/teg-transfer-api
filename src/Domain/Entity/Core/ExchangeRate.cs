@@ -4,8 +4,6 @@ using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Domain.Entity.Core;
 
-using System.ComponentModel.DataAnnotations.Schema;
-
 public class ExchangeRate : Entity<Guid>
 {
     public Currency BaseCurrency { get; private init; }
@@ -19,17 +17,11 @@ public class ExchangeRate : Entity<Guid>
     public decimal Margin { get; private set; }
 
     // Calculated properties (not stored in DB)
-    [NotMapped]
     public decimal MarketRate => TargetCurrencyValue / BaseCurrencyValue;
-
-    [NotMapped]
     public decimal EffectiveRate => MarketRate * (1 + Margin);
 
     // Inverse rates (target to base)
-    [NotMapped]
     public decimal InverseMarketRate => BaseCurrencyValue / TargetCurrencyValue;
-
-    [NotMapped]
     public decimal InverseEffectiveRate => InverseMarketRate * (1 + Margin);
 
     public DateTime EffectiveFrom { get; private set; }
@@ -174,6 +166,12 @@ public class ExchangeRate : Entity<Guid>
         };
     }
 
+    // Add this method to ExchangeRate entity
+    public void ApplyTier(ExchangeRateTier tier)
+    {
+        Margin = tier.Margin;
+    }
+
     public void Expire(DateTime newRateEffectiveFrom, string deactivatedBy, string reason)
     {
         // Set the expiration to 1 second before the new rate starts
@@ -227,7 +225,7 @@ public class ExchangeRate : Entity<Guid>
     // Domain methods for managing tiers
     public void AddTier(decimal minAmount, decimal maxAmount, decimal rate, decimal margin, string createdBy)
     {
-        var tier = ExchangeRateTier.Create(Id, minAmount, maxAmount, rate, margin, createdBy);
+        var tier = ExchangeRateTier.Create(Id, minAmount, maxAmount,  margin, createdBy);
         _tiers.Add(tier);
     }
 

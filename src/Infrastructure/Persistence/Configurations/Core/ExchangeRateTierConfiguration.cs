@@ -26,10 +26,7 @@ public class ExchangeRateTierConfiguration : IEntityTypeConfiguration<ExchangeRa
             .HasPrecision(18, 4)
             .IsRequired();
 
-        // Rate and Margin
-        builder.Property(x => x.Rate)
-            .HasPrecision(18, 8)
-            .IsRequired();
+        // Margin
 
         builder.Property(x => x.Margin)
             .HasPrecision(5, 4)

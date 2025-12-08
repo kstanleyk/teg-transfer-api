@@ -8,8 +8,9 @@ namespace TegWallet.Application.Features.Core.ExchangeRates.Queries;
 
 public record GetClientExchangeRateQuery(
     Guid ClientId,
-    Currency BaseCurrency,
-    Currency TargetCurrency,
+    string BaseCurrencyCode,
+    string TargetCurrencyCode,
+    decimal Amount = 0,  // Amount in target currency, default to 0 for hierarchical rate
     DateTime? AsOfDate = null) : IRequest<Result<ClientWithExchangeRateDto?>>;
 
 public class GetClientExchangeRateQueryHandler(
@@ -31,23 +32,41 @@ public class GetClientExchangeRateQueryHandler(
 
             var asOfDate = query.AsOfDate ?? DateTime.UtcNow;
 
-            // Get the most specific rate available (Individual > Group > General)
-            var rate = await _exchangeRateRepository.GetEffectiveRateForClientAsync(
-                query.ClientId,
-                client.ClientGroupId,
-                query.BaseCurrency,
-                query.TargetCurrency,
-                asOfDate);
+            // Convert string currency codes to Currency objects
+            var baseCurrency = Currency.FromCode(query.BaseCurrencyCode);
+            var targetCurrency = Currency.FromCode(query.TargetCurrencyCode);
 
-            if (rate == null)
+            // If amount is 0, return hierarchical rate (backward compatibility)
+            if (query.Amount == 0)
+            {
+                var rate = await _exchangeRateRepository.GetEffectiveRateForClientAsync(query.ClientId,
+                    client.ClientGroupId, baseCurrency, targetCurrency, asOfDate);
+
+                if (rate == null)
+                    return Result<ClientWithExchangeRateDto?>.Succeeded(null);
+
+                var exchangeRateDto = MapDto(client, rate);
+                return Result<ClientWithExchangeRateDto?>.Succeeded(exchangeRateDto);
+            }
+
+            // For non-zero amounts, use tiered rate logic
+            var applicationResult = await _exchangeRateRepository.GetApplicableRateWithTiersAsync(query.ClientId,
+                client.ClientGroupId, baseCurrency, targetCurrency, query.Amount, asOfDate);
+
+            var exchangeRate = applicationResult.ExchangeRate;
+
+            if (exchangeRate == null)
                 return Result<ClientWithExchangeRateDto?>.Succeeded(null);
 
-            var rateDto = MapDto(client, rate);
+            var appliedTier = applicationResult.AppliedTier;
+            if (appliedTier != null) exchangeRate.ApplyTier(appliedTier);
+
+            var rateDto = MapDto(client, exchangeRate);
+
             return Result<ClientWithExchangeRateDto?>.Succeeded(rateDto);
         }
         catch (Exception ex)
         {
-            // Log exception here if needed
             return Result<ClientWithExchangeRateDto?>.Failed($"An error occurred while retrieving exchange rate: {ex.Message}");
         }
     }

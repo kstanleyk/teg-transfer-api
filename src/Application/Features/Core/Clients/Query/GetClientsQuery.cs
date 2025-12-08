@@ -13,18 +13,15 @@ public class GetClientsQueryHandler(
     IMapper mapper)
     :RequestHandlerBase, IRequestHandler<GetClientsQuery, Result<ClientDto[]>>
 {
-    private readonly IClientRepository _clientRepository = clientRepository;
-    private readonly IMapper _mapper = mapper;
-
     public async Task<Result<ClientDto[]>> Handle(GetClientsQuery query, CancellationToken cancellationToken)
     {
-        var clients = await _clientRepository.GetAllAsync();
+        var clients = await clientRepository.GetAllAsync();
 
-        return Result<ClientDto[]>.Succeeded(_mapper.Map<ClientDto[]>(clients),"Clients retrieved successfully.");
+        return Result<ClientDto[]>.Succeeded(mapper.Map<ClientDto[]>(clients),"Clients retrieved successfully.");
     }
 
     protected override void DisposeCore()
     {
-        _clientRepository.Dispose();
+        clientRepository.Dispose();
     }
 }

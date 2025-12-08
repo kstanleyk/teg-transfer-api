@@ -9,8 +9,7 @@ public class ExchangeRateTier : Entity<Guid>
 
     public decimal MinAmount { get; private set; }
     public decimal MaxAmount { get; private set; }
-    public decimal Rate { get; private set; } // Override rate for this tier
-    public decimal Margin { get; private set; } // Override margin for this tier
+    public decimal Margin { get; private set; }
 
     public DateTime CreatedAt { get; private set; }
     public string CreatedBy { get; private set; }
@@ -20,7 +19,6 @@ public class ExchangeRateTier : Entity<Guid>
         Guid exchangeRateId,
         decimal minAmount,
         decimal maxAmount,
-        decimal rate,
         decimal margin,
         string createdBy)
     {
@@ -30,7 +28,6 @@ public class ExchangeRateTier : Entity<Guid>
             ExchangeRateId = exchangeRateId,
             MinAmount = minAmount,
             MaxAmount = maxAmount,
-            Rate = rate,
             Margin = margin,
             CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow

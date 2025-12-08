@@ -6,18 +6,21 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TegWallet.Application.Features.Core.Clients.Dto;
+using TegWallet.Application.Features.Core.Clients.Query;
+using TegWallet.Application.Helpers;
 using TegWallet.Domain.Entity.Auth;
 
 namespace TegWallet.WalletApi.Controllers.Auth;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/login")]
-[AllowAnonymous]
-public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration config) : ControllerBase
+[Route("api/v{version:apiVersion}")]
+public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration config) : ApiControllerBase<AuthController>
 {
     [MapToApiVersion("1.0")]
-    [HttpPost()]
+    [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody]LoginDto dto)
     {
         var user = await userManager.FindByEmailAsync(dto.Email);
@@ -36,6 +39,18 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
             token_type = "Bearer",
             expires_in = expiresInSeconds
         });
+    }
+
+    [HttpGet("profile")]
+    public async Task<ActionResult<Result<UserProfileDto>>> GetProfile()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var command = new GetUserProfileQuery(userId);
+
+        var result = await MediatorSender.Send(command);
+
+        return Ok(result);
     }
 
     private (string token, int expiresInSeconds) GenerateJwtToken(ApplicationUser user)
@@ -70,5 +85,4 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
 
 public record RegisterDto(string Email, string PhoneNumber, string FirstName, string LastName, string Password);
 public record LoginDto(string Email, string Password);
-
 public record LoginResponse(string Token, DateTime Password);

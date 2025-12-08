@@ -107,7 +107,6 @@ public class ExchangeRateRepository(IMinimumAmountConfigurationRepository minimu
                     RateType = RateType.General,
                     IsTieredRate = true,
                     MinimumAmount = minimumAmount,
-                    EffectiveRate = applicableTier.Rate,
                     EffectiveMargin = applicableTier.Margin
                 };
             }
@@ -155,7 +154,7 @@ public class ExchangeRateRepository(IMinimumAmountConfigurationRepository minimu
             .FirstOrDefaultAsync();
     }
 
-    private async Task<List<ExchangeRate>> GetAllRatesWithTiersInHierarchyAsync(
+    public async Task<List<ExchangeRate>> GetAllRatesWithTiersInHierarchyAsync(
         Guid? clientId,
         Guid? clientGroupId,
         Currency baseCurrency,

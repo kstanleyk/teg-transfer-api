@@ -107,11 +107,11 @@ public class ExchangeRateTierRequestDtoValidator : AbstractValidator<ExchangeRat
             .LessThanOrEqualTo(1000000) // 1 million
             .WithMessage("Max amount cannot exceed 1,000,000");
 
-        RuleFor(x => x.Rate)
-            .GreaterThan(0)
-            .WithMessage("Rate must be greater than 0")
-            .LessThan(10000)
-            .WithMessage("Rate cannot exceed 10,000");
+        //RuleFor(x => x.Rate)
+        //    .GreaterThan(0)
+        //    .WithMessage("Rate must be greater than 0")
+        //    .LessThan(10000)
+        //    .WithMessage("Rate cannot exceed 10,000");
 
         RuleFor(x => x.Margin)
             .GreaterThanOrEqualTo(0)

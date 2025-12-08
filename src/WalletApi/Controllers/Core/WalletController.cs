@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Features.Core.Wallets.Query;
@@ -184,5 +186,40 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         var query = new GetPurchaseReservationByIdQuery(reservationId);
 
         return Ok(await Mediator.Send(query));
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/exchange-rates/{baseCurrencyCode}/{targetCurrencyCode}")]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status400BadRequest)]
+    [MustMatchClient]
+    public async Task<IActionResult> GetClientExchangeRateV1(
+        Guid clientId,
+        string baseCurrencyCode,
+        string targetCurrencyCode,
+        [FromQuery] decimal amount,
+        DateTime? asOfDate = null)
+    {
+        try
+        {
+            var query = new GetClientExchangeRateQuery(clientId, baseCurrencyCode, targetCurrencyCode, amount, asOfDate);
+            var result = await Mediator.Send(query);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            // Handle invalid currency codes
+            return BadRequest(Result<ExchangeRateDto?>.Failed($"Invalid currency code: {ex.Message}"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                Result<ExchangeRateDto?>.Failed($"Internal server error: {ex.Message}"));
+        }
     }
 }

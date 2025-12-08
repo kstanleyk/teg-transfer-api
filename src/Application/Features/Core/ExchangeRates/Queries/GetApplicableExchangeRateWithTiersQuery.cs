@@ -39,13 +39,8 @@ public class GetApplicableExchangeRateWithTiersQueryHandler(
             var asOfDate = query.AsOfDate ?? DateTime.UtcNow;
 
             // Get applicable rate with tiered logic
-            var applicationResult = await exchangeRateRepository.GetApplicableRateWithTiersAsync(
-                query.ClientId,
-                query.ClientGroupId,
-                baseCurrency,
-                targetCurrency,
-                query.TransactionAmount,
-                asOfDate);
+            var applicationResult = await exchangeRateRepository.GetApplicableRateWithTiersAsync(query.ClientId,
+                query.ClientGroupId, baseCurrency!, targetCurrency!, query.TransactionAmount, asOfDate);
 
             if (applicationResult.ExchangeRate == null && applicationResult.AppliedTier == null)
             {
@@ -75,7 +70,6 @@ public class GetApplicableExchangeRateWithTiersQueryHandler(
                 Id = result.AppliedTier.Id,
                 MinAmount = result.AppliedTier.MinAmount,
                 MaxAmount = result.AppliedTier.MaxAmount,
-                Rate = result.AppliedTier.Rate,
                 Margin = result.AppliedTier.Margin,
                 CreatedBy = result.AppliedTier.CreatedBy,
                 CreatedAt = result.AppliedTier.CreatedAt

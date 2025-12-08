@@ -13,12 +13,11 @@ public class GetWalletByClientIdQueryHandler(
     IMapper mapper)
     : IRequestHandler<GetWalletByClientIdQuery, Result<WalletDto>>
 {
-    private readonly IWalletRepository _walletRepository = walletRepository;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<WalletDto>> Handle(GetWalletByClientIdQuery query, CancellationToken cancellationToken)
     {
-        var wallet = await _walletRepository.GetByClientIdWithDetailsAsync(query.ClientId);
+        var wallet = await walletRepository.GetByClientIdWithDetailsAsync(query.ClientId);
 
         return Result<WalletDto>.Succeeded(_mapper.Map<WalletDto>(wallet));
     }
