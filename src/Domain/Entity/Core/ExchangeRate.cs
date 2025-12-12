@@ -270,7 +270,7 @@ public class ExchangeRate : Entity<Guid>
 
     public string GetInverseRateShortDescription()
     {
-        return $"1 {TargetCurrency.Code} = {InverseEffectiveRate:N6} {BaseCurrency.Code}";
+        return $"1 {TargetCurrency.Code} = {InverseEffectiveRate:N3} {BaseCurrency.Code}";
     }
 
     /// <summary>

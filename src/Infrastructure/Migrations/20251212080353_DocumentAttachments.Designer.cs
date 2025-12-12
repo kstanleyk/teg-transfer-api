@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TegWallet.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using TegWallet.Infrastructure.Persistence.Context;
 namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TegWalletContext))]
-    partial class TegWalletContextModelSnapshot : ModelSnapshot
+    [Migration("20251212080353_DocumentAttachments")]
+    partial class DocumentAttachments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -646,7 +649,7 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("uploaded_at");
 
-                    b.Property<string>("ClientId")
+                    b.Property<string>("UploadedBy")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -670,7 +673,7 @@ namespace TegWallet.Infrastructure.Migrations
                     b.HasIndex("UploadedAt")
                         .HasDatabaseName("ix_document_attachment_uploaded_at");
 
-                    b.HasIndex("ClientId")
+                    b.HasIndex("UploadedBy")
                         .HasDatabaseName("ix_document_attachment_uploaded_by");
 
                     b.HasIndex("EntityId", "EntityType", "IsDeleted")

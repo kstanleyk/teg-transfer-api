@@ -26,8 +26,8 @@ public class LedgerMapper
         try
         {
             var money = new Money(AmountAmount, Currency.FromCode(AmountCurrency));
-            var ledger = Ledger.Hydrate(WalletId, Type, money, Status, FailureReason, CompletionType, CompletedBy, CompletedAt, Reference, Description,
-                Timestamp, ReservationId);
+            var ledger = Ledger.Hydrate(Id, WalletId, Type, money, Status, DateTime.Now, Reference, Description,
+                FailureReason, CompletionType, CompletedBy, CompletedAt, ReservationId);
             ledger.SetId(Id);
             ledger.HydrateFields(FailureReason, CompletionType, CompletedBy, CompletedAt);
             return ledger;

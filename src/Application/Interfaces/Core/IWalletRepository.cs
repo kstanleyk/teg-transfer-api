@@ -24,4 +24,5 @@ public interface IWalletRepository : IRepository<Wallet, Guid>
     Task<RepositoryActionResult<Wallet>> RejectWithdrawFundsAsync(RejectWithdrawFundsCommand fundsCommand);
     Task<Wallet[]> GetWalletsAsync();
     Task<Wallet[]> GetWalletsForClientsAsync(Guid[] walletIds);
+    Task<Wallet?> GetByLedgerIdAsync(Guid ledgerId);
 }

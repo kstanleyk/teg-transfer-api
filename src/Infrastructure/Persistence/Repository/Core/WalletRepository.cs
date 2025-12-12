@@ -45,6 +45,29 @@ public class WalletRepository(IDatabaseFactory databaseFactory, ILedgerRepositor
                             l.Status == TransactionStatus.Pending))
             .FirstOrDefaultAsync(x => x.ClientId == clientId);
 
+    public async Task<Wallet?> GetByLedgerIdAsync(Guid ledgerId)
+    {
+        try
+        {
+            // Approach 1: Query with JOIN through Ledgers table
+            var wallet = await DbSet
+                .Include(w => w.Ledgers) // Include ledgers if needed
+                .Where(w => w.Ledgers.Any(l => l.Id == ledgerId))
+                .FirstOrDefaultAsync();
+
+            if (wallet == null)
+            {
+                return null;
+            }
+
+            return wallet;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
     public async Task<Wallet?> GetByReservationIdAsync(Guid reservationId) =>
         await DbSet
             .Include(x=>x.Reservations)

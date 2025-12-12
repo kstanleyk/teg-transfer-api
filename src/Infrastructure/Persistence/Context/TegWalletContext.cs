@@ -25,9 +25,10 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     public virtual DbSet<ExchangeRateTier> ExchangeRateTierSet { get; set; }
     public virtual DbSet<MinimumAmountConfiguration> MinimumAmountConfigurationSet { get; set; }
     public virtual DbSet<RateLock> RateLockSet { get; set; }
-    public virtual DbSet<Reservation> PurchaseReservationSet { get; set; }
+    public virtual DbSet<Reservation> ReservationSet { get; set; }
     public virtual DbSet<Ledger> LedgerSet { get; set; }
     public virtual DbSet<Wallet> WalletSet { get; set; }
+    public virtual DbSet<DocumentAttachment> DocumentAttachmentSet { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

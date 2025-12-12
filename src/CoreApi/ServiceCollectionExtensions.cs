@@ -64,14 +64,15 @@ public static class ServiceCollectionExtensions
             host.UseUrls($"{protocolSettings.Url}:{protocolSettings.Port}");
         }
 
-        services
-            .AddOptions<WebProtocolSettings>()
-            .Bind(configuration.GetSection("WebProtocolSettings"))
+        services.AddOptions<WebProtocolSettings>()
+            .BindConfiguration("WebProtocolSettings")
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.Configure<RateLockingSettings>(configuration
-            .GetSection("RateLockingSettings"));
+        services.AddOptions<RateLockingSettings>()
+            .BindConfiguration("RateLockingSettings")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         var allowedOrigins = configuration
             .GetSection("Cors:AllowedOrigins")
