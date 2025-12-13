@@ -22,35 +22,16 @@ public record AttachDocumentToLedgerCommand(
     string DocumentType,
     string? Description = null) : IRequest<Result<DocumentUploadResultDto>>;
 
-public class AttachDocumentToLedgerCommandHandler
-        : IRequestHandler<AttachDocumentToLedgerCommand, Result<DocumentUploadResultDto>>
+public class AttachDocumentToLedgerCommandHandler(
+    ILedgerRepository ledgerRepository,
+    IDocumentService documentService,
+    IDocumentAttachmentRepository documentAttachmentRepository,
+    IClientRepository clientRepository,
+    IWalletRepository walletRepository,
+    IAppLocalizer localizer,
+    ILogger<AttachDocumentToLedgerCommandHandler> logger)
+    : IRequestHandler<AttachDocumentToLedgerCommand, Result<DocumentUploadResultDto>>
 {
-    private readonly ILedgerRepository _ledgerRepository;
-    private readonly IDocumentService _documentService;
-    private readonly IDocumentAttachmentRepository _documentRepository;
-    private readonly IClientRepository _clientRepository;
-    private readonly IWalletRepository _walletRepository;
-    private readonly IAppLocalizer _localizer;
-    private readonly ILogger<AttachDocumentToLedgerCommandHandler> _logger;
-
-    public AttachDocumentToLedgerCommandHandler(
-        ILedgerRepository ledgerRepository,
-        IDocumentService documentService,
-        IDocumentAttachmentRepository documentRepository,
-        IClientRepository clientRepository,
-        IWalletRepository walletRepository,
-        IAppLocalizer localizer,
-        ILogger<AttachDocumentToLedgerCommandHandler> logger)
-    {
-        _ledgerRepository = ledgerRepository;
-        _documentService = documentService;
-        _documentRepository = documentRepository;
-        _clientRepository = clientRepository;
-        _walletRepository = walletRepository;
-        _localizer = localizer;
-        _logger = logger;
-    }
-
     public async Task<Result<DocumentUploadResultDto>> Handle(
         AttachDocumentToLedgerCommand command,
         CancellationToken cancellationToken)
@@ -72,38 +53,38 @@ public class AttachDocumentToLedgerCommandHandler
         try
         {
             // Log the start of document attachment process
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Starting document attachment to ledger. LedgerId: {LedgerId}, ClientId: {ClientId}, DocumentType: {DocumentType}, FileName: {FileName}",
                 command.LedgerId, command.ClientId, command.DocumentType, command.File.FileName);
 
             // 1. Validate client exists
-            var client = await _clientRepository.GetAsync(command.ClientId);
+            var client = await clientRepository.GetAsync(command.ClientId);
             if (client == null)
             {
-                _logger.LogWarning("Client not found for ledger document upload. ClientId: {ClientId}", command.ClientId);
+                logger.LogWarning("Client not found for ledger document upload. ClientId: {ClientId}", command.ClientId);
                 return Result<DocumentUploadResultDto>.Failed("Client not found");
             }
 
             // 2. Validate client is active
             if (client.Status != ClientStatus.Active)
             {
-                _logger.LogWarning("Client is not active. ClientId: {ClientId}, Status: {Status}",
+                logger.LogWarning("Client is not active. ClientId: {ClientId}, Status: {Status}",
                     command.ClientId, client.Status);
                 return Result<DocumentUploadResultDto>.Failed("Client account is not active");
             }
 
             // 3. Validate ledger exists
-            var ledger = await _ledgerRepository.GetAsync(command.LedgerId);
+            var ledger = await ledgerRepository.GetAsync(command.LedgerId);
             if (ledger == null)
             {
-                _logger.LogWarning("Ledger not found. LedgerId: {LedgerId}", command.LedgerId);
+                logger.LogWarning("Ledger not found. LedgerId: {LedgerId}", command.LedgerId);
                 return Result<DocumentUploadResultDto>.Failed("Ledger not found");
             }
 
             // 4. Check if ledger is pending
             if (!ledger.IsPending)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Cannot attach document to non-pending ledger. LedgerId: {LedgerId}, Status: {Status}",
                     command.LedgerId, ledger.Status);
                 return Result<DocumentUploadResultDto>.Failed("Cannot attach document to a ledger that is not in pending status");
@@ -113,7 +94,7 @@ public class AttachDocumentToLedgerCommandHandler
             var hasPermission = await ClientHasPermissionToUploadAsync(command.ClientId, ledger);
             if (!hasPermission)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Client does not have permission to upload to ledger. ClientId: {ClientId}, LedgerId: {LedgerId}",
                     command.ClientId, command.LedgerId);
                 return Result<DocumentUploadResultDto>.Failed("Client does not have permission to upload documents for this ledger");
@@ -123,23 +104,23 @@ public class AttachDocumentToLedgerCommandHandler
             UploadResult? uploadResult;
             try
             {
-                _logger.LogDebug("Uploading file to Cloudinary. FileName: {FileName}, Size: {Size} bytes, ContentType: {ContentType}",
+                logger.LogDebug("Uploading file to Cloudinary. FileName: {FileName}, Size: {Size} bytes, ContentType: {ContentType}",
                     command.File.FileName, command.File.Length, command.File.ContentType);
 
-                uploadResult = await _documentService.UploadDocument(command.File);
+                uploadResult = await documentService.UploadDocument(command.File);
 
                 if (uploadResult == null)
                 {
-                    _logger.LogError("Cloudinary upload returned null result for file: {FileName}", command.File.FileName);
+                    logger.LogError("Cloudinary upload returned null result for file: {FileName}", command.File.FileName);
                     return Result<DocumentUploadResultDto>.Failed("Failed to upload document to cloud storage");
                 }
 
-                _logger.LogDebug("Cloudinary upload completed. PublicId: {PublicId}, StatusCode: {StatusCode}, Format: {Format}",
+                logger.LogDebug("Cloudinary upload completed. PublicId: {PublicId}, StatusCode: {StatusCode}, Format: {Format}",
                     uploadResult.PublicId, uploadResult.StatusCode, uploadResult.Format);
             }
             catch (Exception uploadEx)
             {
-                _logger.LogError(uploadEx,
+                logger.LogError(uploadEx,
                     "Cloudinary upload failed. LedgerId: {LedgerId}, ClientId: {ClientId}, FileName: {FileName}",
                     command.LedgerId, command.ClientId, command.File.FileName);
 
@@ -150,7 +131,7 @@ public class AttachDocumentToLedgerCommandHandler
             // 7. Validate Cloudinary upload result
             if (uploadResult.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Cloudinary upload returned non-OK status. StatusCode: {StatusCode}, Error: {ErrorMessage}",
                     uploadResult.StatusCode, uploadResult.Error?.Message);
 
@@ -164,7 +145,7 @@ public class AttachDocumentToLedgerCommandHandler
                 var cloudinaryError = uploadResult.Error.Message.ToLower();
                 var userMessage = GetUserFriendlyErrorMessage(cloudinaryError);
 
-                _logger.LogWarning("Cloudinary error: {Error}, UserMessage: {UserMessage}",
+                logger.LogWarning("Cloudinary error: {Error}, UserMessage: {UserMessage}",
                     cloudinaryError, userMessage);
 
                 return Result<DocumentUploadResultDto>.Failed(userMessage);
@@ -173,7 +154,7 @@ public class AttachDocumentToLedgerCommandHandler
             // 9. Validate that we got a secure URL
             if (string.IsNullOrEmpty(uploadResult.SecureUrl?.AbsoluteUri))
             {
-                _logger.LogError("Cloudinary upload succeeded but returned no secure URL. PublicId: {PublicId}",
+                logger.LogError("Cloudinary upload succeeded but returned no secure URL. PublicId: {PublicId}",
                     uploadResult.PublicId);
                 return Result<DocumentUploadResultDto>.Failed("Document upload completed but failed to get file URL");
             }
@@ -194,12 +175,12 @@ public class AttachDocumentToLedgerCommandHandler
                     description: command.Description ?? string.Empty,
                     uploadedBy: command.ClientId.ToString());
 
-                _logger.LogDebug("Document attachment entity created. AttachmentId: {AttachmentId}, FileCategory: {FileCategory}",
+                logger.LogDebug("Document attachment entity created. AttachmentId: {AttachmentId}, FileCategory: {FileCategory}",
                     attachment.Id, attachment.FileCategory);
             }
             catch (DomainException domainEx)
             {
-                _logger.LogError(domainEx, "Domain validation failed while creating attachment");
+                logger.LogError(domainEx, "Domain validation failed while creating attachment");
                 return Result<DocumentUploadResultDto>.Failed(domainEx.Message);
             }
 
@@ -207,28 +188,28 @@ public class AttachDocumentToLedgerCommandHandler
             Domain.Entity.Core.DocumentAttachment savedAttachment;
             try
             {
-                savedAttachment = await _documentRepository.AddLedgerAttachmentAsync(
+                savedAttachment = await documentAttachmentRepository.AddLedgerAttachmentAsync(
                     command.LedgerId, attachment, cancellationToken);
 
-                _logger.LogDebug("Document attachment saved to database. AttachmentId: {AttachmentId}",
+                logger.LogDebug("Document attachment saved to database. AttachmentId: {AttachmentId}",
                     savedAttachment.Id);
             }
             catch (Exception dbEx)
             {
-                _logger.LogError(dbEx,
+                logger.LogError(dbEx,
                     "Failed to save document attachment to database. LedgerId: {LedgerId}, PublicId: {PublicId}",
                     command.LedgerId, uploadResult.PublicId);
 
                 // Attempt to delete from Cloudinary since database save failed
                 try
                 {
-                    await _documentService.DeleteDocument(uploadResult.PublicId);
-                    _logger.LogInformation("Cleaned up Cloudinary file after database save failure. PublicId: {PublicId}",
+                    await documentService.DeleteDocument(uploadResult.PublicId);
+                    logger.LogInformation("Cleaned up Cloudinary file after database save failure. PublicId: {PublicId}",
                         uploadResult.PublicId);
                 }
                 catch (Exception cleanupEx)
                 {
-                    _logger.LogError(cleanupEx,
+                    logger.LogError(cleanupEx,
                         "Failed to clean up Cloudinary file after database save failure. PublicId: {PublicId}",
                         uploadResult.PublicId);
                 }
@@ -243,13 +224,13 @@ public class AttachDocumentToLedgerCommandHandler
                 ledger.AddExistingAttachment(savedAttachment);
                 //await _ledgerRepository.UpdateAsync(ledger, cancellationToken);
 
-                _logger.LogDebug("Ledger updated with new attachment. LedgerId: {LedgerId}, AttachmentId: {AttachmentId}",
+                logger.LogDebug("Ledger updated with new attachment. LedgerId: {LedgerId}, AttachmentId: {AttachmentId}",
                     command.LedgerId, savedAttachment.Id);
             }
             catch (Exception updateEx)
             {
                 // Log but don't fail the operation since the attachment is already saved
-                _logger.LogWarning(updateEx,
+                logger.LogWarning(updateEx,
                     "Failed to update ledger with attachment reference. LedgerId: {LedgerId}, AttachmentId: {AttachmentId}",
                     command.LedgerId, savedAttachment.Id);
             }
@@ -268,29 +249,29 @@ public class AttachDocumentToLedgerCommandHandler
             };
 
             // 14. Log successful completion
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Document attached to ledger successfully. LedgerId: {LedgerId}, ClientId: {ClientId}, " +
                 "AttachmentId: {AttachmentId}, FileType: {ContentType}, FileSize: {FileSize} bytes",
                 command.LedgerId, command.ClientId, savedAttachment.Id,
                 savedAttachment.ContentType, savedAttachment.FileSize);
 
-            var message = _localizer["DocumentUploadedSuccess"];
+            var message = localizer["DocumentUploadedSuccess"];
             return Result<DocumentUploadResultDto>.Succeeded(resultDto, message);
         }
         catch (DomainException ex)
         {
-            _logger.LogError(ex, "Domain exception in AttachDocumentToLedgerCommandHandler");
+            logger.LogError(ex, "Domain exception in AttachDocumentToLedgerCommandHandler");
             return Result<DocumentUploadResultDto>.Failed(ex.Message);
         }
         catch (ValidationException ex)
         {
             // This should have been caught earlier, but just in case
-            _logger.LogWarning(ex, "Validation exception in AttachDocumentToLedgerCommandHandler");
+            logger.LogWarning(ex, "Validation exception in AttachDocumentToLedgerCommandHandler");
             return Result<DocumentUploadResultDto>.Failed(string.Join(", ", ex.ValidationErrors));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
+            logger.LogError(ex,
                 "Unexpected error in AttachDocumentToLedgerCommandHandler. LedgerId: {LedgerId}, ClientId: {ClientId}",
                 command.LedgerId, command.ClientId);
 
@@ -342,43 +323,43 @@ public class AttachDocumentToLedgerCommandHandler
     {
         try
         {
-            _logger.LogDebug(
+            logger.LogDebug(
                 "Checking client permission for ledger upload. ClientId: {ClientId}, LedgerId: {LedgerId}, LedgerType: {LedgerType}",
                 clientId, ledger.Id, ledger.Type);
 
             // 1. Get the wallet that contains this ledger
-            var wallet = await _walletRepository.GetByLedgerIdAsync(ledger.Id);
+            var wallet = await walletRepository.GetByLedgerIdAsync(ledger.Id);
             if (wallet == null)
             {
-                _logger.LogWarning("Wallet not found for ledger. LedgerId: {LedgerId}", ledger.Id);
+                logger.LogWarning("Wallet not found for ledger. LedgerId: {LedgerId}", ledger.Id);
                 return false;
             }
 
-            _logger.LogDebug("Found wallet {WalletId} for ledger {LedgerId}", wallet.Id, ledger.Id);
+            logger.LogDebug("Found wallet {WalletId} for ledger {LedgerId}", wallet.Id, ledger.Id);
 
             // 2. Check if the wallet belongs to the client
             if (wallet.ClientId != clientId)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Client does not own the wallet containing this ledger. ClientId: {ClientId}, WalletClientId: {WalletClientId}",
                     clientId, wallet.ClientId);
                 return false;
             }
 
-            _logger.LogDebug("Client {ClientId} owns wallet {WalletId}", clientId, wallet.Id);
+            logger.LogDebug("Client {ClientId} owns wallet {WalletId}", clientId, wallet.Id);
 
             // 3. Get client to check account status
-            var client = await _clientRepository.GetAsync(clientId);
+            var client = await clientRepository.GetAsync(clientId);
             if (client == null)
             {
-                _logger.LogWarning("Client not found during permission check. ClientId: {ClientId}", clientId);
+                logger.LogWarning("Client not found during permission check. ClientId: {ClientId}", clientId);
                 return false;
             }
 
             // 4. Check if client's account is not suspended
             if (client.Status == ClientStatus.Suspended)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Client account is suspended. ClientId: {ClientId}, Status: {Status}",
                     clientId, client.Status);
                 return false;
@@ -387,13 +368,13 @@ public class AttachDocumentToLedgerCommandHandler
             // 5. Check if client's account is active (not inactive)
             if (client.Status == ClientStatus.Inactive)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Client account is inactive. ClientId: {ClientId}, Status: {Status}",
                     clientId, client.Status);
                 return false;
             }
 
-            _logger.LogDebug("Client {ClientId} account status is valid: {Status}", clientId, client.Status);
+            logger.LogDebug("Client {ClientId} account status is valid: {Status}", clientId, client.Status);
 
             // 6. Check if wallet is "active" (has positive balance or is in good standing)
             // Since we don't have an explicit "WalletStatus", we can check:
@@ -403,45 +384,45 @@ public class AttachDocumentToLedgerCommandHandler
 
             if (!IsWalletActive(wallet))
             {
-                _logger.LogWarning("Wallet is not active. WalletId: {WalletId}", wallet.Id);
+                logger.LogWarning("Wallet is not active. WalletId: {WalletId}", wallet.Id);
                 return false;
             }
 
-            _logger.LogDebug("Wallet {WalletId} is active", wallet.Id);
+            logger.LogDebug("Wallet {WalletId} is active", wallet.Id);
 
             // 7. Check if ledger type allows document attachments
             if (!LedgerTypeAllowsDocumentAttachments(ledger.Type))
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Ledger type does not allow document attachments. LedgerId: {LedgerId}, Type: {Type}",
                     ledger.Id, ledger.Type);
                 return false;
             }
 
-            _logger.LogDebug("Ledger type {LedgerType} allows document attachments", ledger.Type);
+            logger.LogDebug("Ledger type {LedgerType} allows document attachments", ledger.Type);
 
             // 8. Additional check: Verify ledger amount is positive (if applicable)
             if (ledger.Amount.Amount <= 0)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Ledger amount is not positive. LedgerId: {LedgerId}, Amount: {Amount}",
                     ledger.Id, ledger.Amount.Amount);
                 return false;
             }
 
             // 9. Check if document attachment limit hasn't been exceeded for this ledger
-            var attachmentCount = await _documentRepository.GetLedgerAttachmentCountAsync(ledger.Id);
+            var attachmentCount = await documentAttachmentRepository.GetLedgerAttachmentCountAsync(ledger.Id);
             var maxAttachments = GetMaxAttachmentsForLedgerType(ledger.Type);
 
             if (attachmentCount >= maxAttachments)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Document attachment limit exceeded for ledger. LedgerId: {LedgerId}, Current: {Current}, Max: {Max}",
                     ledger.Id, attachmentCount, maxAttachments);
                 return false;
             }
 
-            _logger.LogDebug("Attachment count within limits. LedgerId: {LedgerId}, Count: {Count}, Max: {Max}",
+            logger.LogDebug("Attachment count within limits. LedgerId: {LedgerId}, Count: {Count}, Max: {Max}",
                 ledger.Id, attachmentCount, maxAttachments);
 
             // 10. Check if client has exceeded daily upload limit
@@ -450,16 +431,16 @@ public class AttachDocumentToLedgerCommandHandler
 
             if (todayUploads >= dailyLimit)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Client daily upload limit exceeded. ClientId: {ClientId}, Today: {Today}, Limit: {Limit}",
                     clientId, todayUploads, dailyLimit);
                 return false;
             }
 
-            _logger.LogDebug("Client daily upload count: {Today}/{Limit}", todayUploads, dailyLimit);
+            logger.LogDebug("Client daily upload count: {Today}/{Limit}", todayUploads, dailyLimit);
 
             // All checks passed
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Client permission granted for ledger upload. ClientId: {ClientId}, LedgerId: {LedgerId}, WalletId: {WalletId}",
                 clientId, ledger.Id, wallet.Id);
 
@@ -467,7 +448,7 @@ public class AttachDocumentToLedgerCommandHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
+            logger.LogError(ex,
                 "Error checking client permission for ledger. ClientId: {ClientId}, LedgerId: {LedgerId}",
                 clientId, ledger.Id);
             return false;
@@ -492,7 +473,7 @@ public class AttachDocumentToLedgerCommandHandler
         var walletAge = DateTime.UtcNow - wallet.CreatedAt;
         if (walletAge.TotalDays > maxWalletAgeDays)
         {
-            _logger.LogWarning("Wallet is too old. WalletId: {WalletId}, AgeDays: {AgeDays}",
+            logger.LogWarning("Wallet is too old. WalletId: {WalletId}, AgeDays: {AgeDays}",
                 wallet.Id, walletAge.TotalDays);
             return false;
         }
@@ -501,7 +482,7 @@ public class AttachDocumentToLedgerCommandHandler
         var lastUpdateAge = DateTime.UtcNow - wallet.UpdatedAt;
         if (lastUpdateAge.TotalDays > 90)
         {
-            _logger.LogWarning("Wallet has not been updated recently. WalletId: {WalletId}, LastUpdateDays: {LastUpdateDays}",
+            logger.LogWarning("Wallet has not been updated recently. WalletId: {WalletId}, LastUpdateDays: {LastUpdateDays}",
                 wallet.Id, lastUpdateAge.TotalDays);
             // Don't return false here - this is just a warning, not a blocker
         }
@@ -509,7 +490,7 @@ public class AttachDocumentToLedgerCommandHandler
         // Check 3: Wallet balance is not negative (if that's a business rule)
         if (wallet.Balance.Amount < 0)
         {
-            _logger.LogWarning("Wallet has negative balance. WalletId: {WalletId}, Balance: {Balance}",
+            logger.LogWarning("Wallet has negative balance. WalletId: {WalletId}, Balance: {Balance}",
                 wallet.Id, wallet.Balance.Amount);
             // Don't return false unless negative balance blocks uploads
         }
@@ -535,7 +516,7 @@ public class AttachDocumentToLedgerCommandHandler
 
         if (!isAllowed)
         {
-            _logger.LogDebug("Ledger type {LedgerType} is not in allowed list for attachments", ledgerType);
+            logger.LogDebug("Ledger type {LedgerType} is not in allowed list for attachments", ledgerType);
         }
 
         return isAllowed;
@@ -563,14 +544,14 @@ public class AttachDocumentToLedgerCommandHandler
 
             // Query document attachments uploaded by this client today
             // This assumes DocumentAttachment has UploadedBy (string) and UploadedAt properties
-            var count = await _documentRepository.CountClientUploadsTodayAsync(
+            var count = await documentAttachmentRepository.CountClientUploadsTodayAsync(
                 clientId.ToString(), today, tomorrow);
 
             return count;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting client daily upload count. ClientId: {ClientId}", clientId);
+            logger.LogError(ex, "Error getting client daily upload count. ClientId: {ClientId}", clientId);
             return 0; // Fail open - don't block uploads if we can't check the limit
         }
     }

@@ -41,6 +41,7 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         var query = new GetLedgerAttachmentsQuery
         {
             LedgerId = ledgerId,
+            ClientId = clientId,
             IncludeDeleted = false
         };
 

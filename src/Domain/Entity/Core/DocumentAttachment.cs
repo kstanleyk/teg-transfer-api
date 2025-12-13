@@ -28,26 +28,17 @@ public class DocumentAttachment : Entity<Guid>
     }
 
     // Factory method with domain validation
-    public static DocumentAttachment Create(
-        Guid entityId,
-        string entityType,
-        string fileName,
-        string fileUrl,
-        string publicId,
-        string contentType,
-        long fileSize,
-        string documentType,
-        string description,
-        string uploadedBy)
+    public static DocumentAttachment Create(Guid entityId, string entityType, string fileName, string fileUrl,
+        string publicId, string contentType, long fileSize, string documentType, string description, string uploadedBy)
     {
-        DomainGuards.AgainstDefault(entityId, nameof(entityId));
-        DomainGuards.AgainstNullOrWhiteSpace(entityType, nameof(entityType));
-        DomainGuards.AgainstNullOrWhiteSpace(fileName, nameof(fileName));
-        DomainGuards.AgainstNullOrWhiteSpace(fileUrl, nameof(fileUrl));
-        DomainGuards.AgainstNullOrWhiteSpace(publicId, nameof(publicId));
-        DomainGuards.AgainstNullOrWhiteSpace(contentType, nameof(contentType));
-        DomainGuards.AgainstNullOrWhiteSpace(documentType, nameof(documentType));
-        DomainGuards.AgainstNullOrWhiteSpace(uploadedBy, nameof(uploadedBy));
+        DomainGuards.AgainstDefault(entityId);
+        DomainGuards.AgainstNullOrWhiteSpace(entityType);
+        DomainGuards.AgainstNullOrWhiteSpace(fileName);
+        DomainGuards.AgainstNullOrWhiteSpace(fileUrl);
+        DomainGuards.AgainstNullOrWhiteSpace(publicId);
+        DomainGuards.AgainstNullOrWhiteSpace(contentType);
+        DomainGuards.AgainstNullOrWhiteSpace(documentType);
+        DomainGuards.AgainstNullOrWhiteSpace(uploadedBy);
 
         // Validate entity type
         ValidateEntityType(entityType);
@@ -134,9 +125,9 @@ public class DocumentAttachment : Entity<Guid>
         var maxSize = GetMaxFileSize(contentType);
         if (fileSize > maxSize)
         {
-            var sizeInMB = maxSize / (1024 * 1024);
+            var sizeInMb = maxSize / (1024 * 1024);
             var fileType = GetContentTypeDescription(contentType);
-            throw new DomainException($"{fileType} file size must not exceed {sizeInMB}MB");
+            throw new DomainException($"{fileType} file size must not exceed {sizeInMb}MB");
         }
     }
 
@@ -185,23 +176,23 @@ public class DocumentAttachment : Entity<Guid>
     {
         return contentType.ToLower() switch
         {
-            "image/jpeg" => new[] { ".jpg", ".jpeg" },
-            "image/png" => new[] { ".png" },
-            "image/gif" => new[] { ".gif" },
-            "image/bmp" => new[] { ".bmp" },
-            "image/webp" => new[] { ".webp" },
-            "image/tiff" => new[] { ".tiff", ".tif" },
-            "image/svg+xml" => new[] { ".svg" },
-            "application/pdf" => new[] { ".pdf" },
-            "video/mp4" => new[] { ".mp4" },
-            "video/mpeg" => new[] { ".mpeg", ".mpg" },
-            "video/quicktime" => new[] { ".mov" },
-            "video/x-msvideo" => new[] { ".avi" },
-            "video/x-ms-wmv" => new[] { ".wmv" },
-            "video/webm" => new[] { ".webm" },
-            "video/3gpp" => new[] { ".3gp", ".3g2" },
-            "video/x-matroska" => new[] { ".mkv" },
-            _ => Array.Empty<string>()
+            "image/jpeg" => [".jpg", ".jpeg"],
+            "image/png" => [".png"],
+            "image/gif" => [".gif"],
+            "image/bmp" => [".bmp"],
+            "image/webp" => [".webp"],
+            "image/tiff" => [".tiff", ".tif"],
+            "image/svg+xml" => [".svg"],
+            "application/pdf" => [".pdf"],
+            "video/mp4" => [".mp4"],
+            "video/mpeg" => [".mpeg", ".mpg"],
+            "video/quicktime" => [".mov"],
+            "video/x-msvideo" => [".avi"],
+            "video/x-ms-wmv" => [".wmv"],
+            "video/webm" => [".webm"],
+            "video/3gpp" => [".3gp", ".3g2"],
+            "video/x-matroska" => [".mkv"],
+            _ => []
         };
     }
 
@@ -249,7 +240,7 @@ public class DocumentAttachment : Entity<Guid>
 
     // Static validation rules - part of the domain
     private static readonly string[] AllowedContentTypes =
-    {
+    [
         // Images
         "image/jpeg",      // .jpg, .jpeg
         "image/png",       // .png
@@ -271,17 +262,18 @@ public class DocumentAttachment : Entity<Guid>
         "video/webm",      // .webm
         "video/3gpp",      // .3gp, .3g2
         "video/x-matroska" // .mkv
-    };
+    ];
 
     private static readonly Dictionary<string, string[]> AllowedContentTypesByDocumentType = new()
     {
-        ["ProofOfPayment"] = new[] { "image/jpeg", "image/png", "image/gif", "image/bmp", "application/pdf", "video/mp4", "video/mpeg", "video/quicktime" },
-        ["Invoice"] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        ["Receipt"] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        ["Contract"] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        ["IDDocument"] = new[] { "image/jpeg", "image/png", "image/gif", "image/bmp", "application/pdf" },
-        ["BankStatement"] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        ["VideoProof"] = new[] { "video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo", "video/webm" },
+        ["ProofOfPayment"] = ["image/jpeg", "image/png", "image/gif", "image/bmp", "application/pdf", "video/mp4", "video/mpeg", "video/quicktime"
+        ],
+        ["Invoice"] = ["image/jpeg", "image/png", "application/pdf"],
+        ["Receipt"] = ["image/jpeg", "image/png", "application/pdf"],
+        ["Contract"] = ["image/jpeg", "image/png", "application/pdf"],
+        ["IDDocument"] = ["image/jpeg", "image/png", "image/gif", "image/bmp", "application/pdf"],
+        ["BankStatement"] = ["image/jpeg", "image/png", "application/pdf"],
+        ["VideoProof"] = ["video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo", "video/webm"],
         ["Other"] = AllowedContentTypes // Allow all supported types
     };
 
@@ -293,8 +285,8 @@ public class DocumentAttachment : Entity<Guid>
     // Domain behavior methods
     public void MarkAsDeleted(string deletedBy, string reason)
     {
-        DomainGuards.AgainstNullOrWhiteSpace(deletedBy, nameof(deletedBy));
-        DomainGuards.AgainstNullOrWhiteSpace(reason, nameof(reason));
+        DomainGuards.AgainstNullOrWhiteSpace(deletedBy);
+        DomainGuards.AgainstNullOrWhiteSpace(reason);
 
         if (IsDeleted) return;
 
@@ -322,7 +314,7 @@ public class DocumentAttachment : Entity<Guid>
     {
         return AllowedContentTypesByDocumentType.TryGetValue(documentType, out var allowedTypes)
             ? allowedTypes.ToList()
-            : new List<string>();
+            : [];
     }
 
     public static long GetMaximumFileSizeForContentType(string contentType)
@@ -342,7 +334,7 @@ public enum DocumentType
     ProofOfPayment = 1,
     Invoice = 2,
     Contract = 3,
-    IDDocument = 4,
+    IdDocument = 4,
     Receipt = 5,
     BankStatement = 6,
     TaxDocument = 7,
@@ -353,14 +345,16 @@ public static class DocumentTypeExtensions
 {
     private static readonly Dictionary<DocumentType, string[]> AllowedContentTypes = new()
     {
-        [DocumentType.ProofOfPayment] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        [DocumentType.Invoice] = new[] { "application/pdf", "image/jpeg", "image/png" },
-        [DocumentType.Contract] = new[] { "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
-        [DocumentType.IDDocument] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        [DocumentType.Receipt] = new[] { "image/jpeg", "image/png", "application/pdf" },
-        [DocumentType.BankStatement] = new[] { "application/pdf", "image/jpeg", "image/png" },
-        [DocumentType.TaxDocument] = new[] { "application/pdf", "image/jpeg", "image/png" },
-        [DocumentType.Other] = new[] { "image/jpeg", "image/png", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain" }
+        [DocumentType.ProofOfPayment] = ["image/jpeg", "image/png", "application/pdf"],
+        [DocumentType.Invoice] = ["application/pdf", "image/jpeg", "image/png"],
+        [DocumentType.Contract] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ],
+        [DocumentType.IdDocument] = ["image/jpeg", "image/png", "application/pdf"],
+        [DocumentType.Receipt] = ["image/jpeg", "image/png", "application/pdf"],
+        [DocumentType.BankStatement] = ["application/pdf", "image/jpeg", "image/png"],
+        [DocumentType.TaxDocument] = ["application/pdf", "image/jpeg", "image/png"],
+        [DocumentType.Other] = ["image/jpeg", "image/png", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"
+        ]
     };
 
     public static bool IsContentTypeAllowed(this DocumentType documentType, string contentType)
@@ -373,6 +367,6 @@ public static class DocumentTypeExtensions
     {
         return AllowedContentTypes.TryGetValue(documentType, out var allowedTypes)
             ? allowedTypes
-            : Array.Empty<string>();
+            : [];
     }
 }

@@ -39,6 +39,13 @@ public class DocumentAttachmentConfiguration : IEntityTypeConfiguration<Document
         builder.Property(x => x.FileSize)
             .IsRequired();
 
+        builder.Property(x => x.FileCategory)
+            .IsRequired()
+            .HasConversion<int>(); // Store the enum as int in database
+        // If you want to store it as a string instead, use:
+        // .HasConversion<string>()
+        // .HasMaxLength(50); // Add appropriate max length if using string
+
         builder.Property(x => x.DocumentType)
             .IsRequired()
             .HasMaxLength(50)

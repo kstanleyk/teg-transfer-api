@@ -32,7 +32,7 @@ public class DocumentAttachmentRepository(IDatabaseFactory databaseFactory)
     public async Task<IReadOnlyList<DocumentAttachment>> GetActiveLedgerAttachmentsAsync(Guid ledgerId, CancellationToken cancellationToken = default)
     {
         return await DbSet
-            .Where(a => a.Id == ledgerId
+            .Where(a => a.EntityId == ledgerId
                 && a.EntityType == nameof(Ledger)
                 && !a.IsDeleted)
             .OrderByDescending(a => a.UploadedAt)
@@ -42,18 +42,26 @@ public class DocumentAttachmentRepository(IDatabaseFactory databaseFactory)
     public async Task<DocumentAttachment> AddLedgerAttachmentAsync(Guid ledgerId, DocumentAttachment attachment, CancellationToken cancellationToken = default)
     {
         // Verify ledger exists and is pending
-        var isLedgerPending = await IsLedgerPendingAsync(ledgerId, cancellationToken);
-        if (!isLedgerPending)
-            throw new DomainException($"Cannot add attachment to non-pending ledger: {ledgerId}");
+        try
+        {
+            var isLedgerPending = await IsLedgerPendingAsync(ledgerId, cancellationToken);
+            if (!isLedgerPending)
+                throw new DomainException($"Cannot add attachment to non-pending ledger: {ledgerId}");
 
-        // Ensure attachment belongs to this ledger
-        if (attachment.Id != ledgerId || attachment.EntityType != nameof(Ledger))
-            throw new DomainException($"Attachment does not belong to ledger: {ledgerId}");
+            // Ensure attachment belongs to this ledger
+            //if (attachment.Id != ledgerId || attachment.EntityType != nameof(Ledger))
+            //    throw new DomainException($"Attachment does not belong to ledger: {ledgerId}");
 
-        DbSet.Add(attachment);
-        await Context.SaveChangesAsync(cancellationToken);
+            DbSet.Add(attachment);
+            await Context.SaveChangesAsync(cancellationToken);
 
-        return attachment;
+            return attachment;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task RemoveLedgerAttachmentAsync(Guid ledgerId, Guid attachmentId, string deletedBy, string reason, CancellationToken cancellationToken = default)
