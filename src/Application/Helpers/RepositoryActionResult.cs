@@ -7,6 +7,7 @@ public enum RepositoryActionStatus
     Updated,
     NotFound,
     ConcurrencyConflict,
+    AlreadyExists,
     Deadlock,
     Deleted,
     NothingModified,

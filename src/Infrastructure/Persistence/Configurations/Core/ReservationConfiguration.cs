@@ -9,30 +9,18 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
 {
     public void Configure(EntityTypeBuilder<Reservation> builder)
     {
-        // Table name
         builder.ToTable("reservation", SchemaNames.Core);
 
-        // Primary Key
         builder.HasKey(pr => pr.Id);
-        builder.Property(pr => pr.Id)
-            .ValueGeneratedNever() // Since we generate GUIDs in domain
-            .IsRequired();
+        builder.Property(pr => pr.Id).ValueGeneratedNever().IsRequired();
 
         // Properties
-        builder.Property(pr => pr.ClientId)
-            .IsRequired();
+        builder.Property(pr => pr.ClientId).IsRequired();
+        builder.Property(pr => pr.WalletId).IsRequired();
+        builder.Property(pr => pr.PurchaseLedgerId).IsRequired();
+        builder.Property(pr => pr.ServiceFeeLedgerId).IsRequired();
 
-        builder.Property(pr => pr.WalletId)
-            .IsRequired();
-
-        // LedgerId value objects (stored as GUID)
-        builder.Property(pr => pr.PurchaseLedgerId)
-            .IsRequired();
-
-        builder.Property(pr => pr.ServiceFeeLedgerId)
-            .IsRequired();
-
-        // Money value objects (stored in separate columns)
+        // Money value objects
         builder.OwnsOne(pr => pr.PurchaseAmount, money =>
         {
             money.Property(m => m.Amount)
@@ -40,9 +28,7 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
                 .IsRequired();
 
             money.Property(m => m.Currency)
-                .HasConversion(
-                    currency => currency.Code,
-                    code => Currency.FromCode(code))
+                .HasConversion(currency => currency.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3)
                 .IsRequired();
         });
@@ -54,9 +40,7 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
                 .IsRequired();
 
             money.Property(m => m.Currency)
-                .HasConversion(
-                    currency => currency.Code,
-                    code => Currency.FromCode(code))
+                .HasConversion(currency => currency.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3)
                 .IsRequired();
         });
@@ -68,25 +52,15 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
                 .IsRequired();
 
             money.Property(m => m.Currency)
-                .HasConversion(
-                    currency => currency.Code,
-                    code => Currency.FromCode(code))
+                .HasConversion(currency => currency.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3)
                 .IsRequired();
         });
 
         // String properties
-        builder.Property(pr => pr.Description)
-            .HasMaxLength(500)
-            .IsRequired();
-
-        builder.Property(pr => pr.SupplierDetails)
-            .HasMaxLength(500)
-            .IsRequired();
-
-        builder.Property(pr => pr.PaymentMethod)
-            .HasMaxLength(100)
-            .IsRequired();
+        builder.Property(pr => pr.Description).HasMaxLength(500).IsRequired();
+        builder.Property(pr => pr.SupplierDetails).HasMaxLength(500).IsRequired();
+        builder.Property(pr => pr.PaymentMethod).HasMaxLength(100).IsRequired();
 
         // Status as string (enum)
         builder.Property(pr => pr.Status)
@@ -95,25 +69,15 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
             .IsRequired();
 
         // DateTime properties
-        builder.Property(pr => pr.CreatedAt)
-            .IsRequired();
-
-        builder.Property(pr => pr.CompletedAt)
-            .IsRequired(false);
-
-        builder.Property(pr => pr.CancelledAt)
-            .IsRequired(false);
+        builder.Property(pr => pr.CreatedAt).IsRequired();
+        builder.Property(pr => pr.CompletedAt).IsRequired(false);
+        builder.Property(pr => pr.CancelledAt).IsRequired(false);
 
         // Nullable string properties
-        builder.Property(pr => pr.CancellationReason)
-            .HasMaxLength(1000)
-            .IsRequired(false);
+        builder.Property(pr => pr.CancellationReason).HasMaxLength(1000).IsRequired(false);
+        builder.Property(pr => pr.ProcessedBy).HasMaxLength(100).IsRequired(false);
 
-        builder.Property(pr => pr.ProcessedBy)
-            .HasMaxLength(100)
-            .IsRequired(false);
-
-        // Indexes for performance
+        // Indexes
         builder.HasIndex(pr => pr.ClientId);
         builder.HasIndex(pr => pr.WalletId);
         builder.HasIndex(pr => pr.PurchaseLedgerId);
@@ -126,6 +90,12 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
         builder.HasOne<Wallet>()
             .WithMany(w => w.Reservations)
             .HasForeignKey(pr => pr.WalletId)
-            .OnDelete(DeleteBehavior.Cascade); // Delete reservations when wallet is deleted
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure attachments collection (same pattern as Ledger)
+        builder.Ignore(pr => pr.Attachments); // Navigation property is not directly mapped
+
+        // Optional: Add a shadow property for easier queries if needed
+        // builder.Metadata.AddProperty("AttachmentCount", typeof(int));
     }
 }

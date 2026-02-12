@@ -1,6 +1,11 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TegWallet.Application.Features.Core.DocumentAttachment.Command;
+using TegWallet.Application.Features.Core.DocumentAttachment.Dto;
+using TegWallet.Application.Features.Core.DocumentAttachment.Query;
+using TegWallet.Application.Features.Core.ExchangeRates.Dtos;
+using TegWallet.Application.Features.Core.ExchangeRates.Queries;
 using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Features.Core.Wallets.Query;
@@ -14,6 +19,107 @@ namespace TegWallet.WalletApi.Controllers.Core;
 public class WalletController(IMediator mediator) : ApiControllerBase<WalletController>
 {
     public IMediator Mediator { get; } = mediator;
+
+    [MapToApiVersion("1.0")]
+    [HttpPost("{clientId:guid}/ledger/{ledgerId:guid}/attach")]
+    [MustMatchClient]
+    public async Task<IActionResult> AttachDocumentToLedgerV1(
+        [FromForm] AttachDocumentToLedgerRequestDto request, Guid clientId, Guid ledgerId)
+    {
+        var command = new AttachDocumentToLedgerCommand(clientId, ledgerId, request.File, request.DocumentType, 
+            request.Description);
+
+        var result = await MediatorSender.Send(command);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/ledger/{ledgerId:guid}/attachments")]
+    [MustMatchClient]
+    public async Task<IActionResult> GetLedgerAttachmentsV1(Guid clientId, Guid ledgerId)
+    {
+        var query = new GetLedgerAttachmentsQuery
+        {
+            LedgerId = ledgerId,
+            ClientId = clientId,
+            IncludeDeleted = false
+        };
+
+        var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpPost("{clientId:guid}/reservation/{reservationId:guid}/attach")]
+    [MustMatchClient]
+    public async Task<IActionResult> AttachDocumentToReservationV1(
+        [FromForm] AttachDocumentToReservationRequestDto request,
+        Guid clientId,
+        Guid reservationId
+        )
+    {
+        var command = new AttachDocumentToReservationCommand(clientId, reservationId, request.File,
+            request.DocumentType, request.Description);
+
+        var result = await MediatorSender.Send(command);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/reservation/{reservationId:guid}/attachments")]
+    [MustMatchClient]
+    public async Task<IActionResult> GetReservationAttachmentsV1(Guid clientId, Guid reservationId)
+    {
+        var query = new GetReservationAttachmentsQuery
+        {
+            ReservationId = reservationId,
+            ClientId = clientId,
+            IncludeDeleted = false
+        };
+
+        var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/{entityType}/{entityId:guid}/attachments/{attachmentId:guid}")]
+    [MustMatchClient]
+    public async Task<IActionResult> GetDocumentByIdV1(
+        Guid clientId,
+        string entityType,
+        Guid entityId,
+        Guid attachmentId)
+    {
+        var query = new GetDocumentByIdQuery
+        {
+            EntityId = entityId,
+            EntityType = entityType,
+            AttachmentId = attachmentId,
+            ClientId = clientId
+        };
+
+        var result = await MediatorSender.Send(query);
+        return Ok(result);
+    }
+
+    [HttpDelete("{clientId:guid}/{entityType}/{entityId:guid}/attachments/{attachmentId:guid}")]
+    [MustMatchClient]
+    public async Task<IActionResult> DeleteDocumentV1(
+        string entityType,
+        Guid entityId,
+        Guid attachmentId,
+        [FromBody] DeleteDocumentRequestDto request, Guid clientId)
+    {
+        var command = new DeleteDocumentCommand(
+            entityId,
+            entityType,
+            attachmentId,
+            clientId,  
+            request.Reason);
+
+        var result = await MediatorSender.Send(command);
+        return Ok(result);
+    }
 
     [MapToApiVersion("1.0")]
     [HttpPost("{clientId:guid}/deposit")]
@@ -184,5 +290,40 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
         var query = new GetPurchaseReservationByIdQuery(reservationId);
 
         return Ok(await Mediator.Send(query));
+    }
+
+    [MapToApiVersion("1.0")]
+    [HttpGet("{clientId:guid}/exchange-rates/{baseCurrencyCode}/{targetCurrencyCode}")]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status400BadRequest)]
+    [MustMatchClient]
+    public async Task<IActionResult> GetClientExchangeRateV1(
+        Guid clientId,
+        string baseCurrencyCode,
+        string targetCurrencyCode,
+        [FromQuery] decimal amount,
+        DateTime? asOfDate = null)
+    {
+        try
+        {
+            var query = new GetClientExchangeRateQuery(clientId, baseCurrencyCode, targetCurrencyCode, amount, asOfDate);
+            var result = await Mediator.Send(query);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            // Handle invalid currency codes
+            return BadRequest(Result<ExchangeRateDto?>.Failed($"Invalid currency code: {ex.Message}"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                Result<ExchangeRateDto?>.Failed($"Internal server error: {ex.Message}"));
+        }
     }
 }

@@ -12,7 +12,7 @@ using TegWallet.Infrastructure.Persistence.Context;
 namespace TegWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(TegWalletContext))]
-    [Migration("20251113175216_Initial")]
+    [Migration("20251216122324_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -575,6 +575,123 @@ namespace TegWallet.Infrastructure.Migrations
                     b.ToTable("client_group", "core");
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.DocumentAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("document_type");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<int>("FileCategory")
+                        .HasColumnType("integer")
+                        .HasColumnName("file_category");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("file_url");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("uploaded_at");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("uploaded_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_document_attachment");
+
+                    b.HasIndex("DocumentType")
+                        .HasDatabaseName("ix_document_attachment_document_type");
+
+                    b.HasIndex("EntityId")
+                        .HasDatabaseName("ix_document_attachment_entity_id");
+
+                    b.HasIndex("EntityType")
+                        .HasDatabaseName("ix_document_attachment_entity_type");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("ix_document_attachment_is_deleted");
+
+                    b.HasIndex("UploadedAt")
+                        .HasDatabaseName("ix_document_attachment_uploaded_at");
+
+                    b.HasIndex("UploadedBy")
+                        .HasDatabaseName("ix_document_attachment_uploaded_by");
+
+                    b.HasIndex("EntityId", "EntityType", "IsDeleted")
+                        .HasDatabaseName("ix_document_attachment_entity_id_entity_type_is_deleted");
+
+                    b.HasIndex("EntityType", "IsDeleted", "UploadedAt")
+                        .HasDatabaseName("ix_document_attachment_entity_type_is_deleted_uploaded_at");
+
+                    b.HasIndex("EntityId", "EntityType", "IsDeleted", "DocumentType")
+                        .HasDatabaseName("ix_document_attachment_entity_id_entity_type_is_deleted_docume");
+
+                    b.ToTable("document_attachment", "core");
+                });
+
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -660,6 +777,53 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasDatabaseName("ix_exchange_rate_client_id");
 
                     b.ToTable("exchange_rate", "core");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRateTier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ExchangeRateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exchange_rate_id");
+
+                    b.Property<decimal>("Margin")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("margin");
+
+                    b.Property<decimal>("MaxAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("max_amount");
+
+                    b.Property<decimal>("MinAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("min_amount");
+
+                    b.HasKey("Id")
+                        .HasName("pk_exchange_rate_tier");
+
+                    b.HasIndex("ExchangeRateId")
+                        .HasDatabaseName("ix_exchange_rate_tier_exchange_rate_id");
+
+                    b.HasIndex("ExchangeRateId", "MinAmount", "MaxAmount")
+                        .HasDatabaseName("ix_exchange_rate_tier_exchange_rate_id_min_amount_max_amount");
+
+                    b.ToTable("exchange_rate_tier", "core");
                 });
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
@@ -752,6 +916,63 @@ namespace TegWallet.Infrastructure.Migrations
                         .HasDatabaseName("ix_ledger_wallet_id");
 
                     b.ToTable("ledger", "core");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.MinimumAmountConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BaseCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("base_currency");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_to");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("MinimumAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("minimum_amount");
+
+                    b.Property<string>("TargetCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("target_currency");
+
+                    b.HasKey("Id")
+                        .HasName("pk_minimum_amount_configuration");
+
+                    b.HasIndex("BaseCurrency", "TargetCurrency", "IsActive")
+                        .HasDatabaseName("ix_minimum_amount_configuration_base_currency_target_currency_");
+
+                    b.HasIndex("IsActive", "EffectiveFrom", "EffectiveTo")
+                        .HasDatabaseName("ix_minimum_amount_configuration_is_active_effective_from_effec");
+
+                    b.ToTable("minimum_amount_configuration", "core");
                 });
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.RateLock", b =>
@@ -977,6 +1198,358 @@ namespace TegWallet.Infrastructure.Migrations
                     b.ToTable("wallet", "core");
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.EmailVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_verification");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_email_verification_client_id");
+
+                    b.HasIndex("Email")
+                        .HasDatabaseName("ix_email_verification_email");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_email_verification_status");
+
+                    b.ToTable("email_verification", "kyc");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.IdentityDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BackImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("back_image_path");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_of_birth");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DeletionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("deletion_reason");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("document_number");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<string>("FrontImagePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("front_image_path");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("full_name");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issue_date");
+
+                    b.Property<string>("IssuingAuthority")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("issuing_authority");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("nationality");
+
+                    b.Property<string>("SelfieImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("selfie_image_path");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_identity_document");
+
+                    b.HasIndex("ClientId")
+                        .HasDatabaseName("ix_identity_document_client_id");
+
+                    b.HasIndex("DocumentNumber")
+                        .HasDatabaseName("ix_identity_document_document_number");
+
+                    b.HasIndex("ExpiryDate")
+                        .HasDatabaseName("ix_identity_document_expiry_date");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_identity_document_status");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("ix_identity_document_type");
+
+                    b.HasIndex("ClientId", "Status", "ExpiryDate")
+                        .HasDatabaseName("ix_identity_document_client_id_status_expiry_date");
+
+                    b.ToTable("identity_document", "kyc");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.KycProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("RejectedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rejected_by");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("VerificationNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("verification_notes");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.Property<string>("VerifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("verified_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_kyc_profile");
+
+                    b.HasAlternateKey("ClientId")
+                        .HasName("ak_kyc_profile_client_id");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_kyc_profile_client_id");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("ix_kyc_profile_expires_at");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_kyc_profile_status");
+
+                    b.ToTable("kyc_profile", "kyc");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.KycVerificationHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("action");
+
+                    b.Property<Guid>("KycProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("kyc_profile_id");
+
+                    b.Property<string>("NewStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("new_status");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("OldStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("old_status");
+
+                    b.Property<DateTime>("PerformedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("performed_at");
+
+                    b.Property<string>("PerformedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("performed_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_kyc_verification_history");
+
+                    b.HasIndex("KycProfileId")
+                        .HasDatabaseName("ix_kyc_verification_history_kyc_profile_id");
+
+                    b.HasIndex("PerformedAt")
+                        .HasDatabaseName("ix_kyc_verification_history_performed_at");
+
+                    b.HasIndex("PerformedBy")
+                        .HasDatabaseName("ix_kyc_verification_history_performed_by");
+
+                    b.HasIndex("KycProfileId", "PerformedAt")
+                        .HasDatabaseName("ix_kyc_verification_history_kyc_profile_id_performed_at");
+
+                    b.ToTable("kyc_verification_history", "kyc");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.PhoneVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("character varying(35)")
+                        .HasColumnName("phone_number");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_phone_verification");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_phone_verification_client_id");
+
+                    b.HasIndex("PhoneNumber")
+                        .HasDatabaseName("ix_phone_verification_phone_number");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_phone_verification_status");
+
+                    b.ToTable("phone_verification", "kyc");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -1117,13 +1690,25 @@ namespace TegWallet.Infrastructure.Migrations
                     b.Navigation("ClientGroup");
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRateTier", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Core.ExchangeRate", "ExchangeRate")
+                        .WithMany("Tiers")
+                        .HasForeignKey("ExchangeRateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_exchange_rate_tier_exchange_rate_exchange_rate_id");
+
+                    b.Navigation("ExchangeRate");
+                });
+
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Ledger", b =>
                 {
                     b.HasOne("TegWallet.Domain.Entity.Core.Reservation", null)
                         .WithMany()
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_ledger_purchase_reservation_set_reservation_id");
+                        .HasConstraintName("fk_ledger_reservation_set_reservation_id");
 
                     b.HasOne("TegWallet.Domain.Entity.Core.Wallet", null)
                         .WithMany("Ledgers")
@@ -1345,6 +1930,350 @@ namespace TegWallet.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.EmailVerification", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Kyc.KycProfile", null)
+                        .WithOne("EmailVerification")
+                        .HasForeignKey("TegWallet.Domain.Entity.Kyc.EmailVerification", "ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_email_verification_kyc_profile_client_id");
+
+                    b.OwnsMany("TegWallet.Domain.Entity.Kyc.KycVerificationAttempt", "Attempts", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("AttemptedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("attempted_at");
+
+                            b1.Property<Guid>("EmailVerificationId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("email_verification_id");
+
+                            b1.Property<string>("FailureReason")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("failure_reason");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("method");
+
+                            b1.Property<string>("ReferenceId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("reference_id");
+
+                            b1.Property<bool>("Successful")
+                                .HasColumnType("boolean")
+                                .HasColumnName("successful");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_email_verification_attempts");
+
+                            b1.HasIndex("EmailVerificationId")
+                                .HasDatabaseName("ix_email_verification_attempts_email_verification_id");
+
+                            b1.ToTable("email_verification_attempts", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmailVerificationId")
+                                .HasConstraintName("fk_email_verification_attempts_email_verification_email_verifi");
+                        });
+
+                    b.OwnsOne("TegWallet.Domain.Entity.Kyc.KycVerificationDetails", "VerificationDetails", b1 =>
+                        {
+                            b1.Property<Guid>("EmailVerificationId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("verification_details_method");
+
+                            b1.Property<string>("Notes")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("verification_details_notes");
+
+                            b1.Property<string>("ProviderName")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("verification_details_provider_name");
+
+                            b1.Property<string>("VerificationId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verification_id");
+
+                            b1.Property<DateTime?>("VerifiedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("verification_details_verified_at");
+
+                            b1.Property<string>("VerifiedBy")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verified_by");
+
+                            b1.HasKey("EmailVerificationId");
+
+                            b1.ToTable("email_verification", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmailVerificationId")
+                                .HasConstraintName("fk_email_verification_email_verification_id");
+                        });
+
+                    b.Navigation("Attempts");
+
+                    b.Navigation("VerificationDetails");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.IdentityDocument", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Kyc.KycProfile", null)
+                        .WithMany("IdentityDocuments")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_identity_document_kyc_profile_client_id");
+
+                    b.OwnsMany("TegWallet.Domain.Entity.Kyc.KycVerificationAttempt", "Attempts", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("AttemptedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("attempted_at");
+
+                            b1.Property<string>("FailureReason")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("failure_reason");
+
+                            b1.Property<Guid>("IdentityDocumentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("identity_document_id");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("method");
+
+                            b1.Property<string>("ReferenceId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("reference_id");
+
+                            b1.Property<bool>("Successful")
+                                .HasColumnType("boolean")
+                                .HasColumnName("successful");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_identity_document_attempts");
+
+                            b1.HasIndex("IdentityDocumentId")
+                                .HasDatabaseName("ix_identity_document_attempts_identity_document_id");
+
+                            b1.ToTable("identity_document_attempts", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("IdentityDocumentId")
+                                .HasConstraintName("fk_identity_document_attempts_identity_document_identity_docum");
+                        });
+
+                    b.OwnsOne("TegWallet.Domain.Entity.Kyc.KycVerificationDetails", "VerificationDetails", b1 =>
+                        {
+                            b1.Property<Guid>("IdentityDocumentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("verification_details_method");
+
+                            b1.Property<string>("Notes")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("verification_details_notes");
+
+                            b1.Property<string>("ProviderName")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("verification_details_provider_name");
+
+                            b1.Property<string>("VerificationId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verification_id");
+
+                            b1.Property<DateTime?>("VerifiedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("verification_details_verified_at");
+
+                            b1.Property<string>("VerifiedBy")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verified_by");
+
+                            b1.HasKey("IdentityDocumentId");
+
+                            b1.ToTable("identity_document", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("IdentityDocumentId")
+                                .HasConstraintName("fk_identity_document_identity_document_id");
+                        });
+
+                    b.Navigation("Attempts");
+
+                    b.Navigation("VerificationDetails");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.KycProfile", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Core.Client", null)
+                        .WithOne("KycProfile")
+                        .HasForeignKey("TegWallet.Domain.Entity.Kyc.KycProfile", "ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_kyc_profile_client_client_id");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.KycVerificationHistory", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Kyc.KycProfile", null)
+                        .WithMany("VerificationHistory")
+                        .HasForeignKey("KycProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_kyc_verification_history_kyc_profile_kyc_profile_id");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.PhoneVerification", b =>
+                {
+                    b.HasOne("TegWallet.Domain.Entity.Kyc.KycProfile", null)
+                        .WithOne("PhoneVerification")
+                        .HasForeignKey("TegWallet.Domain.Entity.Kyc.PhoneVerification", "ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_phone_verification_kyc_profile_client_id");
+
+                    b.OwnsMany("TegWallet.Domain.Entity.Kyc.KycVerificationAttempt", "Attempts", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("AttemptedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("attempted_at");
+
+                            b1.Property<string>("FailureReason")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("failure_reason");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("method");
+
+                            b1.Property<Guid>("PhoneVerificationId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("phone_verification_id");
+
+                            b1.Property<string>("ReferenceId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("reference_id");
+
+                            b1.Property<bool>("Successful")
+                                .HasColumnType("boolean")
+                                .HasColumnName("successful");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_phone_verification_attempts");
+
+                            b1.HasIndex("PhoneVerificationId")
+                                .HasDatabaseName("ix_phone_verification_attempts_phone_verification_id");
+
+                            b1.ToTable("phone_verification_attempts", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PhoneVerificationId")
+                                .HasConstraintName("fk_phone_verification_attempts_phone_verification_phone_verifi");
+                        });
+
+                    b.OwnsOne("TegWallet.Domain.Entity.Kyc.KycVerificationDetails", "VerificationDetails", b1 =>
+                        {
+                            b1.Property<Guid>("PhoneVerificationId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("verification_details_method");
+
+                            b1.Property<string>("Notes")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("verification_details_notes");
+
+                            b1.Property<string>("ProviderName")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("verification_details_provider_name");
+
+                            b1.Property<string>("VerificationId")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verification_id");
+
+                            b1.Property<DateTime?>("VerifiedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("verification_details_verified_at");
+
+                            b1.Property<string>("VerifiedBy")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("verification_details_verified_by");
+
+                            b1.HasKey("PhoneVerificationId");
+
+                            b1.ToTable("phone_verification", "kyc");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PhoneVerificationId")
+                                .HasConstraintName("fk_phone_verification_phone_verification_id");
+                        });
+
+                    b.Navigation("Attempts");
+
+                    b.Navigation("VerificationDetails");
+                });
+
             modelBuilder.Entity("TegWallet.Domain.Entity.Auth.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -1364,6 +2293,8 @@ namespace TegWallet.Infrastructure.Migrations
 
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Client", b =>
                 {
+                    b.Navigation("KycProfile");
+
                     b.Navigation("User");
 
                     b.Navigation("Wallet")
@@ -1377,11 +2308,27 @@ namespace TegWallet.Infrastructure.Migrations
                     b.Navigation("ExchangeRates");
                 });
 
+            modelBuilder.Entity("TegWallet.Domain.Entity.Core.ExchangeRate", b =>
+                {
+                    b.Navigation("Tiers");
+                });
+
             modelBuilder.Entity("TegWallet.Domain.Entity.Core.Wallet", b =>
                 {
                     b.Navigation("Ledgers");
 
                     b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("TegWallet.Domain.Entity.Kyc.KycProfile", b =>
+                {
+                    b.Navigation("EmailVerification");
+
+                    b.Navigation("IdentityDocuments");
+
+                    b.Navigation("PhoneVerification");
+
+                    b.Navigation("VerificationHistory");
                 });
 #pragma warning restore 612, 618
         }

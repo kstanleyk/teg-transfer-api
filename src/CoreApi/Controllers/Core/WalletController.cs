@@ -255,22 +255,19 @@ public class WalletController(IMediator mediator) : ApiControllerBase<WalletCont
 
     [MapToApiVersion("1.0")]
     [HttpGet("{clientId:guid}/exchange-rates/{baseCurrencyCode}/{targetCurrencyCode}")]
-    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(Result<ExchangeRateDto?>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Result<ClientWithExchangeRateDto?>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetClientExchangeRateV1(
             Guid clientId,
             string baseCurrencyCode,
             string targetCurrencyCode,
+            [FromQuery] decimal amount,
             DateTime? asOfDate = null)
     {
         try
         {
-            // Convert string currency codes to Currency objects
-            var baseCurrency = Currency.FromCode(baseCurrencyCode);
-            var targetCurrency = Currency.FromCode(targetCurrencyCode);
-
-            var query = new GetClientExchangeRateQuery(clientId, baseCurrency, targetCurrency, asOfDate);
+            var query = new GetClientExchangeRateQuery(clientId, baseCurrencyCode, targetCurrencyCode, amount, asOfDate);
             var result = await Mediator.Send(query);
 
             if (!result.Success)

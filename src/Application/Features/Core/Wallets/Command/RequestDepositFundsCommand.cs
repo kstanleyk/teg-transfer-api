@@ -53,8 +53,11 @@ public class RequestDepositFundsCommandHandler(
 
         var message = localizer["OrderCreatedSuccess"];
 
-        var transactionDto = mapper.Map<LedgerDto>(result.Entity);
-        return Result<LedgerDto>.Succeeded(transactionDto,message);
+        var ledgerDto = mapper.Map<LedgerDto>(result.Entity);
+
+        await UpdateClient(ledgerDto, result.Entity!.WalletId);
+
+        return Result<LedgerDto>.Succeeded(ledgerDto, message);
     }
 
     protected override void DisposeCore()

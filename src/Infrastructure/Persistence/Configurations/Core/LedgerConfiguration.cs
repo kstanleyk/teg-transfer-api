@@ -25,6 +25,7 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
         builder.Property(t => t.CompletionType).HasMaxLength(25).HasDefaultValue(string.Empty);
         builder.Property(t => t.CompletedBy).HasMaxLength(100).HasDefaultValue(string.Empty);
         builder.Property(t => t.CompletedAt).IsRequired(false);
+        builder.Property(t => t.ReservationId).IsRequired(false);
 
         // Configure Amount as owned entity
         builder.OwnsOne(t => t.Amount, amountBuilder =>
@@ -35,28 +36,37 @@ public class LedgerConfiguration : IEntityTypeConfiguration<Ledger>
                 .IsRequired().HasMaxLength(3);
         });
 
-        builder.Property(l => l.ReservationId)
-            .IsRequired(false);
-
         // Indexes
         builder.HasIndex(l => l.WalletId);
         builder.HasIndex(l => l.Type);
         builder.HasIndex(l => l.Status);
         builder.HasIndex(l => l.Timestamp);
         builder.HasIndex(l => l.Reference);
-
-        //Index for ReservationId
         builder.HasIndex(l => l.ReservationId);
 
-        // Relationship to Wallet
-        builder.HasOne<Wallet>().WithMany(w => w.Ledgers).HasForeignKey(l => l.WalletId)
+        // Relationships
+        builder.HasOne<Wallet>()
+            .WithMany(w => w.Ledgers)
+            .HasForeignKey(l => l.WalletId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        //Optional relationship to Reservation
         builder.HasOne<Reservation>()
-            .WithMany() // Reservation doesn't have navigation back to Ledger
+            .WithMany()
             .HasForeignKey(l => l.ReservationId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete ledgers when reservation is deleted
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure attachments collection
+        // Note: We don't configure navigation directly because attachments are shared
+        // between Ledger and Reservation. Instead, we rely on the DocumentAttachmentConfiguration
+        // and query through the EntityId/EntityType pattern.
+
+        // Optional: Add computed property for quick access to attachment count
+        builder.Ignore(l => l.Attachments); // Navigation property is not directly mapped
+
+        // If you want to query attachments, use:
+        // var attachments = context.DocumentAttachments
+        //     .Where(a => a.EntityId == ledgerId && a.EntityType == nameof(Ledger) && !a.IsDeleted)
+        //     .ToList();
     }
 }

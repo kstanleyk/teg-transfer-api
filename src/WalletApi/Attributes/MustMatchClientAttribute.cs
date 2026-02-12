@@ -1,42 +1,46 @@
 ﻿namespace TegWallet.WalletApi.Attributes;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Domain.Entity.Auth;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-public class MustMatchClientAttribute : Attribute, IAsyncActionFilter
+public class MustMatchClientAttribute : TypeFilterAttribute
 {
-    private readonly string[]? _routeParamNames;
-
-    /// <summary>
-    /// Specify one or more route parameter names to check against the authenticated user's ID.
-    /// </summary>
-    /// <param name="routeParamNames">Route parameter names, e.g. "clientId", "userId"</param>
     public MustMatchClientAttribute(params string[]? routeParamNames)
+        : base(typeof(MustMatchClientFilter))
     {
         if (routeParamNames == null || routeParamNames.Length == 0)
         {
-            _routeParamNames = ["clientId"]; // default
+            Arguments = [new[] { "clientId" }]; // default
         }
         else
         {
-            _routeParamNames = routeParamNames;
+            Arguments = [routeParamNames];
         }
     }
+}
 
+
+public class MustMatchClientFilter(
+    UserManager<ApplicationUser> userManager,
+    ILogger<MustMatchClientFilter> logger,
+    string[] routeParamNames)
+    : IAsyncActionFilter
+{
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        var logger = context.HttpContext.RequestServices.GetService(typeof(ILogger<MustMatchClientAttribute>)) as ILogger;
-
         try
         {
-            // Extract the authenticated user's ID from claim ("sub" or NameIdentifier)
+            // Get user ID from claims
             var user = context.HttpContext.User;
-            var userIdClaim = user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = user.FindFirst("sub")?.Value
+                           ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
             {
@@ -44,16 +48,24 @@ public class MustMatchClientAttribute : Attribute, IAsyncActionFilter
                 return;
             }
 
-            // Check each specified route parameter
-            foreach (var paramName in _routeParamNames!)
+            // Optional: load user from database, since you now have _userManager available
+            var dbUser = await userManager.FindByIdAsync(userId.ToString());
+            if (dbUser == null)
+            {
+                context.Result = CreateError(401, "unauthorized", "User not found.");
+                return;
+            }
+
+            // Validate route values
+            foreach (var paramName in routeParamNames)
             {
                 if (!context.ActionArguments.TryGetValue(paramName, out var paramValue))
-                    continue; // skip missing route params
+                    continue;
 
-                if (paramValue is Guid routeId && routeId != userId)
+                if (paramValue is Guid routeId && routeId != dbUser.ClientId)
                 {
-                    logger?.LogWarning(
-                        "Unauthorized access attempt: user {UserId} tried to access {RouteParam}={RouteValue} at {Path}",
+                    logger.LogWarning(
+                        "Unauthorized access: User {UserId} tried to access {Param}={Value} at {Path}",
                         userId, paramName, routeId, context.HttpContext.Request.Path
                     );
 
@@ -62,15 +74,17 @@ public class MustMatchClientAttribute : Attribute, IAsyncActionFilter
                 }
             }
 
-            await next(); // ✅ proceed if all matched
+            await next(); // everything ok, continue
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Error occurred while enforcing MatchClientId attribute.");
-            context.Result = CreateError(500, "server_error", "An unexpected error occurred while processing your request.");
+            logger.LogError(ex, "MustMatchClientFilter processing error");
+            context.Result = CreateError(500, "server_error", "Unexpected server error.");
         }
     }
 
-    private JsonResult CreateError(int statusCode, string code, string message)
+
+    private static JsonResult CreateError(int statusCode, string code, string message)
         => new(new { code, message }) { StatusCode = statusCode };
 }
+

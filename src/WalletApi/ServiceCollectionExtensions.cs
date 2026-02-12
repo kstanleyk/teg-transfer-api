@@ -1,12 +1,14 @@
-using System.Globalization;
-using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
+using System.Text;
 using TegWallet.Application.Interfaces.Localization;
+using TegWallet.Domain.Entity.Core;
+using TegWallet.Infrastructure.Photos;
 using TegWallet.WalletApi.Localization;
 using TegWallet.WalletApi.Services;
 
@@ -52,9 +54,13 @@ public static class ServiceCollectionExtensions
             host.UseUrls($"{protocolSettings.Url}:{protocolSettings.Port}");
         }
 
-        services
-            .AddOptions<WebProtocolSettings>()
-            .Bind(configuration.GetSection("WebProtocolSettings"))
+        services.AddOptions<WebProtocolSettings>()
+            .BindConfiguration("WebProtocolSettings")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<RateLockingSettings>()
+            .BindConfiguration("RateLockingSettings")
             .ValidateDataAnnotations()
             .ValidateOnStart();
 

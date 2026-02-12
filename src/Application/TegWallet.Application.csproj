@@ -18,4 +18,8 @@
     <PackageReference Include="CloudinaryDotNet" Version="1.27.8" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Kyc\Query\" />
+  </ItemGroup>
+
 </Project>

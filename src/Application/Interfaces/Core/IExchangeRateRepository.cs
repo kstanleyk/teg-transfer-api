@@ -76,4 +76,11 @@ public interface IExchangeRateRepository : IRepository<ExchangeRate, Guid>
         DateTime asOfDate);
 
     Task ManageExchangeRateTiersAsync(Guid exchangeRateId, List<ExchangeRateTierRequest> tierRequests);
+
+    Task<List<ExchangeRate>> GetAllRatesWithTiersInHierarchyAsync(
+        Guid? clientId,
+        Guid? clientGroupId,
+        Currency baseCurrency,
+        Currency targetCurrency,
+        DateTime asOfDate);
 }

@@ -1,4 +1,4 @@
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using TegWallet.Application.Authorization;
 using TegWallet.Application.Interfaces.Localization;
 using TegWallet.CoreApi.BackgroundServices;
+using TegWallet.CoreApi.Controllers;
 using TegWallet.CoreApi.Localization;
 using TegWallet.CoreApi.Permissions;
 using TegWallet.CoreApi.Services;
@@ -62,14 +64,15 @@ public static class ServiceCollectionExtensions
             host.UseUrls($"{protocolSettings.Url}:{protocolSettings.Port}");
         }
 
-        services
-            .AddOptions<WebProtocolSettings>()
-            .Bind(configuration.GetSection("WebProtocolSettings"))
+        services.AddOptions<WebProtocolSettings>()
+            .BindConfiguration("WebProtocolSettings")
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.Configure<RateLockingSettings>(configuration
-            .GetSection("RateLockingSettings"));
+        services.AddOptions<RateLockingSettings>()
+            .BindConfiguration("RateLockingSettings")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         var allowedOrigins = configuration
             .GetSection("Cors:AllowedOrigins")
@@ -86,18 +89,28 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddControllersWithViews(config =>
-        {
-            var policy = new AuthorizationPolicyBuilder()
-                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                .RequireAuthenticatedUser()
-                .Build();
+            {
+                // authentication/authorization setup
+                var policy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .Build();
 
-            config.Filters.Add(new AuthorizeFilter(policy));
-        })
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-        });
+                config.Filters.Add(new AuthorizeFilter(policy));
+
+                // 🔥 Add kebab-case controller routing
+                config.Conventions.Add(
+                    new RouteTokenTransformerConvention(new KebabCaseRouteTransformer())
+                );
+
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(
+                    new System.Text.Json.Serialization.JsonStringEnumConverter()
+                );
+            });
+
 
         services.AddHttpContextAccessor();
         services.AddScoped<CurrentUserService>();

@@ -1,4 +1,6 @@
-﻿namespace TegWallet.Application.Features.Core.Wallets.Dto;
+﻿using TegWallet.Application.Features.Core.Currencies.Dto;
+
+namespace TegWallet.Application.Features.Core.Wallets.Dto;
 
 public class WalletDto
 {

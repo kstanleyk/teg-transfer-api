@@ -1,4 +1,5 @@
-﻿using TegWallet.Application.Helpers;
+﻿using TegWallet.Application.Features.Core.Wallets.Dto;
+using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Enum;
 using TegWallet.Domain.Exceptions;
@@ -55,6 +56,18 @@ public abstract class BaseWalletCommandHandler<TResult>(
             return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Failed("Reservation does not belong to the specified client");
 
         return Result<(Domain.Entity.Core.Client, Domain.Entity.Core.Wallet)>.Succeeded((client, wallet));
+    }
+
+    protected async Task<LedgerDto> UpdateClient(LedgerDto ledgerDto,  Guid walletId)
+    {
+        var wallet = await WalletRepository.GetAsync(walletId);
+        if (wallet == null)
+        {
+            return ledgerDto;
+        }
+
+        ledgerDto.ClientId = wallet.ClientId;
+        return ledgerDto;
     }
 
     protected Result<TResult> HandleDomainException(DomainException ex)
