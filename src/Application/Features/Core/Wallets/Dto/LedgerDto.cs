@@ -3,8 +3,8 @@
 public class LedgerDto
 {
     public Guid Id { get; set; }
-    public Guid ClientId { get; set; }
     public Guid WalletId { get; set; }
+    public Guid ClientId { get; set; }
     public string Type { get; set; } = string.Empty;
     public MoneyDto Amount { get; set; } = null!;
     public string Status { get; set; } = string.Empty;

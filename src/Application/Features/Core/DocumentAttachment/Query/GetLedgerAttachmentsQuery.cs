@@ -163,7 +163,7 @@ public class GetLedgerAttachmentsQueryHandler(
             EntityType = attachment.EntityType,
             FileName = attachment.FileName,
             FileUrl = attachment.FileUrl,
-            CloudinaryPublicId = attachment.PublicId,
+            PublicId = attachment.PublicId,
             ContentType = attachment.ContentType,
             FileSize = attachment.FileSize,
             FileCategory = attachment.FileCategory.ToString(),

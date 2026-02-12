@@ -23,7 +23,7 @@ public record DocumentAttachmentDto
     public string EntityType { get; init; } = string.Empty;
     public string FileName { get; init; } = string.Empty;
     public string FileUrl { get; init; } = string.Empty;
-    public string CloudinaryPublicId { get; init; } = string.Empty;
+    public string PublicId { get; init; } = string.Empty;
     public string ContentType { get; init; } = string.Empty;
     public long FileSize { get; init; }
     public string FileCategory { get; init; } = string.Empty; // "Image", "Pdf", "Video"

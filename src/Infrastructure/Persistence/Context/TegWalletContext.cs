@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TegWallet.Domain.Abstractions;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity.Kyc;
 using TegWallet.Infrastructure.Persistence.Configurations;
 
 namespace TegWallet.Infrastructure.Persistence.Context;
@@ -29,6 +30,13 @@ public class TegWalletContext(DbContextOptions<TegWalletContext> options)
     public virtual DbSet<Ledger> LedgerSet { get; set; }
     public virtual DbSet<Wallet> WalletSet { get; set; }
     public virtual DbSet<DocumentAttachment> DocumentAttachmentSet { get; set; }
+
+    // KYC entities
+    public DbSet<KycProfile> KycProfileSet { get; set; }
+    public DbSet<EmailVerification> EmailVerificationSet { get; set; }
+    public DbSet<PhoneVerification> PhoneVerificationSet { get; set; }
+    public DbSet<IdentityDocument> IdentityDocumentSet { get; set; }
+    public DbSet<KycVerificationHistory> KycVerificationHistorySet { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

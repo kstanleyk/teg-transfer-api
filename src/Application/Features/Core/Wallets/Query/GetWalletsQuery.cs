@@ -1,9 +1,11 @@
 ﻿using MediatR;
+using TegWallet.Application.Features.Core.Currencies.Dto;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Helpers;
 using TegWallet.Application.Interfaces.Core;
 using TegWallet.Domain.Entity.Core;
 using TegWallet.Domain.Entity.Enum;
+using TegWallet.Domain.ValueObjects;
 
 namespace TegWallet.Application.Features.Core.Wallets.Query;
 
@@ -52,6 +54,16 @@ public class GetWalletsQueryHandler(
         };
 
         return dto;
+    }
+
+    private static CurrencyDto MapToCurrencyDto(Currency currency)
+    {
+        return new CurrencyDto
+        {
+            Code = currency.Code,
+            Symbol = currency.Symbol,
+            DecimalPlaces = currency.DecimalPlaces
+        };
     }
 
     private static List<LedgerDto> GetRecentTransactions(Wallet wallet)

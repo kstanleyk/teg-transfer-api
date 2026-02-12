@@ -32,4 +32,5 @@ public record Money
             throw new InvalidOperationException("Cannot subtract different currencies");
         return new Money(a.Amount - b.Amount, a.Currency);
     }
+
 }

@@ -49,8 +49,8 @@ public class MinimumAmountConfigurationConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(x => new { x.IsActive, x.EffectiveFrom, x.EffectiveTo });
 
         // Unique constraint: Only one active configuration per currency pair at a time
-        builder.HasIndex(x => new { x.BaseCurrency, x.TargetCurrency, x.IsActive })
-            .HasFilter($"{nameof(MinimumAmountConfiguration.IsActive)} = 1")
-            .IsUnique();
+        //builder.HasIndex(x => new { x.BaseCurrency, x.TargetCurrency, x.IsActive })
+        //    .HasFilter($"{nameof(MinimumAmountConfiguration.IsActive)} = 1")
+        //    .IsUnique();
     }
 }

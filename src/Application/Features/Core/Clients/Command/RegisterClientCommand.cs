@@ -60,7 +60,7 @@ public class RegisterClientCommandHandler(
             return Result<ClientRegisteredDto>.Failed($"An error occured while creating client account");
 
         // Map to DTO and return
-        var clientDto = mapper.Map<ClientRegisteredDto>(createResult.Status);
+        var clientDto = mapper.Map<ClientRegisteredDto>(createResult.Entity);
         return Result<ClientRegisteredDto>.Succeeded(clientDto,"Client account created successfully.");
     }
 

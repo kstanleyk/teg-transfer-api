@@ -7,12 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TegWallet.Application.Interfaces.Auth;
 using TegWallet.Application.Interfaces.Core;
+using TegWallet.Application.Interfaces.Kyc;
 using TegWallet.Application.Interfaces.Photos;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Infrastructure.Persistence.Context;
 using TegWallet.Infrastructure.Persistence.Repository;
 using TegWallet.Infrastructure.Persistence.Repository.Auth;
 using TegWallet.Infrastructure.Persistence.Repository.Core;
+using TegWallet.Infrastructure.Persistence.Repository.Kyc;
 using TegWallet.Infrastructure.Photos;
 
 namespace TegWallet.Infrastructure;
@@ -69,6 +71,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IExchangeRateTierRepository, ExchangeRateTierRepository>();
         services.AddScoped<IMinimumAmountConfigurationRepository, MinimumAmountConfigurationRepository>();
         services.AddScoped<IDocumentAttachmentRepository, DocumentAttachmentRepository>();
+        services.AddScoped<IKycProfileRepository, KycProfileRepository>();
 
         return services;
     }

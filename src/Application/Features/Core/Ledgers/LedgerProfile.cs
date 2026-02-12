@@ -11,6 +11,7 @@ public class LedgerProfile : Profile
         CreateMap<Domain.Entity.Core.Ledger, LedgerDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.WalletId, opt => opt.MapFrom(src => src.WalletId))
+            .ForMember(dest => dest.CurrencyCode, opt => opt.MapFrom(src => src.Amount.Currency))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
             .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))

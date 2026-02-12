@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TegWallet.Domain.Entity.Auth;
 using TegWallet.Domain.Entity.Core;
+using TegWallet.Domain.Entity.Kyc;
 
 namespace TegWallet.Infrastructure.Persistence.Configurations.Core;
 
@@ -47,6 +48,12 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.HasOne(c => c.Wallet)
             .WithOne()
             .HasForeignKey<Wallet>(w => w.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // KYC Profile relationship (one-to-one)
+        builder.HasOne(c => c.KycProfile)
+            .WithOne()
+            .HasForeignKey<KycProfile>(k => k.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Relationship with ApplicationUser

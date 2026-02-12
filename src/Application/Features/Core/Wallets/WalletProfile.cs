@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using TegWallet.Application.Features.Core.Currencies.Dto;
 using TegWallet.Application.Features.Core.Wallets.Command;
 using TegWallet.Application.Features.Core.Wallets.Dto;
 using TegWallet.Application.Features.Core.Wallets.Model;
@@ -19,6 +20,8 @@ public class WalletProfile : Profile
         CreateMap<ApproveDepositDto, ApproveDepositFundsCommand>();
 
         CreateMap<RejectDepositDto, RejectDepositFundsCommand>();
+
+        CreateMap<Currency, CurrencyDto>();
 
         // Money to MoneyDto
         CreateMap<Money, MoneyDto>()
